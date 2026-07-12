@@ -1,0 +1,590 @@
+# ch02(2026软件).pptx
+幻灯片数：75
+
+## Slide 1
+Chapter 2: Intro to Relational Model
+
+## Slide 2
+Example of a Relation
+attributes (or columns)
+tuples (or rows)
+
+## Slide 3
+Attribute Types
+The set of allowed values for each attribute is called the domain of the attribute Attribute values are (normally) required to be atomic ; that is, indivisible The special value null is a member of every domain. Indicated that the value is “ unknown ” The null value causes complications in the definition of many operations
+
+## Slide 4
+Relation Schema and Instance
+A 1 , A 2 , …, A n are attributes R = ( A 1 , A 2 , …, A n ) is a relation schema Example: instructor = ( ID, name, dept_name, salary ) Formally, given sets D 1 , D 2 , …. D n a relation r is a subset of D 1 x D 2 x … x D n Thus, a relation is a set of n -tuples ( a 1 , a 2 , …, a n ) where each a i  D i
+The current values ( relation instance ) of a relation are specified by a table An element t of r is a tuple , represented by a row in a table
+
+## Slide 5
+Relations are Unordered
+Order of tuples is irrelevant (tuples may be stored in an arbitrary order) Example: instructor relation with unordered tuples
+
+## Slide 6
+Keys
+Let K  R K is a superkey of R if values for K are sufficient to identify a unique tuple of each possible relation r(R) Example: { ID } and {ID,name} are both superkeys of instructor. Superkey K is a candidate key if K is minimal Example: { ID } is a candidate key for Instructor One of the candidate keys is selected to be the primary key . which one? Foreign key constraint: Value in one relation must appear in another Referencing relation Referenced relation Example – dept_name in i nstructor is a foreign key from instructor referencing department
+
+## Slide 7
+Schema Diagram for University Database
+
+## Slide 8
+Relational Query Languages
+Procedural vs .non-procedural, or declarative “Pure” languages: Relational algebra Tuple relational calculus Domain relational calculus The above 3 pure languages are equivalent in computing power We will concentrate in this chapter on relational algebra Not turning-machine equivalent consists of 6 basic operations
+
+## Slide 9
+9
+数据库系统 — 关系模型
+Relational Query Languages
+
+## Slide 10
+Relational Algebra
+Procedural language Six basic operators select:  project:  union:  set difference: – Cartesian product: x rename:  The operators take one or two relations as inputs and produce a new relation as a result.
+
+## Slide 11
+Select Operation
+Notation:  p ( r ) p is called the selection predicate Defined as:  p ( r ) = { t | t  r and p(t) } Where p is a formula in propositional calculus consisting of terms connected by :  ( and ),  ( or ),  ( not ) Each term is one of: <attribute> op <attribute> or <constant> where op is one of: =, , >, . <.  Example of selection:  dept_name =“ Physics” ( instructor )
+
+## Slide 12
+Select Operation – selection of rows (tuples)
+Relation r
+ A=B ^ D > 5 (r)
+
+## Slide 13
+Project Operation
+Notation: where A 1 , A 2 are attribute names and r is a relation name. The result is defined as the relation of k columns obtained by erasing the columns that are not listed Duplicate rows removed from result, since relations are sets Example: To eliminate the ID,name and salary attribute of intructor  ID,name,salary ( instructor )
+
+## Slide 14
+Project Operation – selection of columns (Attributes)
+Relation r :
+ A,C ( r )
+
+## Slide 15
+Union Operation
+Notation: r  s Defined as: r  s = { t | t  r or t  s } For r  s to be valid . 1. r, s must have the same arity (same number of attributes) 2. The attribute domains must be compatible (example: 2 nd column of r deals with the same type of values as does the 2 nd column of s ) Example: to find all courses taught in the Fall 2009 semester, or in the Spring 2010 semester, or in both  course_id (  semester=“Fall” Λ year=2009 ( section ))   course_id (  semester=“Spring” Λ year=2010 ( section ))
+
+## Slide 16
+Union of two relations
+Relations r, s:
+r  s :
+
+## Slide 17
+Set Difference Operation
+Notation r – s Defined as: r – s = { t | t  r and t  s } Set differences must be taken between compatible relations. r and s must have the same arity attribute domains of r and s must be compatible Example: to find all courses taught in the Fall 2009 semester, but not in the Spring 2010 semester  course_id (  semester=“Fall” Λ year=2009 ( section )) −  course_id (  semester=“Spring” Λ year=2010 ( section ))
+
+## Slide 18
+Set difference of two relations
+Relations r , s :
+r – s :
+
+## Slide 19
+Cartesian-Product Operation
+Notation r x s Defined as: r x s = { t q | t  r and q  s } Assume that attributes of r(R) and s(S) are disjoint. That is, R  S =  . If attributes of r(R) and s(S ) are not disjoint, then renaming must be used .
+
+## Slide 20
+joining two relations -- Cartesian-product
+Relations r, s :
+r x s :
+
+## Slide 21
+Cartesian-product – naming issue
+Relations r, s :
+r x s :
+s.B
+B
+r.B
+
+## Slide 22
+Renaming a Table
+Allows us to refer to a relation, (say E) by more than one name.  x ( E ) returns the expression E under the name X
+Relations r
+r x  s (r)
+α α β β
+1 1 2 2
+α β α β
+1 2 1 2
+r.A r.B s.A s.B
+
+## Slide 23
+Composition of Operations
+Can build expressions using multiple operations Example:  A=C ( r x s ) r x s  A=C ( r x s )
+
+## Slide 24
+Formal Definition
+A basic expression in the relational algebra consists of either one of the following: A relation in the database A constant relation Let E 1 and E 2 be relational-algebra expressions; the following are all relational-algebra expressions: E 1  E 2 E 1 – E 2 E 1 x E 2  p ( E 1 ) , P is a predicate on attributes in E 1  s ( E 1 ) , S is a list consisting of some of the attributes in E 1  x ( E 1 ) , x is the new name for the result of E 1
+
+## Slide 25
+Banking Example
+branch ( branch_name , branch_city , assets) customer ( customer_name , customer_street , customer_city ) account ( account_number , branch_name , balance) loan ( loan_number , branch_name , amount) depositor ( customer_name , account_number ) borrower ( customer_name , loan_number )
+
+## Slide 26
+Example Queries
+Find all loans of over $1200
+Find the loan number for each loan of an amount greater than $1200
+ amount > 1200 ( loan )
+ loan_number ( amount > 1200 ( loan ))
+Find the names of all customers who have a loan, an account, or both, from the bank
+ customer_name ( borrower )   customer_name ( depositor )
+
+## Slide 27
+Example Queries
+Find the names of all customers who have a loan at the Perryridge branch.
+Find the names of all customers who have a loan at the Perryridge branch but do not have an account at any branch of the bank.
+ customer_name ( branch_name = “ Perryridge” ( borrower.loan_number = loan.loan_number (borrower x loan))) –  customer_name (depositor )
+ customer_name ( branch_name =“ Perryridge ” (  borrower.loan_number = loan.loan_number ( borrower x loan )))
+
+## Slide 28
+Example Queries
+Find the names of all customers who have a loan at the Perryridge branch.
+Query 2  customer_name ( loan.loan_number = borrower.loan_number ( ( branch_name = “ Perryridge ” (loan)) x borrower))
+Query 1  customer_name ( branch_name = “ Perryridge ” (  borrower.loan_number = loan.loan_number (borrower x loan)))
+
+## Slide 29
+Example Queries
+Find the largest account balance Strategy: Find those balances that are not the largest Rename account relation as d so that we can compare each account balance with all others Use set difference to find those account balances that were not found in the earlier step. The query is:
+ balance (account) -  account.balance ( account.balance < d.balance ( account x r d (account )))
+
+## Slide 30
+Account-number Branch-name balance Account-number Branch-name balance A-101 downtown 500 A-101 downtown 500 A-101 downtown 500 A-102 perryridge 400 A-101 downtown 500 A-201 Brighton 900 A-101 downtown 500 A-215 Mianus 700 A-101 downtown 500 A-217 Brighton 750 A-101 downtown 500 A-222 Redwod 700 A-101 downtown 500 A- 305 Round Hill 350 A-102 perryridge 400 A-101 downtown 500 A-102 perryridge 400 A-102 perryridge 400 A-102 perryridge 400 A-201 Brighton 900 A-102 perryridge 400 A-215 Mianus 700 A-102 perryridge 400 A-217 Brighton 750 A-102 perryridge 400 A-222 Redwod 700 A-102 perryridge 400 A- 305 Round Hill 350
+ account.balance < d.balance ( account x  d ( account ))
+
+## Slide 31
+Account-number Branch-name balance Account-number Branch-name balance A-201 Brighton 900 A-101 downtown 500 A-201 Brighton 900 A-102 perryridge 400 A-201 Brighton 900 A-201 Brighton 900 A-201 Brighton 900 A-215 Mianus 700 A-201 Brighton 900 A-217 Brighton 750 A-201 Brighton 900 A-222 Redwod 700 A-201 Brighton 900 A- 305 Round Hill 350 A-215 Mianus 700 A-101 downtown 500 A-215 Mianus 700 A-102 perryridge 400 A-215 Mianus 700 A-201 Brighton 900 A-215 Mianus 700 A-215 Mianus 700 A-215 Mianus 700 A-217 Brighton 750 A-215 Mianus 700 A-222 Redwod 700 A-215 Mianus 700 A- 305 Round Hill 350
+ account.balance < d.balance ( account x  d ( account ))
+
+## Slide 32
+Account-number Branch-name balance Account-number Branch-name balance A-217 Brighton 750 A-101 downtown 500 A-217 Brighton 750 A-102 perryridge 400 A-217 Brighton 750 A-201 Brighton 900 A-217 Brighton 750 A-215 Mianus 700 A-217 Brighton 750 A-217 Brighton 750 A-217 Brighton 750 A-222 Redwod 700 A-217 Brighton 750 A- 305 Round Hill 350 A-222 Redwod 700 A-101 downtown 500 A-222 Redwod 700 A-102 perryridge 400 A-222 Redwod 700 A-201 Brighton 900 A-222 Redwod 700 A-215 Mianus 700 A-222 Redwod 700 A-217 Brighton 750 A-222 Redwod 700 A-222 Redwod 700 A-222 Redwod 700 A- 305 Round Hill 350
+ account.balance < d.balance ( account x  d ( account ))
+
+## Slide 33
+Account-number Branch-name balance Account-number Branch-name balance A- 305 Round Hill 350 A-101 downtown 500 A- 305 Round Hill 350 A-102 perryridge 400 A- 305 Round Hill 350 A-201 Brighton 900 A- 305 Round Hill 350 A-215 Mianus 700 A- 305 Round Hill 350 A-217 Brighton 750 A- 305 Round Hill 350 A-222 Redwod 700 A- 305 Round Hill 350 A- 305 Round Hill 350
+ account.balance < d.balance ( account x  d ( account ))
+
+## Slide 34
+balance 500 400 900 700 750 350
+balance 500 400 700 750 350
+balance 900
+Example Queries
+-
+=
+ balance ( account ) -  account.balance (  account.balance < d.balance ( account x  d ( account )))
+
+## Slide 35
+Additional Operations
+We define additional operations that do not add any power to the relational algebra, but that simplify common queries. Set intersection Natural join Division Assignment
+
+## Slide 36
+Set-Intersection Operation
+Notation: r  s Defined as: r  s = { t | t  r and t  s } Assume: r , s have the same arity attributes of r and s are compatible Note: r  s = r – ( r – s )
+
+## Slide 37
+Set-Intersection Operation – Example
+Relation r, s : r  s
+A B
+  
+1 2 1
+A B
+ 
+2 3
+r
+s
+A B
+ 2
+
+## Slide 38
+Join Operation
+The Cartesian-Product instructor X teaches associates every tuple of instructor with every tuple of teaches . Most of the resulting rows have information about instructors who did NOT teach a particular course. To get only those tuples of “ instructor X teaches “ that pertain to instructors and the courses that they taught, we write:  instructor.id = teaches.id ( instructor x teaches )) We get only those tuples of “ instructor X teaches” that pertain to instructors and the courses that they taught. The result of this expression, shown in the next slide
+
+## Slide 39
+Join Operation (Cont.)
+The table corresponding to:  instructor.id = teaches.id ( instructor x teaches ))
+
+## Slide 40
+Join Operation (Cont.)
+The join operation allows us to combine a select operation and a Cartesian-Product operation into a single operation. Consider relations r ( R ) and s ( S ) Let “theta” be a predicate on attributes in the schema R “union” S . The join operation r s is defined as follows: Thus  instructor.id = teaches.id ( instructor x teaches )) Can equivalently be written as instructor Instructor.id = teaches.id teaches .
+
+## Slide 41
+Natural-Join Operation
+Let r and s be relations on schemas R and S respectively. Then, r s is a relation on schema R  S obtained as follows: Consider each pair of tuples t r from r and t s from s . If t r and t s have the same value on each of the attributes in R  S , add a tuple t to the result, where t has the same value as t r on r t has the same value as t s on s Example: R = ( A, B, C, D ) S = ( E, B, D ) Result schema = ( A, B, C, D, E ) r s is defined as:  r.A , r.B , r.C , r.D , s.E (  r.B = s.B  r.D = s.D ( r x s ))
+Notation: r s
+
+## Slide 42
+Natural-Join Operation
+考虑如下的两个表 r 和 s ：
+A B1 B2 a1 b1 b1 a1 b2 b1 a2 b1 b2
+B1 B2 C b1 b1 c1 b1 b1 c2 b1 b2 c3 b2 b2 c4
+r
+s
+A B1 B2 C a1 b1 b1 c1 a1 b1 b1 c2 a2 b1 b2 c3
+r s
+
+## Slide 43
+Natural Join Operation – Example
+Relations r, s:
+A
+B
+    
+1 1 1 1 2
+C
+D
+    
+a a a a b
+E
+    
+A
+B
+    
+1 2 4 1 2
+C
+D
+    
+a a b a b
+r
+B
+1 3 1 2 3
+D
+a a a b b
+E
+    
+s
+r s
+
+## Slide 44
+选修全部课程的学生
+姓名 课程 张军 物理 王红 数学 张军 数学
+课程 数学 物理
+
+物理
+数学
+课程
+＝
+物理
+王红
+数学
+张军
+数学
+王红
+物理
+张军
+课程
+姓名
+王红
+张军
+姓名
+
+数学
+张军
+数学
+王红
+物理
+张军
+课程
+姓名
+物理
+王红
+数学
+张军
+数学
+王红
+物理
+张军
+课程
+姓名
+姓名
+王红
+张军
+姓名
+王红
+
+＝
+姓名
+张军
+1. 所有学生选修全部课程
+2. 没有选修全部课程的情况
+3. 选修了全部课程的学生
+＝
+姓名 课程 王红 物理
+
+## Slide 45
+Division Operation
+Notation: r  s Suited to queries that include the phrase “ for all ”. Let r and s be relations on schemas R and S respectively where R = ( A 1 , …, A m , B 1 , …, B n ) S = ( B 1 , …, B n ) The result of r  s is a relation on schema R – S = ( A 1 , …, A m ) r  s = { t | t   R - S ( r )   u  s ( t u  r ) } Where t u means the concatenation of tuples t and u to produce a single tuple
+
+## Slide 46
+Division Operation – Example
+Relations r, s:
+r  s :
+A
+ 
+A
+B
+          
+1 2 3 1 1 1 3 4 6 1 2
+r
+B
+1 2
+s
+
+## Slide 47
+Another Division Example
+Relations r, s:
+r  s :
+A
+B
+ 
+a a
+C
+ 
+A
+B
+       
+a a a a a a a a
+C
+D
+       
+a a b a b a b b
+E
+1 1 1 1 3 1 1 1
+r
+D
+a b
+E
+1 1
+s
+
+## Slide 48
+Division Operation(Cont.)
+Property Let q = r  s Then q is the largest relation satisfying q x s  r Definition in terms of the basic algebra operation Let r(R) and s(S) be relations, and let S  R r  s =  R-S ( r ) –  R-S ( (  R-S ( r ) x s ) –  R-S,S ( r )) To see why  R-S,S ( r ) simply reorders attributes of r  R-S ( R-S ( r ) x s ) –  R-S,S ( r ) ) gives those tuples t in  R-S ( r ) such that for some tuple u  s, tu  r .
+
+## Slide 49
+A C B D a c b d a e b f a d b e b e c f e c d d e e d f
+C D c d e f
+A B a b b c e d
+A B C D a b c d a b e f b c c d b c e f e d c d e d e f
+r
+ R-S ( r )
+s
+ R-S ( r )  s
+ R-S (  R-S ( r )  s -  R-S,S ( r ) )
+A B b c
+ R-S,S ( r )
+A B C D a b c d a b e f a b d e b c e f e d c d e d e f
+ R-S ( r )  s -  R-S,S ( r )
+A B C D b c c d
+A B a b e d
+r  s =
+A B a b b c e d
+A B b c
+-
+=
+ R-S ( r ) -  R-S (  R-S ( r )  s -  R-S,S ( r ) )
+
+## Slide 50
+Assignment Operation
+The assignment operation ( ) provides a convenient way to express complex queries. Write query as a sequential program consisting of a series of assignments followed by an expression whose value is displayed as a result of the query. Assignment must always be made to a temporary relation variable . Example: Write r  s as temp1   R-S ( r ) temp2   R-S (( temp1 x s ) –  R-S,S ( r )) result = temp1 – temp2 The result to the right of the  is assigned to the relation variable on the left of the . May use variable in subsequent expressions.
+
+## Slide 51
+Bank Example Queries
+Find the names of all customers who have a loan and an account at bank.
+ customer_name ( borrower )   customer_name ( depositor )
+Find the name of all customers who have a loan at the bank and the loan amount
+ customer_name , loan_number , amount ( borrower loan )
+
+## Slide 52
+Query 2  customer_name , branch_name ( depositor account )   temp( branch_name ) ({( “Downtown” ) , ( “Uptown” )}) Note that Query 2 uses a constant relation.
+Bank Example Queries
+Find all customers who have an account from at least the “ Downtown ” and the Uptown ” branches.
+Query 1  customer_name (  branch_name = “Downtown” ( depositor account ))   customer_name (  branch_name = “Uptown” ( depositor account ))
+
+## Slide 53
+Find all customers who have an account at all branches located in Brooklyn city.
+Bank Example Queries
+ customer_name, branch_name ( depositor account )   branch_name ( branch_city = “Brooklyn” ( branch ))
+
+## Slide 54
+Extended Relational-Algebra-Operations
+Generalized Projection Aggregate Functions Outer Join
+
+## Slide 55
+Generalized Projection
+Extends the projection operation by allowing arithmetic functions to be used in the projection list. E is any relational-algebra expression Each of F 1 , F 2 , …, F n are are arithmetic expressions involving constants and attributes in the schema of E . Given relation credit_info(customer_name, limit, credit_balance), find how much more each person can spend:  customer_name, limit – credit_balance (credit_info)  customer-name, (limit – credit-balance) as credit-available ( credit-info )
+
+## Slide 56
+1750 1500 700 400
+2000 1500 6000 2000
+Curry Hayes Jones Smith
+credit-balance
+limit
+customer-name
+credit-info
+Generalized Projection
+
+## Slide 57
+Aggregate Functions and Operations
+Aggregation function takes a collection of values and returns a single value as a result. avg : average value min: minimum value max: maximum value sum: sum of values count: number of values Aggregate operation in relational algebra E is any relational-algebra expression G 1 , G 2 …, G n is a list of attributes on which to group (can be empty) Each F i is an aggregate function Each A i is an attribute name
+
+## Slide 58
+Aggregate Operation – Example
+Relation r :
+A
+B
+   
+   
+C
+7 7 3 10
+g sum(c) (r)
+sum ( c )
+27
+
+## Slide 59
+Aggregate Operation – Example
+Relation account grouped by branch-name :
+branch_name g sum ( balance ) ( account )
+branch_name
+account_number
+balance
+Perryridge Perryridge Brighton Brighton Redwood
+A-102 A-201 A-217 A-215 A-222
+400 900 750 750 700
+branch_name
+sum ( balance )
+Perryridge Brighton Redwood
+1300 1500 700
+
+## Slide 60
+Aggregate Functions (Cont.)
+Result of aggregation does not have a name Can use rename operation to give it a name For convenience, we permit renaming as part of aggregate operation
+branch_name g sum (balance) as sum_balance ( account )
+
+## Slide 61
+Outer Join
+An extension of the join operation that avoids loss of information. Computes the join and then adds tuples form one relation that does not match tuples in the other relation to the result of the join. Uses null values: null signifies that the value is unknown or does not exist All comparisons involving null are (roughly speaking) false by definition. We shall study precise meaning of comparisons with nulls later
+
+## Slide 62
+Outer Join – Example
+Relation loan
+Relation borrower
+customer_name
+loan_number
+Jones Smith Hayes
+L-170 L-230 L-155
+3000 4000 1700
+loan_number
+amount
+L-170 L-230 L-260
+branch_name
+Downtown Redwood Perryridge
+
+## Slide 63
+Left Outer Join loan borrower
+Outer Join – Example
+Join loan borrower
+loan_number
+amount
+L-170 L-230
+3000 4000
+customer_name
+Jones Smith
+branch_name
+Downtown Redwood
+Jones Smith null
+loan_number
+amount
+L-170 L-230 L-260
+3000 4000 1700
+customer_name
+branch_name
+Downtown Redwood Perryridge
+
+## Slide 64
+Outer Join – Example
+loan_number
+amount
+L-170 L-230 L-155
+3000 4000 null
+customer_name
+Jones Smith Hayes
+branch_name
+Downtown Redwood null
+loan_number
+amount
+L-170 L-230 L-260 L-155
+3000 4000 1700 null
+customer_name
+Jones Smith null Hayes
+branch_name
+Downtown Redwood Perryridge null
+Full Outer Join loan borrower
+Right Outer Join loan borrower
+
+## Slide 65
+Null Values
+It is possible for tuples to have a null value, denoted by null , for some of their attributes null signifies an unknown value or that a value does not exist. The result of any arithmetic expression involving null is null. Aggregate functions simply ignore null values (as in SQL) For duplicate elimination and grouping, null is treated like any other value, and two nulls are assumed to be the same (as in SQL)
+
+## Slide 66
+Null Values
+Comparisons with null values return the special truth value: unknown If false was used instead of unknown , then not (A < 5) would not be equivalent to A >= 5 Three-valued logic using the truth value unknown : OR: ( unknown or true ) = true , ( unknown or false ) = unknown ( unknown or unknown ) = unknown AND: ( true and unknown ) = unknown, ( false and unknown ) = false, ( unknown and unknown ) = unknown NOT : ( not unknown ) = unknown In SQL “ P is unknown ” evaluates to true if predicate P evaluates to unknown Result of select predicate is treated as false if it evaluates to unknown
+
+## Slide 67
+Modification of the Database
+The content of the database may be modified using the following operations: Deletion Insertion Updating All these operations are expressed using the assignment operator.
+
+## Slide 68
+Deletion
+A delete request is expressed similarly to a query, except instead of displaying tuples to the user, the selected tuples are removed from the database. Can delete only whole tuples; cannot delete values on only particular attributes A deletion is expressed in relational algebra by: r  r – E where r is a relation and E is a relational algebra query.
+
+## Slide 69
+Deletion Examples
+Delete all account records in the Perryridge branch.
+Delete all accounts at branches located in Needham.
+r 1    branch_city = “Needham” ( account branch ) r 2   account_number , branch_name, balance ( r 1 ) r 3   customer_name, account_number ( r 2 depositor) account  account – r 2 depositor  depositor – r 3
+Delete all loan records with amount in the range of 0 to 50
+loan  loan –   amount 0and amount  50 ( loan )
+account  account –  branch_name = “Perryridge” ( account )
+
+## Slide 70
+Insertion
+To insert data into a relation, we either: specify a tuple to be inserted write a query whose result is a set of tuples to be inserted in relational algebra, an insertion is expressed by: r  r  E where r is a relation and E is a relational algebra expression. The insertion of a single tuple is expressed by letting E be a constant relation containing one tuple.
+
+## Slide 71
+Insertion Examples
+Insert information in the database specifying that Smith has $1200 in account A-973 at the Perryridge branch.
+Provide as a gift for all loan customers in the Perryridge branch, a $200 savings account. Let the loan number serve as the account number for the new savings account.
+account  account  {(“A-973”, “ Perryridge ”, 1200)} depositor  depositor  {(“Smith”, “A-973”)}
+r 1  ( branch_name = “ Perryridge ” ( borrower loan)) account  account   loan_number , branch_name , 200 ( r 1 ) depositor  depositor   customer_name , loan_number ( r 1 )
+
+## Slide 72
+Updating
+A mechanism to change a value in a tuple without charging all values in the tuple Use the generalized projection operator to do this task Each F i is either the I th attribute of r , if the I th attribute is not updated, or, if the attribute is to be updated F i is an expression, involving only constants and the attributes of r , which gives the new value for the attribute
+
+## Slide 73
+Update Examples
+Make interest payments by increasing all balances by 5 percent.
+Pay all accounts with balances over $10,000 6 percent interest and pay all others 5 percent
+account   account_number , branch_name , balance * 1.06 ( BAL  10000 ( account ))   account_number , branch_name , balance * 1.05 ( BAL  10000 ( account ))
+account   account_number , branch_name , balance * 1.05 ( account )
+
+## Slide 74
+Summary of Relational Algebra Operators
+Symbol (Name) Example of Use
+(Selection) σ salary > = 85000 ( instructor )
+σ
+Return rows of the input relation that satisfy the predicate.
+Π
+(Projection) Π ID, salary ( instructor )
+Output specified attributes from all rows of the input relation. Remove duplicate tuples from the output.
+x
+(Cartesian Product) instructor x department
+Output pairs of rows from the two input relations that have the same value on all attributes that have the same name.
+∪
+(Union) Π name ( instructor) ∪ Π name ( student)
+Output the union of tuples from the two input relations.
+(Natural Join) instructor ⋈ department
+Output pairs of rows from the two input relations that have the same value on all attributes that have the same name.
+⋈
+-
+(Set Difference) Π name ( instructor) -- Π name ( student)
+Output the set difference of tuples from the two input relations.
+
+## Slide 75
+End of Chapter 2

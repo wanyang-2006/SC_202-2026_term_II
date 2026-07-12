@@ -1,0 +1,476 @@
+{
+  "file": "C:\\Users\\yang\\Desktop\\数据库原理\\数据库系统原理\\数据库系统原理课件\\ch04(2026软件).pptx",
+  "slide_count": 61,
+  "slides": [
+    {
+      "slide": 1,
+      "text": [
+        "Chapter 4: Intermediate SQL"
+      ],
+      "joined": "Chapter 4: Intermediate SQL"
+    },
+    {
+      "slide": 2,
+      "text": [
+        "Chapter 4: Intermediate SQL",
+        "Join Expressions Views Transactions Integrity Constraints SQL Data Types and Schemas Authorization"
+      ],
+      "joined": "Chapter 4: Intermediate SQL\nJoin Expressions Views Transactions Integrity Constraints SQL Data Types and Schemas Authorization"
+    },
+    {
+      "slide": 3,
+      "text": [
+        "Joined Relations",
+        "Join operations take two relations and return as a result another relation. A join operation is a Cartesian product which requires that tuples in the two relations match (under some condition). It also specifies the attributes that are present in the result of the join The join operations are typically used as subquery expressions in the from clause"
+      ],
+      "joined": "Joined Relations\nJoin operations take two relations and return as a result another relation. A join operation is a Cartesian product which requires that tuples in the two relations match (under some condition). It also specifies the attributes that are present in the result of the join The join operations are typically used as subquery expressions in the from clause"
+    },
+    {
+      "slide": 4,
+      "text": [
+        "Join operations – Example",
+        "Relation course",
+        "Relation prereq",
+        "Observe that prereq information is missing for CS-315 and course information is missing for CS-437"
+      ],
+      "joined": "Join operations – Example\nRelation course\nRelation prereq\nObserve that prereq information is missing for CS-315 and course information is missing for CS-437"
+    },
+    {
+      "slide": 5,
+      "text": [
+        "Outer Join",
+        "An extension of the join operation that avoids loss of information. Computes the join and then adds tuples form one relation that does not match tuples in the other relation to the result of the join. Uses null values."
+      ],
+      "joined": "Outer Join\nAn extension of the join operation that avoids loss of information. Computes the join and then adds tuples form one relation that does not match tuples in the other relation to the result of the join. Uses null values."
+    },
+    {
+      "slide": 6,
+      "text": [
+        "Left Outer Join",
+        "course natural left outer join prereq"
+      ],
+      "joined": "Left Outer Join\ncourse natural left outer join prereq"
+    },
+    {
+      "slide": 7,
+      "text": [
+        "Right Outer Join",
+        "course natural right outer join prereq"
+      ],
+      "joined": "Right Outer Join\ncourse natural right outer join prereq"
+    },
+    {
+      "slide": 8,
+      "text": [
+        "Joined Relations",
+        "Join operations take two relations and return as a result another relation. These additional operations are typically used as subquery expressions in the from clause Join condition – defines which tuples in the two relations match, and what attributes are present in the result of the join. Join type – defines how tuples in each relation that do not match any tuple in the other relation (based on the join condition) are treated."
+      ],
+      "joined": "Joined Relations\nJoin operations take two relations and return as a result another relation. These additional operations are typically used as subquery expressions in the from clause Join condition – defines which tuples in the two relations match, and what attributes are present in the result of the join. Join type – defines how tuples in each relation that do not match any tuple in the other relation (based on the join condition) are treated."
+    },
+    {
+      "slide": 9,
+      "text": [
+        "Full Outer Join",
+        "course natural full outer join prereq"
+      ],
+      "joined": "Full Outer Join\ncourse natural full outer join prereq"
+    },
+    {
+      "slide": 10,
+      "text": [
+        "Joined Relations – Examples",
+        "course inner join prereq on course.course_id = prereq.course_id",
+        "What is the difference between the above, and a natural join ? course left outer join prereq on course.course_id = prereq.course_id"
+      ],
+      "joined": "Joined Relations – Examples\ncourse inner join prereq on course.course_id = prereq.course_id\nWhat is the difference between the above, and a natural join ? course left outer join prereq on course.course_id = prereq.course_id"
+    },
+    {
+      "slide": 11,
+      "text": [
+        "Joined Relations – Examples",
+        "course natural right outer join prereq",
+        "course full outer join prereq using ( course_id )"
+      ],
+      "joined": "Joined Relations – Examples\ncourse natural right outer join prereq\ncourse full outer join prereq using ( course_id )"
+    },
+    {
+      "slide": 12,
+      "text": [
+        "连接的三种写法",
+        "SELECT Student.Sno , Course.Cno , Grade FROM Student, Course, SC WHERE Student.Sno = SC.Sno AND Course. Cno = SC.Cno AND Sname =“ 李博 ” SELECT Student.Sno , Course.Cno , Grade FROM ((Student INNER JOIN SC on Student.Sno = SC.Sno ) INNER JOIN Course ON Course. Cno = SC.Cno ) WHERE Sname =“ 李博 ” SELECT Student.Sno , Course.Cno , Grade FROM ((Student INNER JOIN SC USING ( Sno )) // 同名字段 INNER JOIN Course USING ( Cno )) WHERE Sname =“ 李博 ”"
+      ],
+      "joined": "连接的三种写法\nSELECT Student.Sno , Course.Cno , Grade FROM Student, Course, SC WHERE Student.Sno = SC.Sno AND Course. Cno = SC.Cno AND Sname =“ 李博 ” SELECT Student.Sno , Course.Cno , Grade FROM ((Student INNER JOIN SC on Student.Sno = SC.Sno ) INNER JOIN Course ON Course. Cno = SC.Cno ) WHERE Sname =“ 李博 ” SELECT Student.Sno , Course.Cno , Grade FROM ((Student INNER JOIN SC USING ( Sno )) // 同名字段 INNER JOIN Course USING ( Cno )) WHERE Sname =“ 李博 ”"
+    },
+    {
+      "slide": 13,
+      "text": [
+        "Views",
+        "In some cases, it is not desirable for all users to see the entire logical model (that is, all the actual relations stored in the database.) Consider a person who needs to know an instructors name and department, but not the salary. This person should see a relation described, in SQL, by select ID , name , dept_name from instructor A view provides a mechanism to hide certain data from the view of certain users . Any relation that is not of the conceptual model but is made visible to a user as a “virtual relation” is called a view ."
+      ],
+      "joined": "Views\nIn some cases, it is not desirable for all users to see the entire logical model (that is, all the actual relations stored in the database.) Consider a person who needs to know an instructors name and department, but not the salary. This person should see a relation described, in SQL, by select ID , name , dept_name from instructor A view provides a mechanism to hide certain data from the view of certain users . Any relation that is not of the conceptual model but is made visible to a user as a “virtual relation” is called a view ."
+    },
+    {
+      "slide": 14,
+      "text": [
+        "View Definition",
+        "A view is defined using the create view statement which has the form create view v as < query expression > where <query expression> is any legal SQL expression . The view name is represented by v. Once a view is defined, the view name can be used to refer to the virtual relation that the view generates. View definition is not the same as creating a new relation by evaluating the query expression Rather, a view definition causes the saving of an expression; the expression is substituted into queries using the view."
+      ],
+      "joined": "View Definition\nA view is defined using the create view statement which has the form create view v as < query expression > where <query expression> is any legal SQL expression . The view name is represented by v. Once a view is defined, the view name can be used to refer to the virtual relation that the view generates. View definition is not the same as creating a new relation by evaluating the query expression Rather, a view definition causes the saving of an expression; the expression is substituted into queries using the view."
+    },
+    {
+      "slide": 15,
+      "text": [
+        "Example Views",
+        "A view of instructors without their salary create view faculty as select ID , name , dept_name from instructor Find all instructors in the Biology department select name from faculty where dept_name = ‘Biology’ Create a view of department salary totals create view departments_total_salary ( dept_name , total_salary ) as select dept_name , sum ( salary ) from instructor group by dept_name ;"
+      ],
+      "joined": "Example Views\nA view of instructors without their salary create view faculty as select ID , name , dept_name from instructor Find all instructors in the Biology department select name from faculty where dept_name = ‘Biology’ Create a view of department salary totals create view departments_total_salary ( dept_name , total_salary ) as select dept_name , sum ( salary ) from instructor group by dept_name ;"
+    },
+    {
+      "slide": 16,
+      "text": [
+        "Views Defined Using Other Views",
+        "create view physics_fall_2009 as select course . course_id , sec_id , building , room_number from course , section where course . course_id = section . course_id and course . dept_name = ’Physics’ and section . semester = ’Fall’ and section . year = ’2009’; create view physics_fall_2009_watson as select course_id , room_number from physics_fall_2009 where building = ’Watson’;"
+      ],
+      "joined": "Views Defined Using Other Views\ncreate view physics_fall_2009 as select course . course_id , sec_id , building , room_number from course , section where course . course_id = section . course_id and course . dept_name = ’Physics’ and section . semester = ’Fall’ and section . year = ’2009’; create view physics_fall_2009_watson as select course_id , room_number from physics_fall_2009 where building = ’Watson’;"
+    },
+    {
+      "slide": 17,
+      "text": [
+        "View Expansion",
+        "Expand use of a view in a query/another view",
+        "create view physics_fall_2009_watson as ( select course_id , room_number from ( select course . course_id , building , room_number from course , section where course . course_id = section . course_id and course . dept_name = ’Physics’ and section . semester = ’Fall’ and section . year = ’2009’) where building = ’Watson’;"
+      ],
+      "joined": "View Expansion\nExpand use of a view in a query/another view\ncreate view physics_fall_2009_watson as ( select course_id , room_number from ( select course . course_id , building , room_number from course , section where course . course_id = section . course_id and course . dept_name = ’Physics’ and section . semester = ’Fall’ and section . year = ’2009’) where building = ’Watson’;"
+    },
+    {
+      "slide": 18,
+      "text": [
+        "Views Defined Using Other Views",
+        "One view may be used in the expression defining another view A view relation v 1 is said to depend directly on a view relation v 2 if v 2 is used in the expression defining v 1 A view relation v 1 is said to depend on view relation v 2 if either v 1 depends directly to v 2 or there is a path of dependencies from v 1 to v 2 A view relation v is said to be recursive if it depends on itself."
+      ],
+      "joined": "Views Defined Using Other Views\nOne view may be used in the expression defining another view A view relation v 1 is said to depend directly on a view relation v 2 if v 2 is used in the expression defining v 1 A view relation v 1 is said to depend on view relation v 2 if either v 1 depends directly to v 2 or there is a path of dependencies from v 1 to v 2 A view relation v is said to be recursive if it depends on itself."
+    },
+    {
+      "slide": 19,
+      "text": [
+        "View Expansion",
+        "A way to define the meaning of views defined in terms of other views. Let view v 1 be defined by an expression e 1 that may itself contain uses of view relations. View expansion of an expression repeats the following replacement step: repeat Find any view relation v i in e 1 Replace the view relation v i by the expression defining v i until no more view relations are present in e 1 As long as the view definitions are not recursive, this loop will terminate"
+      ],
+      "joined": "View Expansion\nA way to define the meaning of views defined in terms of other views. Let view v 1 be defined by an expression e 1 that may itself contain uses of view relations. View expansion of an expression repeats the following replacement step: repeat Find any view relation v i in e 1 Replace the view relation v i by the expression defining v i until no more view relations are present in e 1 As long as the view definitions are not recursive, this loop will terminate"
+    },
+    {
+      "slide": 20,
+      "text": [
+        "Update of a View",
+        "Add a new tuple to faculty view which we defined earlier insert into faculty values (’30765’, ’Green’, ’Music’); This insertion must be represented by the insertion of the tuple (’30765’, ’Green’, ’Music’, null) into the instructor relation",
+        "create view faculty as select ID , name , dept_name from instructor"
+      ],
+      "joined": "Update of a View\nAdd a new tuple to faculty view which we defined earlier insert into faculty values (’30765’, ’Green’, ’Music’); This insertion must be represented by the insertion of the tuple (’30765’, ’Green’, ’Music’, null) into the instructor relation\ncreate view faculty as select ID , name , dept_name from instructor"
+    },
+    {
+      "slide": 21,
+      "text": [
+        "Some Updates cannot be Translated Uniquely",
+        "create view instructor_info as select ID , name , building from instructor , department where instructor . dept_name = department . dept_name ; insert into instructor_info values (’69987’, ’White’, ’Taylor’); which department, if multiple departments in Taylor? what if no department is in Taylor? Most SQL implementations allow updates only on simple views The from clause has only one database relation. The select clause contains only attribute names of the relation, and does not have any expressions, aggregates, or distinct specification. Any attribute not listed in the select clause can be set to null The query does not have a group by or having clause."
+      ],
+      "joined": "Some Updates cannot be Translated Uniquely\ncreate view instructor_info as select ID , name , building from instructor , department where instructor . dept_name = department . dept_name ; insert into instructor_info values (’69987’, ’White’, ’Taylor’); which department, if multiple departments in Taylor? what if no department is in Taylor? Most SQL implementations allow updates only on simple views The from clause has only one database relation. The select clause contains only attribute names of the relation, and does not have any expressions, aggregates, or distinct specification. Any attribute not listed in the select clause can be set to null The query does not have a group by or having clause."
+    },
+    {
+      "slide": 22,
+      "text": [
+        "And Some Not at All",
+        "create view history_instructors as select * from instructor where dept_name = ’History’; What happens if we insert (’25566’, ’Brown’, ’Biology’, 100000) into history_instructors ?"
+      ],
+      "joined": "And Some Not at All\ncreate view history_instructors as select * from instructor where dept_name = ’History’; What happens if we insert (’25566’, ’Brown’, ’Biology’, 100000) into history_instructors ?"
+    },
+    {
+      "slide": 23,
+      "text": [
+        "Materialized Views",
+        "Materializing a view : create a physical table containing all the tuples in the result of the query defining the view If relations used in the query are updated, the materialized view result becomes out of date Need to maintain the view, by updating the view whenever the underlying relations are updated. 视图是一种“虚关系”，实际查询时需要根据定义查询底层关系，当存在大量这样的查询时会有较高的成本。 某些数据库支持 物化 视图 ，像存储表一样将创建的视图关系 “物化”存储 在数据库中 。 物化视图的创建、修改与删除语法同视图类似，区别是多了关键字 MATERIALIZED 。"
+      ],
+      "joined": "Materialized Views\nMaterializing a view : create a physical table containing all the tuples in the result of the query defining the view If relations used in the query are updated, the materialized view result becomes out of date Need to maintain the view, by updating the view whenever the underlying relations are updated. 视图是一种“虚关系”，实际查询时需要根据定义查询底层关系，当存在大量这样的查询时会有较高的成本。 某些数据库支持 物化 视图 ，像存储表一样将创建的视图关系 “物化”存储 在数据库中 。 物化视图的创建、修改与删除语法同视图类似，区别是多了关键字 MATERIALIZED 。"
+    },
+    {
+      "slide": 24,
+      "text": [
+        "Transactions",
+        "Unit of work Atomic transaction either fully executed or rolled back as if it never occurred Isolation from concurrent transactions Transactions begin implicitly Ended by commit work or rollback work But default on most databases: each SQL statement commits automatically Can turn off auto commit for a session (e.g. using API) In SQL:1999, can use: begin atomic …. end Not supported on most databases"
+      ],
+      "joined": "Transactions\nUnit of work Atomic transaction either fully executed or rolled back as if it never occurred Isolation from concurrent transactions Transactions begin implicitly Ended by commit work or rollback work But default on most databases: each SQL statement commits automatically Can turn off auto commit for a session (e.g. using API) In SQL:1999, can use: begin atomic …. end Not supported on most databases"
+    },
+    {
+      "slide": 25,
+      "text": [
+        "Integrity Constraints",
+        "Integrity constraints guard against accidental damage to the database, by ensuring that authorized changes to the database do not result in a loss of data consistency. A checking account must have a balance greater than $10,000.00 A salary of a bank employee must be at least $4.00 an hour A customer must have a (non-null) phone number"
+      ],
+      "joined": "Integrity Constraints\nIntegrity constraints guard against accidental damage to the database, by ensuring that authorized changes to the database do not result in a loss of data consistency. A checking account must have a balance greater than $10,000.00 A salary of a bank employee must be at least $4.00 an hour A customer must have a (non-null) phone number"
+    },
+    {
+      "slide": 26,
+      "text": [
+        "Integrity Constraints on a Single Relation",
+        "not null primary key unique check (P), where P is a predicate"
+      ],
+      "joined": "Integrity Constraints on a Single Relation\nnot null primary key unique check (P), where P is a predicate"
+    },
+    {
+      "slide": 27,
+      "text": [
+        "Not Null and Unique Constraints",
+        "not null Declare name and budget to be not null name varchar (20) not null budget numeric (12,2) not null unique ( A 1 , A 2 , …, A m ) The unique specification states that the attributes A 1 , A 2 , … A m form a candidate key . Candidate keys are permitted to be null (in contrast to primary keys)."
+      ],
+      "joined": "Not Null and Unique Constraints\nnot null Declare name and budget to be not null name varchar (20) not null budget numeric (12,2) not null unique ( A 1 , A 2 , …, A m ) The unique specification states that the attributes A 1 , A 2 , … A m form a candidate key . Candidate keys are permitted to be null (in contrast to primary keys)."
+    },
+    {
+      "slide": 28,
+      "text": [
+        "The check clause",
+        "check (P) ， where P is a predicate",
+        "Example: ensure that semester is one of fall, winter, spring or summer: create table section ( course_id varchar (8), sec_id varchar (8), semester varchar (6), year numeric (4,0), building varchar (15), room_number varchar (7), time slot id varchar (4), primary key ( course_id , sec_id , semester , year ), check ( semester in (’Fall’, ’Winter’, ’Spring’, ’Summer’)) );"
+      ],
+      "joined": "The check clause\ncheck (P) ， where P is a predicate\nExample: ensure that semester is one of fall, winter, spring or summer: create table section ( course_id varchar (8), sec_id varchar (8), semester varchar (6), year numeric (4,0), building varchar (15), room_number varchar (7), time slot id varchar (4), primary key ( course_id , sec_id , semester , year ), check ( semester in (’Fall’, ’Winter’, ’Spring’, ’Summer’)) );"
+    },
+    {
+      "slide": 29,
+      "text": [
+        "Referential Integrity",
+        "Ensures that a value that appears in one relation for a given set of attributes also appears for a certain set of attributes in another relation. Example: If “Biology” is a department name appearing in one of the tuples in the instructor relation, then there exists a tuple in the department relation for “Biology”. Let A be a set of attributes. Let R and S be two relations that contain attributes A and where A is the primary key of S . A is said to be a foreign key of R if for any values of A appearing in R these values also appear in S."
+      ],
+      "joined": "Referential Integrity\nEnsures that a value that appears in one relation for a given set of attributes also appears for a certain set of attributes in another relation. Example: If “Biology” is a department name appearing in one of the tuples in the instructor relation, then there exists a tuple in the department relation for “Biology”. Let A be a set of attributes. Let R and S be two relations that contain attributes A and where A is the primary key of S . A is said to be a foreign key of R if for any values of A appearing in R these values also appear in S."
+    },
+    {
+      "slide": 30,
+      "text": [
+        "Cascading Actions in Referential Integrity",
+        "create table course ( course_id char (5) primary key , title varchar (20), dept_name varchar (20) references department ) create table course ( … dept_name varchar (20), foreign key ( dept_name ) references department on delete cascade on update cascade , . . . ) alternative actions to cascade: set null , set default"
+      ],
+      "joined": "Cascading Actions in Referential Integrity\ncreate table course ( course_id char (5) primary key , title varchar (20), dept_name varchar (20) references department ) create table course ( … dept_name varchar (20), foreign key ( dept_name ) references department on delete cascade on update cascade , . . . ) alternative actions to cascade: set null , set default"
+    },
+    {
+      "slide": 31,
+      "text": [
+        "Integrity Constraint Violation During Transactions",
+        "E.g. create table person ( ID char (10), name char (40), mother char (10), father char (10), primary key ID, foreign key father references person, foreign key mother references person ) How to insert a tuple without causing constraint violation ? insert father and mother of a person before inserting person OR , set father and mother to null initially, update after inserting all persons (not possible if father and mother attributes declared to be not null ) OR defer constraint checking (next slide)"
+      ],
+      "joined": "Integrity Constraint Violation During Transactions\nE.g. create table person ( ID char (10), name char (40), mother char (10), father char (10), primary key ID, foreign key father references person, foreign key mother references person ) How to insert a tuple without causing constraint violation ? insert father and mother of a person before inserting person OR , set father and mother to null initially, update after inserting all persons (not possible if father and mother attributes declared to be not null ) OR defer constraint checking (next slide)"
+    },
+    {
+      "slide": 32,
+      "text": [
+        "Complex Check Clauses",
+        "check ( time_slot_id in ( select time_slot_id from time_slot )) section 关系上定义约束 why not use a foreign key here? 引用完整性约束（ referential integrity constraint)= 外键约束 ? Every section has at least one instructor teaching the section. how to write this? Unfortunately: subquery in check clause not supported by pretty much any database Alternative: triggers (later) create assertion <assertion-name> check <predicate>; Also not supported by anyone"
+      ],
+      "joined": "Complex Check Clauses\ncheck ( time_slot_id in ( select time_slot_id from time_slot )) section 关系上定义约束 why not use a foreign key here? 引用完整性约束（ referential integrity constraint)= 外键约束 ? Every section has at least one instructor teaching the section. how to write this? Unfortunately: subquery in check clause not supported by pretty much any database Alternative: triggers (later) create assertion <assertion-name> check <predicate>; Also not supported by anyone"
+    },
+    {
+      "slide": 33,
+      "text": [
+        "Schema Diagram for University Database"
+      ],
+      "joined": "Schema Diagram for University Database"
+    },
+    {
+      "slide": 34,
+      "text": [
+        "Built-in Data Types in SQL",
+        "date : Dates, containing a (4 digit) year, month and date Example: date ‘2005-7-27’ time : Time of day, in hours, minutes and seconds. Example: time ‘09:00:30’ time ‘09:00:30.75’ timestamp : date plus time of day Example: timestamp ‘2005-7-27 09:00:30.75’ interval : period of time Example: interval ‘1’ day Subtracting a date/time/timestamp value from another gives an interval value Interval values can be added to date/time/timestamp values"
+      ],
+      "joined": "Built-in Data Types in SQL\ndate : Dates, containing a (4 digit) year, month and date Example: date ‘2005-7-27’ time : Time of day, in hours, minutes and seconds. Example: time ‘09:00:30’ time ‘09:00:30.75’ timestamp : date plus time of day Example: timestamp ‘2005-7-27 09:00:30.75’ interval : period of time Example: interval ‘1’ day Subtracting a date/time/timestamp value from another gives an interval value Interval values can be added to date/time/timestamp values"
+    },
+    {
+      "slide": 35,
+      "text": [
+        "Index Creation",
+        "create table student ( ID varchar (5), name varchar (20) not null , dept_name varchar (20), tot_cred numeric (3,0) default 0, primary key ( ID ) ) create index studentID_index on student ( ID ) Indices are data structures used to speed up access to records with specified values for index attributes e.g. select * from student where ID = ‘12345’ can be executed by using the index to find the required record, without looking at all records of student More on indices in Chapter 11"
+      ],
+      "joined": "Index Creation\ncreate table student ( ID varchar (5), name varchar (20) not null , dept_name varchar (20), tot_cred numeric (3,0) default 0, primary key ( ID ) ) create index studentID_index on student ( ID ) Indices are data structures used to speed up access to records with specified values for index attributes e.g. select * from student where ID = ‘12345’ can be executed by using the index to find the required record, without looking at all records of student More on indices in Chapter 11"
+    },
+    {
+      "slide": 36,
+      "text": [
+        "Example of B + -Tree"
+      ],
+      "joined": "Example of B + -Tree"
+    },
+    {
+      "slide": 37,
+      "text": [
+        "User-Defined Types",
+        "create type construct in SQL creates user-defined type create type Dollars as numeric (12,2) final create table department ( dept_name varchar (20), building varchar (15), budget Dollars );"
+      ],
+      "joined": "User-Defined Types\ncreate type construct in SQL creates user-defined type create type Dollars as numeric (12,2) final create table department ( dept_name varchar (20), building varchar (15), budget Dollars );"
+    },
+    {
+      "slide": 38,
+      "text": [],
+      "joined": ""
+    },
+    {
+      "slide": 39,
+      "text": [],
+      "joined": ""
+    },
+    {
+      "slide": 40,
+      "text": [],
+      "joined": ""
+    },
+    {
+      "slide": 41,
+      "text": [],
+      "joined": ""
+    },
+    {
+      "slide": 42,
+      "text": [],
+      "joined": ""
+    },
+    {
+      "slide": 43,
+      "text": [
+        "Domains",
+        "create domain construct in SQL-92 creates user-defined domain types create domain person_name char (20) not null Types and domains are similar. Domains can have constraints, such as not null , specified on them. create domain degree_level varchar (10) constraint degree_level_test check ( value in (’Bachelors’, ’Masters’, ’Doctorate’));"
+      ],
+      "joined": "Domains\ncreate domain construct in SQL-92 creates user-defined domain types create domain person_name char (20) not null Types and domains are similar. Domains can have constraints, such as not null , specified on them. create domain degree_level varchar (10) constraint degree_level_test check ( value in (’Bachelors’, ’Masters’, ’Doctorate’));"
+    },
+    {
+      "slide": 44,
+      "text": [
+        "Large-Object Types",
+        "Large objects (photos, videos, CAD files, etc.) are stored as a large object : blob : binary large object -- object is a large collection of uninterpreted binary data (whose interpretation is left to an application outside of the database system) clob : character large object -- object is a large collection of character data When a query returns a large object, a pointer is returned rather than the large object itself."
+      ],
+      "joined": "Large-Object Types\nLarge objects (photos, videos, CAD files, etc.) are stored as a large object : blob : binary large object -- object is a large collection of uninterpreted binary data (whose interpretation is left to an application outside of the database system) clob : character large object -- object is a large collection of character data When a query returns a large object, a pointer is returned rather than the large object itself."
+    },
+    {
+      "slide": 45,
+      "text": [
+        "Authorization",
+        "Forms of authorization on parts of the database: Read - allows reading, but not modification of data. Insert - allows insertion of new data, but not modification of existing data. Update - allows modification, but not deletion of data. Delete - allows deletion of data. Forms of authorization to modify the database schema Index - allows creation and deletion of indices. Resources - allows creation of new relations. Alteration - allows addition or deletion of attributes in a relation. Drop - allows deletion of relations."
+      ],
+      "joined": "Authorization\nForms of authorization on parts of the database: Read - allows reading, but not modification of data. Insert - allows insertion of new data, but not modification of existing data. Update - allows modification, but not deletion of data. Delete - allows deletion of data. Forms of authorization to modify the database schema Index - allows creation and deletion of indices. Resources - allows creation of new relations. Alteration - allows addition or deletion of attributes in a relation. Drop - allows deletion of relations."
+    },
+    {
+      "slide": 46,
+      "text": [
+        "Authorization Specification in SQL",
+        "The grant statement is used to confer authorization grant <privilege list> on <relation name or view name> to <user list> <user list> is: a user-id public , which allows all valid users the privilege granted A role (more on this later) Granting a privilege on a view does not imply granting any privileges on the underlying relations. The grantor of the privilege must already hold the privilege on the specified item (or be the database administrator)."
+      ],
+      "joined": "Authorization Specification in SQL\nThe grant statement is used to confer authorization grant <privilege list> on <relation name or view name> to <user list> <user list> is: a user-id public , which allows all valid users the privilege granted A role (more on this later) Granting a privilege on a view does not imply granting any privileges on the underlying relations. The grantor of the privilege must already hold the privilege on the specified item (or be the database administrator)."
+    },
+    {
+      "slide": 47,
+      "text": [
+        "Privileges in SQL",
+        "select : allows read access to relation,or the ability to query using the view Example: grant users U 1 , U 2 , and U 3 select authorization on the instructor relation: grant select on instructor to U 1 , U 2 , U 3 insert : the ability to insert tuples update : the ability to update using the SQL update statement delete : the ability to delete tuples. all privileges : used as a short form for all the allowable privileges"
+      ],
+      "joined": "Privileges in SQL\nselect : allows read access to relation,or the ability to query using the view Example: grant users U 1 , U 2 , and U 3 select authorization on the instructor relation: grant select on instructor to U 1 , U 2 , U 3 insert : the ability to insert tuples update : the ability to update using the SQL update statement delete : the ability to delete tuples. all privileges : used as a short form for all the allowable privileges"
+    },
+    {
+      "slide": 48,
+      "text": [
+        "Revoking Authorization in SQL",
+        "The revoke statement is used to revoke authorization. revoke <privilege list> on <relation name or view name> from <user list> ， Example: revoke select on branch from U1, U2, U3 <privilege-list> may be all to revoke all privileges the revokee may hold. If < revokee -list> includes public , all users lose the privilege except those granted it explicitly . If the same privilege was granted twice to the same user by different grantees, the user may retain the privilege after the revocation. All privileges that depend on the privilege being revoked are also revoked."
+      ],
+      "joined": "Revoking Authorization in SQL\nThe revoke statement is used to revoke authorization. revoke <privilege list> on <relation name or view name> from <user list> ， Example: revoke select on branch from U1, U2, U3 <privilege-list> may be all to revoke all privileges the revokee may hold. If < revokee -list> includes public , all users lose the privilege except those granted it explicitly . If the same privilege was granted twice to the same user by different grantees, the user may retain the privilege after the revocation. All privileges that depend on the privilege being revoked are also revoked."
+    },
+    {
+      "slide": 49,
+      "text": [
+        "Roles",
+        "create role instructor; grant instructor to Amit; Privileges can be granted to roles: grant select on takes to instructor ; Roles can be granted to users, as well as to other roles create role teaching_assistant grant teaching_assistant to instructor ; Instructor inherits all privileges of teaching_assistant Chain of roles create role dean ; grant instructor to dean ; grant dean to Satoshi;"
+      ],
+      "joined": "Roles\ncreate role instructor; grant instructor to Amit; Privileges can be granted to roles: grant select on takes to instructor ; Roles can be granted to users, as well as to other roles create role teaching_assistant grant teaching_assistant to instructor ; Instructor inherits all privileges of teaching_assistant Chain of roles create role dean ; grant instructor to dean ; grant dean to Satoshi;"
+    },
+    {
+      "slide": 50,
+      "text": [
+        "Authorization on Views",
+        "create view geo_instructor as ( select * from instructor where dept_name = ’Geology’); grant select on geo_instructor to geo_staff Suppose that a geo_staff member issues select * from geo_instructor ; What if geo_staff does not have permissions on instructor? creator of view did not have some permissions on instructor?"
+      ],
+      "joined": "Authorization on Views\ncreate view geo_instructor as ( select * from instructor where dept_name = ’Geology’); grant select on geo_instructor to geo_staff Suppose that a geo_staff member issues select * from geo_instructor ; What if geo_staff does not have permissions on instructor? creator of view did not have some permissions on instructor?"
+    },
+    {
+      "slide": 51,
+      "text": [
+        "Other Authorization Features",
+        "references privilege to create foreign key 用户 Mariano 创建 instructor 表时，需要指定 外键 grant reference ( dept_name ) on department to Mariano; why is this required? transfer of privileges grant select on department to Amit with grant option ; revoke select on department from Amit, Satoshi cascade ; revoke select on department from Amit, Satoshi restrict ; 防止级联收权 Etc. read Section 4.6 for more details we have omitted here."
+      ],
+      "joined": "Other Authorization Features\nreferences privilege to create foreign key 用户 Mariano 创建 instructor 表时，需要指定 外键 grant reference ( dept_name ) on department to Mariano; why is this required? transfer of privileges grant select on department to Amit with grant option ; revoke select on department from Amit, Satoshi cascade ; revoke select on department from Amit, Satoshi restrict ; 防止级联收权 Etc. read Section 4.6 for more details we have omitted here."
+    },
+    {
+      "slide": 52,
+      "text": [
+        "关系代数与 SQL 的转换",
+        "关系代数运算 对应的 SQL 关系代数运算 对应的 SQL 选择运算（ ） WHERE 连接运算（ ） JOIN 投影运算（ ） SELECT 赋值运算（ ） AS 并运算（ ） UNION 除运算（ ） NOT EXISTS 差运算（ ） EXCEPT 去重运算（ ） DISTINCT 笛卡尔积运算 ( ) FROM 广义投影运算 ( ) SELECT 重命名运算（ ） AS 聚集运算（ ） 聚集函数 交运算（ ） INTERSECT 分组运算（ ） GROUP BY",
+        "关系代数运算 对应的 SQL 关系代数运算 对应的 SQL WHERE JOIN SELECT AS UNION NOT EXISTS EXCEPT DISTINCT FROM SELECT AS 聚集函数 INTERSECT GROUP BY"
+      ],
+      "joined": "关系代数与 SQL 的转换\n关系代数运算 对应的 SQL 关系代数运算 对应的 SQL 选择运算（ ） WHERE 连接运算（ ） JOIN 投影运算（ ） SELECT 赋值运算（ ） AS 并运算（ ） UNION 除运算（ ） NOT EXISTS 差运算（ ） EXCEPT 去重运算（ ） DISTINCT 笛卡尔积运算 ( ) FROM 广义投影运算 ( ) SELECT 重命名运算（ ） AS 聚集运算（ ） 聚集函数 交运算（ ） INTERSECT 分组运算（ ） GROUP BY\n关系代数运算 对应的 SQL 关系代数运算 对应的 SQL WHERE JOIN SELECT AS UNION NOT EXISTS EXCEPT DISTINCT FROM SELECT AS 聚集函数 INTERSECT GROUP BY"
+    },
+    {
+      "slide": 53,
+      "text": [
+        "End of Chapter 4"
+      ],
+      "joined": "End of Chapter 4"
+    },
+    {
+      "slide": 54,
+      "text": [
+        "Figure 4.01"
+      ],
+      "joined": "Figure 4.01"
+    },
+    {
+      "slide": 55,
+      "text": [
+        "Figure 4.02"
+      ],
+      "joined": "Figure 4.02"
+    },
+    {
+      "slide": 56,
+      "text": [
+        "Figure 4.03"
+      ],
+      "joined": "Figure 4.03"
+    },
+    {
+      "slide": 57,
+      "text": [
+        "Figure 4.04"
+      ],
+      "joined": "Figure 4.04"
+    },
+    {
+      "slide": 58,
+      "text": [
+        "Figure 4.05"
+      ],
+      "joined": "Figure 4.05"
+    },
+    {
+      "slide": 59,
+      "text": [
+        "Figure 4.07",
+        "Taylor"
+      ],
+      "joined": "Figure 4.07\nTaylor"
+    },
+    {
+      "slide": 60,
+      "text": [
+        "Figure 4.06"
+      ],
+      "joined": "Figure 4.06"
+    },
+    {
+      "slide": 61,
+      "text": [
+        "Figure 4.03"
+      ],
+      "joined": "Figure 4.03"
+    }
+  ]
+}

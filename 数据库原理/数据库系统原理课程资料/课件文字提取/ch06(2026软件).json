@@ -1,0 +1,1056 @@
+{
+  "file": "C:\\Users\\yang\\Desktop\\数据库原理\\数据库系统原理\\数据库系统原理课件\\ch06(2026软件).pptx",
+  "slide_count": 104,
+  "slides": [
+    {
+      "slide": 1,
+      "text": [
+        "Chapter 6: Entity-Relationship Model"
+      ],
+      "joined": "Chapter 6: Entity-Relationship Model"
+    },
+    {
+      "slide": 2,
+      "text": [
+        "Chapter 6: Entity-Relationship Model",
+        "Design Process Modeling Constraints E-R Diagram Design Issues Weak Entity Sets Extended E-R Features Design of the Bank Database Reduction to Relation Schemas Database Design UML"
+      ],
+      "joined": "Chapter 6: Entity-Relationship Model\nDesign Process Modeling Constraints E-R Diagram Design Issues Weak Entity Sets Extended E-R Features Design of the Bank Database Reduction to Relation Schemas Database Design UML"
+    },
+    {
+      "slide": 3,
+      "text": [
+        "Design Phases",
+        "The initial phase of database design is to characterize fully the data needs of the prospective database users . Next, the designer chooses a data model and, by applying the concepts of the chosen data model, translates these requirements into a conceptual schema of the database . A fully developed conceptual schema also indicates the functional requirements of the enterprise. In a “ specification of functional requirements ” ( 功能需求说明书 ) , users describe the kinds of operations (or transactions) that will be performed on the data."
+      ],
+      "joined": "Design Phases\nThe initial phase of database design is to characterize fully the data needs of the prospective database users . Next, the designer chooses a data model and, by applying the concepts of the chosen data model, translates these requirements into a conceptual schema of the database . A fully developed conceptual schema also indicates the functional requirements of the enterprise. In a “ specification of functional requirements ” ( 功能需求说明书 ) , users describe the kinds of operations (or transactions) that will be performed on the data."
+    },
+    {
+      "slide": 4,
+      "text": [
+        "Design Phases (Cont.)",
+        "The process of moving from an abstract data model to the implementation of the database proceeds in two final design phases. Logical Design – Deciding on the database schema. Database design requires that we find a “ good ” collection of relation schemas. Business decision – What attributes should we record in the database? Computer Science decision – What relation schemas should we have and how should the attributes be distributed among the various relation schemas? Physical Design – Deciding on the physical layout of the database"
+      ],
+      "joined": "Design Phases (Cont.)\nThe process of moving from an abstract data model to the implementation of the database proceeds in two final design phases. Logical Design – Deciding on the database schema. Database design requires that we find a “ good ” collection of relation schemas. Business decision – What attributes should we record in the database? Computer Science decision – What relation schemas should we have and how should the attributes be distributed among the various relation schemas? Physical Design – Deciding on the physical layout of the database"
+    },
+    {
+      "slide": 5,
+      "text": [
+        "Design Approaches",
+        "Entity Relationship Model (covered in this chapter) Models an enterprise as a collection of entities and relationships Entity : a “ thing ” or “ object ” in the enterprise that is distinguishable from other objects Described by a set of attributes Relationship : an association among several entities Represented diagrammatically by an entity-relationship diagram: Normalization Theory (Chapter 8) Formalize what designs are bad, and test for them"
+      ],
+      "joined": "Design Approaches\nEntity Relationship Model (covered in this chapter) Models an enterprise as a collection of entities and relationships Entity : a “ thing ” or “ object ” in the enterprise that is distinguishable from other objects Described by a set of attributes Relationship : an association among several entities Represented diagrammatically by an entity-relationship diagram: Normalization Theory (Chapter 8) Formalize what designs are bad, and test for them"
+    },
+    {
+      "slide": 6,
+      "text": [
+        "Outline of the ER Model"
+      ],
+      "joined": "Outline of the ER Model"
+    },
+    {
+      "slide": 7,
+      "text": [
+        "ER model -- Database Modeling",
+        "The ER data mode was developed to facilitate database design by allowing specification of an enterprise schema that represents the overall logical structure of a database. The ER model is very useful in mapping the meanings and interactions of real-world enterprises onto a conceptual schema. Because of this usefulness, many database-design tools draw on concepts from the ER model. The ER data model employs three basic concepts: entity sets, relationship sets, attributes. The ER model also has an associated diagrammatic representation, the ER diagram, which can express the overall logical structure of a database graphically."
+      ],
+      "joined": "ER model -- Database Modeling\nThe ER data mode was developed to facilitate database design by allowing specification of an enterprise schema that represents the overall logical structure of a database. The ER model is very useful in mapping the meanings and interactions of real-world enterprises onto a conceptual schema. Because of this usefulness, many database-design tools draw on concepts from the ER model. The ER data model employs three basic concepts: entity sets, relationship sets, attributes. The ER model also has an associated diagrammatic representation, the ER diagram, which can express the overall logical structure of a database graphically."
+    },
+    {
+      "slide": 8,
+      "text": [
+        "Entity Sets",
+        "An entity is an object that exists and is distinguishable from other objects. Example: specific person, company, event, plant An entity set is a set of entities of the same type that share the same properties. Example: set of all persons, companies, trees, holidays An entity is represented by a set of attributes ; i.e., descriptive properties possessed by all members of an entity set. Example: instructor = ( ID, name, street, city, salary ) course= ( course_id, title, credits ) A subset of the attributes form a primary key of the entity set; i.e., uniquely identifiying each member of the set."
+      ],
+      "joined": "Entity Sets\nAn entity is an object that exists and is distinguishable from other objects. Example: specific person, company, event, plant An entity set is a set of entities of the same type that share the same properties. Example: set of all persons, companies, trees, holidays An entity is represented by a set of attributes ; i.e., descriptive properties possessed by all members of an entity set. Example: instructor = ( ID, name, street, city, salary ) course= ( course_id, title, credits ) A subset of the attributes form a primary key of the entity set; i.e., uniquely identifiying each member of the set."
+    },
+    {
+      "slide": 9,
+      "text": [
+        "Entity Sets -- instructor and student",
+        "instructor_ID instructor_name student-ID student_name"
+      ],
+      "joined": "Entity Sets -- instructor and student\ninstructor_ID instructor_name student-ID student_name"
+    },
+    {
+      "slide": 10,
+      "text": [
+        "Relationship Sets",
+        "A relationship is an association among several entities Example: 44553 (Peltier ) advisor 22222 ( Einstein) student entity relationship set instructor entity A relationship set is a mathematical relation among n  2 entities, each taken from entity sets {( e 1 , e 2 , … e n ) | e 1  E 1 , e 2  E 2 , …, e n  E n } where ( e 1 , e 2 , …, e n ) is a relationship Example: (44553,22222)  advisor"
+      ],
+      "joined": "Relationship Sets\nA relationship is an association among several entities Example: 44553 (Peltier ) advisor 22222 ( Einstein) student entity relationship set instructor entity A relationship set is a mathematical relation among n  2 entities, each taken from entity sets {( e 1 , e 2 , … e n ) | e 1  E 1 , e 2  E 2 , …, e n  E n } where ( e 1 , e 2 , …, e n ) is a relationship Example: (44553,22222)  advisor"
+    },
+    {
+      "slide": 11,
+      "text": [
+        "Relationship Set advisor"
+      ],
+      "joined": "Relationship Set advisor"
+    },
+    {
+      "slide": 12,
+      "text": [
+        "Relationship Sets (Cont.)",
+        "An attribute can also be associated with a relationship set. For instance, the advisor relationship set between entity sets instructor and student may have the attribute date which tracks when the student started being associated with the advisor"
+      ],
+      "joined": "Relationship Sets (Cont.)\nAn attribute can also be associated with a relationship set. For instance, the advisor relationship set between entity sets instructor and student may have the attribute date which tracks when the student started being associated with the advisor"
+    },
+    {
+      "slide": 13,
+      "text": [
+        "Degree of a Relationship Set",
+        "binary relationship involve two entity sets (or degree two). most relationship sets in a database system are binary. Relationships between more than two entity sets are rare. Most relationships are binary. (More on this later.) Example: students work on research projects under the guidance of an instructor . relationship proj_guide is a ternary relationship between instructor, student, and project"
+      ],
+      "joined": "Degree of a Relationship Set\nbinary relationship involve two entity sets (or degree two). most relationship sets in a database system are binary. Relationships between more than two entity sets are rare. Most relationships are binary. (More on this later.) Example: students work on research projects under the guidance of an instructor . relationship proj_guide is a ternary relationship between instructor, student, and project"
+    },
+    {
+      "slide": 14,
+      "text": [
+        "Mapping Cardinality Constraints",
+        "Express the number of entities to which another entity can be associated via a relationship set. Most useful in describing binary relationship sets. For a binary relationship set the mapping cardinality must be one of the following types: One to one One to many Many to one Many to many"
+      ],
+      "joined": "Mapping Cardinality Constraints\nExpress the number of entities to which another entity can be associated via a relationship set. Most useful in describing binary relationship sets. For a binary relationship set the mapping cardinality must be one of the following types: One to one One to many Many to one Many to many"
+    },
+    {
+      "slide": 15,
+      "text": [
+        "Mapping Cardinalities",
+        "One to one",
+        "One to many",
+        "Note: Some elements in A and B may not be mapped to any elements in the other set"
+      ],
+      "joined": "Mapping Cardinalities\nOne to one\nOne to many\nNote: Some elements in A and B may not be mapped to any elements in the other set"
+    },
+    {
+      "slide": 16,
+      "text": [
+        "Mapping Cardinalities",
+        "Many to one",
+        "Many to many",
+        "Note: Some elements in A and B may not be mapped to any elements in the other set"
+      ],
+      "joined": "Mapping Cardinalities\nMany to one\nMany to many\nNote: Some elements in A and B may not be mapped to any elements in the other set"
+    },
+    {
+      "slide": 17,
+      "text": [
+        "Complex Attributes",
+        "Attribute types: Simple and composite attributes. Single-valued and multivalued attributes Example: multivalued attribute: phone_numbers Derived attributes Can be computed from other attributes Example: age, given date_of_birth Domain – the set of permitted values for each attribute"
+      ],
+      "joined": "Complex Attributes\nAttribute types: Simple and composite attributes. Single-valued and multivalued attributes Example: multivalued attribute: phone_numbers Derived attributes Can be computed from other attributes Example: age, given date_of_birth Domain – the set of permitted values for each attribute"
+    },
+    {
+      "slide": 18,
+      "text": [
+        "Composite Attributes"
+      ],
+      "joined": "Composite Attributes"
+    },
+    {
+      "slide": 19,
+      "text": [
+        "Redundant Attributes",
+        "Suppose we have entity sets: instructor , with attributes: ID , name , dept_name , salary department , with attributes: dept_name , building, budget We model the fact that each instructor has an associated department using a relationship set inst_dept 避免：两个实体集之间的联系隐含于一个属性中 The attribute dept_name appears in both entity sets. Since it is the primary key for the entity set department , it replicates information present in the relationship and is therefore redundant in the entity set instructor and needs to be removed. BUT: when converting back to tables, in some cases the attribute gets reintroduced, as we will see later."
+      ],
+      "joined": "Redundant Attributes\nSuppose we have entity sets: instructor , with attributes: ID , name , dept_name , salary department , with attributes: dept_name , building, budget We model the fact that each instructor has an associated department using a relationship set inst_dept 避免：两个实体集之间的联系隐含于一个属性中 The attribute dept_name appears in both entity sets. Since it is the primary key for the entity set department , it replicates information present in the relationship and is therefore redundant in the entity set instructor and needs to be removed. BUT: when converting back to tables, in some cases the attribute gets reintroduced, as we will see later."
+    },
+    {
+      "slide": 20,
+      "text": [
+        "Weak Entity Sets",
+        "Consider a section entity, which is uniquely identified by a course_id , semester, year , and sec_id . Clearly, section entities are related to course entities. Suppose we create a relationship set sec_course between entity sets section and course . Note that the information in sec_course is redundant , since section already has an attribute course_id , which identifies the course with which the section is related. One option to deal with this redundancy is to get rid of the relationship s ec_course ; however, by doing so the relationship between section and course becomes implicit in an attribute , which is not desirable."
+      ],
+      "joined": "Weak Entity Sets\nConsider a section entity, which is uniquely identified by a course_id , semester, year , and sec_id . Clearly, section entities are related to course entities. Suppose we create a relationship set sec_course between entity sets section and course . Note that the information in sec_course is redundant , since section already has an attribute course_id , which identifies the course with which the section is related. One option to deal with this redundancy is to get rid of the relationship s ec_course ; however, by doing so the relationship between section and course becomes implicit in an attribute , which is not desirable."
+    },
+    {
+      "slide": 21,
+      "text": [
+        "Weak Entity Sets (Cont.)",
+        "An alternative way to deal with this redundancy is to not store the attribute course_id in the section entity to only store the remaining attributes section_id , year , and semester . However, the entity set section then does not have enough attributes to identify a particular section entity uniquely ; although each section entity is distinct, sections for different courses may share the same section_id , year , and semester ."
+      ],
+      "joined": "Weak Entity Sets (Cont.)\nAn alternative way to deal with this redundancy is to not store the attribute course_id in the section entity to only store the remaining attributes section_id , year , and semester . However, the entity set section then does not have enough attributes to identify a particular section entity uniquely ; although each section entity is distinct, sections for different courses may share the same section_id , year , and semester ."
+    },
+    {
+      "slide": 22,
+      "text": [
+        "To deal with this problem, we treat the relationship sec_course as a special relationship that provides extra information in this case, the course_id , required to identify section entities uniquely. The notion of weak entity set formalizes the above intuition. A weak entity set is one whose existence is dependent on ( 存在依赖 )another entity, called its identifying entity （标识性实体） ; instead of associating a primary key with a weak entity, we use the identifying entity, along with extra attributes called discriminator （分辨符） to uniquely identify a weak entity. An entity set that is not a weak entity set is termed a strong entity set.",
+        "Weak Entity Sets (Cont.)"
+      ],
+      "joined": "To deal with this problem, we treat the relationship sec_course as a special relationship that provides extra information in this case, the course_id , required to identify section entities uniquely. The notion of weak entity set formalizes the above intuition. A weak entity set is one whose existence is dependent on ( 存在依赖 )another entity, called its identifying entity （标识性实体） ; instead of associating a primary key with a weak entity, we use the identifying entity, along with extra attributes called discriminator （分辨符） to uniquely identify a weak entity. An entity set that is not a weak entity set is termed a strong entity set.\nWeak Entity Sets (Cont.)"
+    },
+    {
+      "slide": 23,
+      "text": [
+        "Weak Entity Sets (Cont.)",
+        "Every weak entity must be associated with an identifying entity; t hat is, the weak entity set is said to be existence dependent on the identifying entity set. The identifying entity set is said to own the weak entity set that it identifies. The relationship associating the weak entity set with the identifying entity set is called the identifying relationship . 标识性联系集不应该有任何描述性属性 Note that the relational schema we eventually create from the entity set section does have the attribute course_id , for reasons that will become clear later, even though we have dropped the attribute course_id from the entity set section ."
+      ],
+      "joined": "Weak Entity Sets (Cont.)\nEvery weak entity must be associated with an identifying entity; t hat is, the weak entity set is said to be existence dependent on the identifying entity set. The identifying entity set is said to own the weak entity set that it identifies. The relationship associating the weak entity set with the identifying entity set is called the identifying relationship . 标识性联系集不应该有任何描述性属性 Note that the relational schema we eventually create from the entity set section does have the attribute course_id , for reasons that will become clear later, even though we have dropped the attribute course_id from the entity set section ."
+    },
+    {
+      "slide": 24,
+      "text": [
+        "E-R Diagrams"
+      ],
+      "joined": "E-R Diagrams"
+    },
+    {
+      "slide": 25,
+      "text": [
+        "Entity Sets",
+        "Entities can be represented graphically as follows: Rectangles represent entity sets . Attributes listed inside entity rectangle Underline indicates primary key attributes"
+      ],
+      "joined": "Entity Sets\nEntities can be represented graphically as follows: Rectangles represent entity sets . Attributes listed inside entity rectangle Underline indicates primary key attributes"
+    },
+    {
+      "slide": 26,
+      "text": [
+        "Relationship Sets",
+        "Diamonds represent relationship sets ."
+      ],
+      "joined": "Relationship Sets\nDiamonds represent relationship sets ."
+    },
+    {
+      "slide": 27,
+      "text": [
+        "Relationship Sets with Attributes"
+      ],
+      "joined": "Relationship Sets with Attributes"
+    },
+    {
+      "slide": 28,
+      "text": [
+        "Roles",
+        "Entity sets of a relationship need not be distinct Each occurrence of an entity set plays a “ role ” in the relationship The labels “ course_id ” and “ prereq_id ” are called roles ."
+      ],
+      "joined": "Roles\nEntity sets of a relationship need not be distinct Each occurrence of an entity set plays a “ role ” in the relationship The labels “ course_id ” and “ prereq_id ” are called roles ."
+    },
+    {
+      "slide": 29,
+      "text": [
+        "Cardinality Constraints",
+        "We express cardinality constraints by drawing either a directed line ( ), signifying “ one, ” or an undirected line (—), signifying “ many, ” between the relationship set and the entity set. One-to-one relationship between an instructor and a student : A student is associated with at most one instructor via the relationship advisor A student is associated with at most one department via stud_dept"
+      ],
+      "joined": "Cardinality Constraints\nWe express cardinality constraints by drawing either a directed line ( ), signifying “ one, ” or an undirected line (—), signifying “ many, ” between the relationship set and the entity set. One-to-one relationship between an instructor and a student : A student is associated with at most one instructor via the relationship advisor A student is associated with at most one department via stud_dept"
+    },
+    {
+      "slide": 30,
+      "text": [
+        "One-to-Many Relationship",
+        "one-to-many relationship between an instructor and a student an instructor is associated with several (including 0) students via advisor a student is associated with at most one instructor via advisor,"
+      ],
+      "joined": "One-to-Many Relationship\none-to-many relationship between an instructor and a student an instructor is associated with several (including 0) students via advisor a student is associated with at most one instructor via advisor,"
+    },
+    {
+      "slide": 31,
+      "text": [
+        "Many-to-One Relationships",
+        "In a many-to-one relationship between an instructor and a student, an instructor is associated with at most one student via advisor , and a student is associated with several (including 0) instructors via advisor"
+      ],
+      "joined": "Many-to-One Relationships\nIn a many-to-one relationship between an instructor and a student, an instructor is associated with at most one student via advisor , and a student is associated with several (including 0) instructors via advisor"
+    },
+    {
+      "slide": 32,
+      "text": [
+        "Many-to-Many Relationship",
+        "An instructor is associated with several (possibly 0) students via advisor A student is associated with several (possibly 0) instructors via advisor"
+      ],
+      "joined": "Many-to-Many Relationship\nAn instructor is associated with several (possibly 0) students via advisor A student is associated with several (possibly 0) instructors via advisor"
+    },
+    {
+      "slide": 33,
+      "text": [
+        "一个实体集内的 递归联系",
+        "一对一  e i  E ， 至多存在一个 e j  E 与之相联系（ j≠i） 一对多 多对多",
+        "职工",
+        "领导",
+        "领导",
+        "属下",
+        "职工",
+        "配偶",
+        "丈夫",
+        "妻子",
+        "构成",
+        "零件",
+        "母零件",
+        "子零件"
+      ],
+      "joined": "一个实体集内的 递归联系\n一对一  e i  E ， 至多存在一个 e j  E 与之相联系（ j≠i） 一对多 多对多\n职工\n领导\n领导\n属下\n职工\n配偶\n丈夫\n妻子\n构成\n零件\n母零件\n子零件"
+    },
+    {
+      "slide": 34,
+      "text": [
+        "Total and Partial Participation",
+        "Total participation (indicated by double line) : every entity in the entity set participates in at least one relationship in the relationship set participation of student in advisor r elation is total every student must have an associated instructor Partial participation : some entities may not participate in any relationship in the relationship set Example: participation of instructor in advisor is partial"
+      ],
+      "joined": "Total and Partial Participation\nTotal participation (indicated by double line) : every entity in the entity set participates in at least one relationship in the relationship set participation of student in advisor r elation is total every student must have an associated instructor Partial participation : some entities may not participate in any relationship in the relationship set Example: participation of instructor in advisor is partial"
+    },
+    {
+      "slide": 35,
+      "text": [
+        "Notation for Expressing More Complex Constraints",
+        "A line may have an associated minimum and maximum cardinality, shown in the form l..h , where l is the minimum and h the maximum cardinality A minimum value of 1 indicates total participation. A maximum value of 1 indicates that the entity participates in at most one relationship A maximum value of * indicates no limit.",
+        "Instructor can advise 0 or more students. A student must have 1 advisor; cannot have multiple advisors"
+      ],
+      "joined": "Notation for Expressing More Complex Constraints\nA line may have an associated minimum and maximum cardinality, shown in the form l..h , where l is the minimum and h the maximum cardinality A minimum value of 1 indicates total participation. A maximum value of 1 indicates that the entity participates in at most one relationship A maximum value of * indicates no limit.\nInstructor can advise 0 or more students. A student must have 1 advisor; cannot have multiple advisors"
+    },
+    {
+      "slide": 36,
+      "text": [
+        "Notation to Express Entity with Complex Attributes"
+      ],
+      "joined": "Notation to Express Entity with Complex Attributes"
+    },
+    {
+      "slide": 37,
+      "text": [
+        "Expressing Weak Entity Sets",
+        "In E-R diagrams, a weak entity set is depicted via a double rectangle. We underline the discriminator of a weak entity set with a dashed line. The relationship set connecting the weak entity set to the identifying strong entity set is depicted by a double diamond. Primary key for section – ( course_id, sec_id, semester, year )"
+      ],
+      "joined": "Expressing Weak Entity Sets\nIn E-R diagrams, a weak entity set is depicted via a double rectangle. We underline the discriminator of a weak entity set with a dashed line. The relationship set connecting the weak entity set to the identifying strong entity set is depicted by a double diamond. Primary key for section – ( course_id, sec_id, semester, year )"
+    },
+    {
+      "slide": 38,
+      "text": [
+        "E-R Diagram for a University Enterprise"
+      ],
+      "joined": "E-R Diagram for a University Enterprise"
+    },
+    {
+      "slide": 39,
+      "text": [
+        "Schema Diagram for University Database"
+      ],
+      "joined": "Schema Diagram for University Database"
+    },
+    {
+      "slide": 40,
+      "text": [
+        "Reduction to Relation Schemas"
+      ],
+      "joined": "Reduction to Relation Schemas"
+    },
+    {
+      "slide": 41,
+      "text": [
+        "Reduction to Relation Schemas",
+        "Entity sets and relationship sets can be expressed uniformly as relation schemas that represent the contents of the database. A database which conforms to an E-R diagram can be represented by a collection of schemas . For each entity set and relationship set there is a unique schema that is assigned the name of the corresponding entity set or relationship set. Each schema has a number of columns (generally corresponding to attributes), which have unique names."
+      ],
+      "joined": "Reduction to Relation Schemas\nEntity sets and relationship sets can be expressed uniformly as relation schemas that represent the contents of the database. A database which conforms to an E-R diagram can be represented by a collection of schemas . For each entity set and relationship set there is a unique schema that is assigned the name of the corresponding entity set or relationship set. Each schema has a number of columns (generally corresponding to attributes), which have unique names."
+    },
+    {
+      "slide": 42,
+      "text": [
+        "Representing Entity Sets",
+        "A strong entity set reduces to a schema with the same attributes student( ID , name, tot_cred) A weak entity set becomes a table that includes a column for the primary key of the identifying strong entity set section ( course_id , sec_id, sem, year )"
+      ],
+      "joined": "Representing Entity Sets\nA strong entity set reduces to a schema with the same attributes student( ID , name, tot_cred) A weak entity set becomes a table that includes a column for the primary key of the identifying strong entity set section ( course_id , sec_id, sem, year )"
+    },
+    {
+      "slide": 43,
+      "text": [
+        "Representing Relationship Sets",
+        "A many-to-many relationship set is represented as a schema with attributes for the primary keys of the two participating entity sets, and any descriptive attributes of the relationship set. Example: schema for relationship set advisor advisor = ( s_id, i_id )"
+      ],
+      "joined": "Representing Relationship Sets\nA many-to-many relationship set is represented as a schema with attributes for the primary keys of the two participating entity sets, and any descriptive attributes of the relationship set. Example: schema for relationship set advisor advisor = ( s_id, i_id )"
+    },
+    {
+      "slide": 44,
+      "text": [
+        "Representation of Entity Sets with Composite Attributes",
+        "Composite attributes are flattened out by creating a separate attribute for each component attribute Example: given entity set instructor with composite attribute name with component attributes first_name and last_name the schema corresponding to the entity set has two attributes name_first_name and name_last_name Prefix omitted if there is no ambiguity ( name_first_name could be first_name) Ignoring multivalued attributes , extended instructor schema is instructor(ID, first_name, middle_initial, last_name, street_number, street_name, apt_number, city, state, zip_code, date_of_birth)"
+      ],
+      "joined": "Representation of Entity Sets with Composite Attributes\nComposite attributes are flattened out by creating a separate attribute for each component attribute Example: given entity set instructor with composite attribute name with component attributes first_name and last_name the schema corresponding to the entity set has two attributes name_first_name and name_last_name Prefix omitted if there is no ambiguity ( name_first_name could be first_name) Ignoring multivalued attributes , extended instructor schema is instructor(ID, first_name, middle_initial, last_name, street_number, street_name, apt_number, city, state, zip_code, date_of_birth)"
+    },
+    {
+      "slide": 45,
+      "text": [
+        "Representation of Entity Sets with Multivalued Attributes",
+        "A multivalued attribute M of an entity E is represented by a separate schema EM Schema EM has attributes corresponding to the primary key of E and an attribute corresponding to multivalued attribute M Example: Multivalued attribute phone_number of instructor is represented by a schema: inst_phone = ( ID , phone_number ) Each value of the multivalued attribute maps to a separate tuple of the relation on schema EM For example, an instructor entity with primary key 22222 and phone numbers 456-7890 and 123-4567 maps to two tuples: (22222, 456-7890) and (22222, 123-4567)"
+      ],
+      "joined": "Representation of Entity Sets with Multivalued Attributes\nA multivalued attribute M of an entity E is represented by a separate schema EM Schema EM has attributes corresponding to the primary key of E and an attribute corresponding to multivalued attribute M Example: Multivalued attribute phone_number of instructor is represented by a schema: inst_phone = ( ID , phone_number ) Each value of the multivalued attribute maps to a separate tuple of the relation on schema EM For example, an instructor entity with primary key 22222 and phone numbers 456-7890 and 123-4567 maps to two tuples: (22222, 456-7890) and (22222, 123-4567)"
+    },
+    {
+      "slide": 46,
+      "text": [
+        "Redundancy of Schemas",
+        "Many-to-one and one-to-many relationship sets that are total on the many-side can be represented by adding an extra attribute to the “ many ” side, containing the primary key of the “ one ” side Example: Instead of creating a schema for relationship set inst_dept , add an attribute dept_name to the schema arising from entity set instructor"
+      ],
+      "joined": "Redundancy of Schemas\nMany-to-one and one-to-many relationship sets that are total on the many-side can be represented by adding an extra attribute to the “ many ” side, containing the primary key of the “ one ” side Example: Instead of creating a schema for relationship set inst_dept , add an attribute dept_name to the schema arising from entity set instructor"
+    },
+    {
+      "slide": 47,
+      "text": [
+        "Redundancy of Schemas (Cont.)",
+        "For one-to-one relationship sets, either side can be chosen to act as the “ many ” side That is, an extra attribute can be added to either of the tables corresponding to the two entity sets If participation is partial on the “ many ” side, replacing a schema by an extra attribute in the schema corresponding to the “ many ” side could result in null values"
+      ],
+      "joined": "Redundancy of Schemas (Cont.)\nFor one-to-one relationship sets, either side can be chosen to act as the “ many ” side That is, an extra attribute can be added to either of the tables corresponding to the two entity sets If participation is partial on the “ many ” side, replacing a schema by an extra attribute in the schema corresponding to the “ many ” side could result in null values"
+    },
+    {
+      "slide": 48,
+      "text": [
+        "Redundancy of Schemas (Cont.)",
+        "The schema corresponding to a relationship set linking a weak entity set to its identifying strong entity set is redundant. Example: The section schema already contains the attributes that would appear in the sec_course schema"
+      ],
+      "joined": "Redundancy of Schemas (Cont.)\nThe schema corresponding to a relationship set linking a weak entity set to its identifying strong entity set is redundant. Example: The section schema already contains the attributes that would appear in the sec_course schema"
+    },
+    {
+      "slide": 49,
+      "text": [
+        "Advanced Topics"
+      ],
+      "joined": "Advanced Topics"
+    },
+    {
+      "slide": 50,
+      "text": [
+        "Non-binary Relationship Sets",
+        "Most relationship sets are binary There are occasions when it is more convenient to represent relationships as non-binary. E-R Diagram with a Ternary Relationship"
+      ],
+      "joined": "Non-binary Relationship Sets\nMost relationship sets are binary There are occasions when it is more convenient to represent relationships as non-binary. E-R Diagram with a Ternary Relationship"
+    },
+    {
+      "slide": 51,
+      "text": [
+        "Cardinality Constraints on Ternary Relationship",
+        "We allow at most one arrow out of a ternary (or greater degree) relationship to indicate a cardinality constraint For exampe , an arrow from proj_guide to instructor indicates each student has at most one guide for a project If there is more than one arrow, there are two ways of defining the meaning. For example, a ternary relationship R between A , B and C with arrows to B and C could mean 1.Each A entity is associated with a unique entity from B and C or 2.Each pair of entities from ( A, B ) is associated with a unique C entity, and each pair ( A, C ) is associated with a unique B Each alternative has been used in different formalisms To avoid confusion we outlaw more than one arrow"
+      ],
+      "joined": "Cardinality Constraints on Ternary Relationship\nWe allow at most one arrow out of a ternary (or greater degree) relationship to indicate a cardinality constraint For exampe , an arrow from proj_guide to instructor indicates each student has at most one guide for a project If there is more than one arrow, there are two ways of defining the meaning. For example, a ternary relationship R between A , B and C with arrows to B and C could mean 1.Each A entity is associated with a unique entity from B and C or 2.Each pair of entities from ( A, B ) is associated with a unique C entity, and each pair ( A, C ) is associated with a unique B Each alternative has been used in different formalisms To avoid confusion we outlaw more than one arrow"
+    },
+    {
+      "slide": 52,
+      "text": [
+        "Specialization",
+        "Top-down design process; we designate sub-groupings within an entity set that are distinctive from other entities in the set. These sub-groupings become lower-level entity sets that have attributes or participate in relationships that do not apply to the higher-level entity set. Depicted by a triangle component labeled ISA (e.g., instructor “ is a ” person ). Attribute inheritance – a lower-level entity set inherits all the attributes and relationship participation of the higher-level entity set to which it is linked."
+      ],
+      "joined": "Specialization\nTop-down design process; we designate sub-groupings within an entity set that are distinctive from other entities in the set. These sub-groupings become lower-level entity sets that have attributes or participate in relationships that do not apply to the higher-level entity set. Depicted by a triangle component labeled ISA (e.g., instructor “ is a ” person ). Attribute inheritance – a lower-level entity set inherits all the attributes and relationship participation of the higher-level entity set to which it is linked."
+    },
+    {
+      "slide": 53,
+      "text": [
+        "Representing Specialization via Schemas",
+        "Method 1: Form a schema for the higher-level entity Form a schema for each lower-level entity set, include primary key of higher-level entity set and local attributes Drawback: getting information about, an employee requires accessing two relations, the one corresponding to the low-level schema and the one corresponding to the high-level schema",
+        "schema attributes person ID, name, street, city student ID, tot_cred employee ID, salary"
+      ],
+      "joined": "Representing Specialization via Schemas\nMethod 1: Form a schema for the higher-level entity Form a schema for each lower-level entity set, include primary key of higher-level entity set and local attributes Drawback: getting information about, an employee requires accessing two relations, the one corresponding to the low-level schema and the one corresponding to the high-level schema\nschema attributes person ID, name, street, city student ID, tot_cred employee ID, salary"
+    },
+    {
+      "slide": 54,
+      "text": [
+        "Representing Specialization as Schemas (Cont.)",
+        "Method 2: Form a schema for each entity set with all local and inherited attributes Drawback: name, street and city may be stored redundantly for people who are both students and employees",
+        "schema attributes person ID, name, street, city student ID, name, street, city, tot_cred employee ID, name, street, city, salary"
+      ],
+      "joined": "Representing Specialization as Schemas (Cont.)\nMethod 2: Form a schema for each entity set with all local and inherited attributes Drawback: name, street and city may be stored redundantly for people who are both students and employees\nschema attributes person ID, name, street, city student ID, name, street, city, tot_cred employee ID, name, street, city, salary"
+    },
+    {
+      "slide": 55,
+      "text": [
+        "Generalization",
+        "A bottom-up design process – combine a number of entity sets that share the same features into a higher-level entity set. Specialization and generalization are simple inversions of each other; they are represented in an E-R diagram in the same way. The terms specialization and generalization are used interchangeably."
+      ],
+      "joined": "Generalization\nA bottom-up design process – combine a number of entity sets that share the same features into a higher-level entity set. Specialization and generalization are simple inversions of each other; they are represented in an E-R diagram in the same way. The terms specialization and generalization are used interchangeably."
+    },
+    {
+      "slide": 56,
+      "text": [
+        "Design Constraints on a Specialization/Generalization",
+        "Completeness constraint -- specifies whether or not an entity in the higher-level entity set must belong to at least one of the lower-level entity sets within a generalization. total : an entity must belong to one of the lower-level entity sets partial : an entity need not belong to one of the lower-level entity sets Partial generalization is the default. We can specify total generalization in an ER diagram by adding the keyword total in the diagram and drawing a dashed line from the keyword to the corresponding hollow arrow-head to which it applies (for a total generalization), or to the set of hollow arrow-heads to which it applies (for an overlapping generalization). The student generalization is total: All student entities must be either graduate or undergraduate. Because the higher-level entity set arrived at through generalization is generally composed of only those entities in the lower-level entity sets, the completeness constraint for a generalized higher-level entity set is usually total"
+      ],
+      "joined": "Design Constraints on a Specialization/Generalization\nCompleteness constraint -- specifies whether or not an entity in the higher-level entity set must belong to at least one of the lower-level entity sets within a generalization. total : an entity must belong to one of the lower-level entity sets partial : an entity need not belong to one of the lower-level entity sets Partial generalization is the default. We can specify total generalization in an ER diagram by adding the keyword total in the diagram and drawing a dashed line from the keyword to the corresponding hollow arrow-head to which it applies (for a total generalization), or to the set of hollow arrow-heads to which it applies (for an overlapping generalization). The student generalization is total: All student entities must be either graduate or undergraduate. Because the higher-level entity set arrived at through generalization is generally composed of only those entities in the lower-level entity sets, the completeness constraint for a generalized higher-level entity set is usually total"
+    },
+    {
+      "slide": 57,
+      "text": [
+        "Aggregation",
+        "Consider the ternary relationship proj_guide , which we saw earlier Suppose we want to record evaluations of a student by a guide on a project"
+      ],
+      "joined": "Aggregation\nConsider the ternary relationship proj_guide , which we saw earlier Suppose we want to record evaluations of a student by a guide on a project"
+    },
+    {
+      "slide": 58,
+      "text": [
+        "Aggregation (Cont.)",
+        "Relationship sets eval_for and proj_guide represent overlapping information Every eval_for relationship corresponds to a proj_guide relationship However, some proj_guide relationships may not correspond to any eval_for relationships So we can ’ t discard the proj_guide relationship Eliminate this redundancy via aggregation Treat relationship as an abstract entity Allows relationships between relationships Abstraction of relationship into new entity"
+      ],
+      "joined": "Aggregation (Cont.)\nRelationship sets eval_for and proj_guide represent overlapping information Every eval_for relationship corresponds to a proj_guide relationship However, some proj_guide relationships may not correspond to any eval_for relationships So we can ’ t discard the proj_guide relationship Eliminate this redundancy via aggregation Treat relationship as an abstract entity Allows relationships between relationships Abstraction of relationship into new entity"
+    },
+    {
+      "slide": 59,
+      "text": [
+        "Aggregation (Cont.)",
+        "Eliminate this redundancy via aggregation without introducing redundancy, the following diagram represents: A student is guided by a particular instructor on a particular project A student, instructor, project combination may have an associated evaluation"
+      ],
+      "joined": "Aggregation (Cont.)\nEliminate this redundancy via aggregation without introducing redundancy, the following diagram represents: A student is guided by a particular instructor on a particular project A student, instructor, project combination may have an associated evaluation"
+    },
+    {
+      "slide": 60,
+      "text": [
+        "Representing Aggregation via Schemas",
+        "To represent aggregation, create a schema containing Primary key of the aggregated relationship, The primary key of the associated entity set Any descriptive attributes In our example: The schema eval_for is: eval_for ( s_ID , project_id , i_ID , evaluation_id ) The schema proj_guide is redundant ."
+      ],
+      "joined": "Representing Aggregation via Schemas\nTo represent aggregation, create a schema containing Primary key of the aggregated relationship, The primary key of the associated entity set Any descriptive attributes In our example: The schema eval_for is: eval_for ( s_ID , project_id , i_ID , evaluation_id ) The schema proj_guide is redundant ."
+    },
+    {
+      "slide": 61,
+      "text": [
+        "Design Issues"
+      ],
+      "joined": "Design Issues"
+    },
+    {
+      "slide": 62,
+      "text": [
+        "Entities vs. Attributes",
+        "Use of entity sets vs. attributes Use of phone as an entity allows extra information about phone numbers (plus multiple phone numbers)"
+      ],
+      "joined": "Entities vs. Attributes\nUse of entity sets vs. attributes Use of phone as an entity allows extra information about phone numbers (plus multiple phone numbers)"
+    },
+    {
+      "slide": 63,
+      "text": [
+        "Entities vs. Relationship sets",
+        "Use of entity sets vs. relationship sets Possible guideline is to designate a relationship set to describe an action that occurs between entities Placement of relationship attributes",
+        "For example, attribute date as attribute of advisor or as attribute of student"
+      ],
+      "joined": "Entities vs. Relationship sets\nUse of entity sets vs. relationship sets Possible guideline is to designate a relationship set to describe an action that occurs between entities Placement of relationship attributes\nFor example, attribute date as attribute of advisor or as attribute of student"
+    },
+    {
+      "slide": 64,
+      "text": [
+        "Binary Vs. Non-Binary Relationships",
+        "Although it is possible to replace any non-binary ( n -ary, for n > 2) relationship set by a number of distinct binary relationship sets, a n -ary relationship set shows more clearly that several entities participate in a single relationship. Some relationships that appear to be non-binary may be better represented using binary relationships For example, a ternary relationship parents , relating a child to his/her father and mother, is best replaced by two binary relationships, father and mother Using two binary relationships allows partial information (e.g., only mother being known) But there are some relationships that are naturally non-binary Example: proj_guide"
+      ],
+      "joined": "Binary Vs. Non-Binary Relationships\nAlthough it is possible to replace any non-binary ( n -ary, for n > 2) relationship set by a number of distinct binary relationship sets, a n -ary relationship set shows more clearly that several entities participate in a single relationship. Some relationships that appear to be non-binary may be better represented using binary relationships For example, a ternary relationship parents , relating a child to his/her father and mother, is best replaced by two binary relationships, father and mother Using two binary relationships allows partial information (e.g., only mother being known) But there are some relationships that are naturally non-binary Example: proj_guide"
+    },
+    {
+      "slide": 65,
+      "text": [
+        "Converting Non-Binary Relationships to Binary Form",
+        "In general, any non-binary relationship can be represented using binary relationships by creating an artificial entity set . Replace R between entity sets A, B and C by an entity set E , and three relationship sets: 1. R A , relating E and A 2. R B , relating E and B 3. R C , relating E and C Create an identifying attribute for E and add any attributes of R to E For each relationship ( a i , b i , c i ) in R, create 1. a new entity e i in the entity set E 2. add ( e i , a i ) to R A 3. add ( e i , b i ) to R B 4. add ( e i , c i ) to R C"
+      ],
+      "joined": "Converting Non-Binary Relationships to Binary Form\nIn general, any non-binary relationship can be represented using binary relationships by creating an artificial entity set . Replace R between entity sets A, B and C by an entity set E , and three relationship sets: 1. R A , relating E and A 2. R B , relating E and B 3. R C , relating E and C Create an identifying attribute for E and add any attributes of R to E For each relationship ( a i , b i , c i ) in R, create 1. a new entity e i in the entity set E 2. add ( e i , a i ) to R A 3. add ( e i , b i ) to R B 4. add ( e i , c i ) to R C"
+    },
+    {
+      "slide": 66,
+      "text": [
+        "R A ， 从 E 到 A 的多对一联系集 R B ， 从 E 到 B 的多对一联系集 R C ， 从 E 到 C 的多对一联系集 额外的联系集增加了设计的复杂性、总的存储空间需求 有可能无法将三元联系上的约束转换为多个二元联系上的约束",
+        "Converting Non-Binary Relationships to Binary Form"
+      ],
+      "joined": "R A ， 从 E 到 A 的多对一联系集 R B ， 从 E 到 B 的多对一联系集 R C ， 从 E 到 C 的多对一联系集 额外的联系集增加了设计的复杂性、总的存储空间需求 有可能无法将三元联系上的约束转换为多个二元联系上的约束\nConverting Non-Binary Relationships to Binary Form"
+    },
+    {
+      "slide": 67,
+      "text": [
+        "Converting Non-Binary Relationships (Cont.)",
+        "Also need to translate constraints Translating all constraints may not be possible There may be instances in the translated schema that cannot correspond to any instance of R Exercise: add constraints to the relationships R A , R B and R C to ensure that a newly created entity corresponds to exactly one entity in each of entity sets A, B and C 来自 A 和 B 的每一对实体最多与一个 C 实体相关联 无法通过 R A , R B 和 R C 表达基数约束。"
+      ],
+      "joined": "Converting Non-Binary Relationships (Cont.)\nAlso need to translate constraints Translating all constraints may not be possible There may be instances in the translated schema that cannot correspond to any instance of R Exercise: add constraints to the relationships R A , R B and R C to ensure that a newly created entity corresponds to exactly one entity in each of entity sets A, B and C 来自 A 和 B 的每一对实体最多与一个 C 实体相关联 无法通过 R A , R B 和 R C 表达基数约束。"
+    },
+    {
+      "slide": 68,
+      "text": [
+        "B",
+        "C",
+        "A",
+        "R 1",
+        "R 2",
+        "R 3",
+        "B",
+        "C",
+        "A",
+        "R",
+        "A B C 1 4 4 2 2 8 3 7 3",
+        "A B 1 4 4 2 2 8",
+        "B C 2 2 8 3 7 3",
+        "A C 1 4 4 3 7 3",
+        "上述转换会有信息丢失",
+        "(4,2,3)  ABC?",
+        "R",
+        "R 1",
+        "R 3",
+        "R 2",
+        "Converting Non-Binary Relationships (Cont.)",
+        "供应商 S 提供零件 P ，项目 J 需要零件 P ， J 从 S 购买零件  S 向 J 供应 P 供货数量放在哪里？"
+      ],
+      "joined": "B\nC\nA\nR 1\nR 2\nR 3\nB\nC\nA\nR\nA B C 1 4 4 2 2 8 3 7 3\nA B 1 4 4 2 2 8\nB C 2 2 8 3 7 3\nA C 1 4 4 3 7 3\n上述转换会有信息丢失\n(4,2,3)  ABC?\nR\nR 1\nR 3\nR 2\nConverting Non-Binary Relationships (Cont.)\n供应商 S 提供零件 P ，项目 J 需要零件 P ， J 从 S 购买零件  S 向 J 供应 P 供货数量放在哪里？"
+    },
+    {
+      "slide": 69,
+      "text": [
+        "E-R Design Decisions",
+        "The use of an attribute or entity set to represent an object. Whether a real-world concept is best expressed by an entity set or a relationship set . The use of a ternary relationship versus a pair of binary relationships . The use of a strong or weak entity set . The use of specialization/generalization – contributes to modularity in the design. The use of aggregation – can treat the aggregate entity set as a single unit without concern for the details of its internal structure."
+      ],
+      "joined": "E-R Design Decisions\nThe use of an attribute or entity set to represent an object. Whether a real-world concept is best expressed by an entity set or a relationship set . The use of a ternary relationship versus a pair of binary relationships . The use of a strong or weak entity set . The use of specialization/generalization – contributes to modularity in the design. The use of aggregation – can treat the aggregate entity set as a single unit without concern for the details of its internal structure."
+    },
+    {
+      "slide": 70,
+      "text": [
+        "Summary of Symbols Used in E-R Notation"
+      ],
+      "joined": "Summary of Symbols Used in E-R Notation"
+    },
+    {
+      "slide": 71,
+      "text": [
+        "Symbols Used in E-R Notation (Cont.)"
+      ],
+      "joined": "Symbols Used in E-R Notation (Cont.)"
+    },
+    {
+      "slide": 72,
+      "text": [
+        "Alternative ER Notations",
+        "Chen, IDE1FX, …"
+      ],
+      "joined": "Alternative ER Notations\nChen, IDE1FX, …"
+    },
+    {
+      "slide": 73,
+      "text": [
+        "Alternative ER Notations",
+        "Chen IDE1FX (Crows feet notation)"
+      ],
+      "joined": "Alternative ER Notations\nChen IDE1FX (Crows feet notation)"
+    },
+    {
+      "slide": 74,
+      "text": [
+        "UML",
+        "UML : Unified Modeling Language UML has many components to graphically model different aspects of an entire software system UML Class Diagrams correspond to E-R Diagram, but several differences."
+      ],
+      "joined": "UML\nUML : Unified Modeling Language UML has many components to graphically model different aspects of an entire software system UML Class Diagrams correspond to E-R Diagram, but several differences."
+    },
+    {
+      "slide": 75,
+      "text": [
+        "ER vs. UML Class Diagrams",
+        "* Note reversal of position in cardinality constraint depiction"
+      ],
+      "joined": "ER vs. UML Class Diagrams\n* Note reversal of position in cardinality constraint depiction"
+    },
+    {
+      "slide": 76,
+      "text": [
+        "ER vs. UML Class Diagrams",
+        "ER Diagram Notation",
+        "Equivalent in UML",
+        "* Generalization can use merged or separate arrows independent of disjoint/overlapping"
+      ],
+      "joined": "ER vs. UML Class Diagrams\nER Diagram Notation\nEquivalent in UML\n* Generalization can use merged or separate arrows independent of disjoint/overlapping"
+    },
+    {
+      "slide": 77,
+      "text": [
+        "UML Class Diagrams (Cont.)",
+        "Binary relationship sets are represented in UML by just drawing a line connecting the entity sets. The relationship set name is written adjacent to the line. The role played by an entity set in a relationship set may also be specified by writing the role name on the line, adjacent to the entity set. The relationship set name may alternatively be written in a box, along with attributes of the relationship set, and the box is connected, using a dotted line, to the line depicting the relationship set."
+      ],
+      "joined": "UML Class Diagrams (Cont.)\nBinary relationship sets are represented in UML by just drawing a line connecting the entity sets. The relationship set name is written adjacent to the line. The role played by an entity set in a relationship set may also be specified by writing the role name on the line, adjacent to the entity set. The relationship set name may alternatively be written in a box, along with attributes of the relationship set, and the box is connected, using a dotted line, to the line depicting the relationship set."
+    },
+    {
+      "slide": 78,
+      "text": [
+        "概念数据库设计过程",
+        "需求分析结果",
+        "确定局部结构范围",
+        "实体定义",
+        "联系定义",
+        "属性分配",
+        "局 部 E | R 模 式 设 计",
+        "全局 E-R 模式设计"
+      ],
+      "joined": "概念数据库设计过程\n需求分析结果\n确定局部结构范围\n实体定义\n联系定义\n属性分配\n局 部 E | R 模 式 设 计\n全局 E-R 模式设计"
+    },
+    {
+      "slide": 79,
+      "text": [
+        "概念数据库设计过程",
+        "局部 E-R 模式",
+        "确定公共实体类型",
+        "合并两个局部 E-R 模式",
+        "检查并消除冲突",
+        "全 局 E | R 模 式 设 计",
+        "还有未合并的 局部模式？",
+        "全局 E-R 模式优化",
+        "无",
+        "有"
+      ],
+      "joined": "概念数据库设计过程\n局部 E-R 模式\n确定公共实体类型\n合并两个局部 E-R 模式\n检查并消除冲突\n全 局 E | R 模 式 设 计\n还有未合并的 局部模式？\n全局 E-R 模式优化\n无\n有"
+    },
+    {
+      "slide": 80,
+      "text": [
+        "概念数据库设计过程——消除冲突",
+        "属性冲突 属性域的冲突：属性的类型、取值范围不同 如不同学校的学号编码方式不同 属性取值单位冲突 如重量分别采用磅、千克 命名冲突 同名异义：不同意义的对象具有相同的名字 异名同义：同一意义的对象具有不同的名字"
+      ],
+      "joined": "概念数据库设计过程——消除冲突\n属性冲突 属性域的冲突：属性的类型、取值范围不同 如不同学校的学号编码方式不同 属性取值单位冲突 如重量分别采用磅、千克 命名冲突 同名异义：不同意义的对象具有相同的名字 异名同义：同一意义的对象具有不同的名字"
+    },
+    {
+      "slide": 81,
+      "text": [
+        "概念数据库设计过程——消除冲突",
+        "结构冲突 同一对象在不同应用中的抽象不同 如职工在某应用中是实体，在另一应用中则抽象为属性 同一实体在不同 E-R 图中属性组成不同 如有的职工实体有 email ，而有的职工实体没有 实体之间的联系在不同 E-R 图中呈现不同的类型 如联系种类不同，参与联系的实体不同"
+      ],
+      "joined": "概念数据库设计过程——消除冲突\n结构冲突 同一对象在不同应用中的抽象不同 如职工在某应用中是实体，在另一应用中则抽象为属性 同一实体在不同 E-R 图中属性组成不同 如有的职工实体有 email ，而有的职工实体没有 实体之间的联系在不同 E-R 图中呈现不同的类型 如联系种类不同，参与联系的实体不同"
+    },
+    {
+      "slide": 82,
+      "text": [
+        "概念数据库设计过程",
+        "合并实体类型",
+        "消除冗余属性",
+        "消除冗余联系",
+        "全 局 E | R 模 式 优 化",
+        "全局 E-R 模式",
+        "逻辑数据库设计"
+      ],
+      "joined": "概念数据库设计过程\n合并实体类型\n消除冗余属性\n消除冗余联系\n全 局 E | R 模 式 优 化\n全局 E-R 模式\n逻辑数据库设计"
+    },
+    {
+      "slide": 83,
+      "text": [
+        "学生",
+        "选修",
+        "课程",
+        "学生",
+        "参加",
+        "项目",
+        "设计实例",
+        "学生",
+        "选修",
+        "课程",
+        "参加",
+        "项目"
+      ],
+      "joined": "学生\n选修\n课程\n学生\n参加\n项目\n设计实例\n学生\n选修\n课程\n参加\n项目"
+    },
+    {
+      "slide": 84,
+      "text": [
+        "设计实例",
+        "考虑一个学校数据库，它要存储以下信息： 教师有 教工号 、教工名、职称； 项目有 项目号 、项目名称、项目类型、起始年份、资助额； 学生有 学号 、学生名、年龄、学位。 一个教工可以负责多个项目； 每个项目只能有一个负责人； 一个老师可以参与多个项目； 一个学生只能参与一个项目 ； 一个项目可以有多个学生和老师参与。"
+      ],
+      "joined": "设计实例\n考虑一个学校数据库，它要存储以下信息： 教师有 教工号 、教工名、职称； 项目有 项目号 、项目名称、项目类型、起始年份、资助额； 学生有 学号 、学生名、年龄、学位。 一个教工可以负责多个项目； 每个项目只能有一个负责人； 一个老师可以参与多个项目； 一个学生只能参与一个项目 ； 一个项目可以有多个学生和老师参与。"
+    },
+    {
+      "slide": 85,
+      "text": [
+        "设计实例",
+        "教师",
+        "项目",
+        "学生",
+        "教工参与",
+        "学生参与",
+        "m",
+        "1",
+        "1",
+        "n",
+        "负责",
+        "m",
+        "n"
+      ],
+      "joined": "设计实例\n教师\n项目\n学生\n教工参与\n学生参与\nm\n1\n1\nn\n负责\nm\nn"
+    },
+    {
+      "slide": 86,
+      "text": [
+        "E-R 模型向关系模式的转换",
+        "实体  关系 属性  关系的属性",
+        "学生",
+        "姓名",
+        "学号",
+        "系别",
+        "学生 姓名 学号 系别"
+      ],
+      "joined": "E-R 模型向关系模式的转换\n实体  关系 属性  关系的属性\n学生\n姓名\n学号\n系别\n学生 姓名 学号 系别"
+    },
+    {
+      "slide": 87,
+      "text": [
+        "E-R 模型向关系模式的转换",
+        "复合属性  将每个组合属性作为复合属性所在实体的属性",
+        "学生",
+        "姓名",
+        "学号",
+        "年",
+        "月",
+        "出生日期",
+        "日",
+        "学生 学号 姓名 年 月 日"
+      ],
+      "joined": "E-R 模型向关系模式的转换\n复合属性  将每个组合属性作为复合属性所在实体的属性\n学生\n姓名\n学号\n年\n月\n出生日期\n日\n学生 学号 姓名 年 月 日"
+    },
+    {
+      "slide": 88,
+      "text": [
+        "E-R 模型向关系模式的转换",
+        "多值属性  新的关系+所在实体的码",
+        "学生",
+        "姓名",
+        "学号",
+        "所选课程",
+        "学生 学号 姓名",
+        "学生选课 学号 课程号"
+      ],
+      "joined": "E-R 模型向关系模式的转换\n多值属性  新的关系+所在实体的码\n学生\n姓名\n学号\n所选课程\n学生 学号 姓名\n学生选课 学号 课程号"
+    },
+    {
+      "slide": 89,
+      "text": [
+        "E-R 模型向关系模式的转换",
+        "一对多联系 ：将单方参与实体的码作为多方参与实体的属性",
+        "教师",
+        "学生",
+        "班主任",
+        "学生 学生号 学生名 系号 班主任教工号",
+        "教师 教工号 教工名"
+      ],
+      "joined": "E-R 模型向关系模式的转换\n一对多联系 ：将单方参与实体的码作为多方参与实体的属性\n教师\n学生\n班主任\n学生 学生号 学生名 系号 班主任教工号\n教师 教工号 教工名"
+    },
+    {
+      "slide": 90,
+      "text": [
+        "E-R 模型向关系模式的转换",
+        "职工",
+        "领导",
+        "领导",
+        "属下",
+        "职工 职工号 职工名 工资 领导职工号"
+      ],
+      "joined": "E-R 模型向关系模式的转换\n职工\n领导\n领导\n属下\n职工 职工号 职工名 工资 领导职工号"
+    },
+    {
+      "slide": 91,
+      "text": [
+        "E-R 模型向关系模式的转换",
+        "学生",
+        "课程",
+        "选修",
+        "学生 学生号 学生名",
+        "课程 课程号 课程名",
+        "选修 学生号 课程号",
+        "多对多联系 ：将联系定义为新的关系，属性为参与双方的码"
+      ],
+      "joined": "E-R 模型向关系模式的转换\n学生\n课程\n选修\n学生 学生号 学生名\n课程 课程号 课程名\n选修 学生号 课程号\n多对多联系 ：将联系定义为新的关系，属性为参与双方的码"
+    },
+    {
+      "slide": 92,
+      "text": [
+        "E-R 模型向关系模式的转换",
+        "构成",
+        "零件",
+        "母零件",
+        "子零件",
+        "零件 零件号 零件名",
+        "构成 母零件号 子零件号"
+      ],
+      "joined": "E-R 模型向关系模式的转换\n构成\n零件\n母零件\n子零件\n零件 零件号 零件名\n构成 母零件号 子零件号"
+    },
+    {
+      "slide": 93,
+      "text": [
+        "E-R 模型向关系模式的转换",
+        "一对一联系 ：若联系双方均部分参与，则将联系定义为一个新的关系，属性为参与双方的码",
+        "职工",
+        "配偶",
+        "丈夫",
+        "妻子",
+        "配偶 丈夫职工号 妻子职工号 e2 e3",
+        "职工号 配偶号 e1 null e2 e3 e3 e2 e4 null"
+      ],
+      "joined": "E-R 模型向关系模式的转换\n一对一联系 ：若联系双方均部分参与，则将联系定义为一个新的关系，属性为参与双方的码\n职工\n配偶\n丈夫\n妻子\n配偶 丈夫职工号 妻子职工号 e2 e3\n职工号 配偶号 e1 null e2 e3 e3 e2 e4 null"
+    },
+    {
+      "slide": 94,
+      "text": [
+        "E-R 模型向关系模式的转换",
+        "一对一联系 ：若联系一方全部参与，则将联系另一方的码作为全部参与一方的属性",
+        "职工",
+        "部门",
+        "管理",
+        "部门 部门号 部门名 管理职工号",
+        "职工 职工号 职工名"
+      ],
+      "joined": "E-R 模型向关系模式的转换\n一对一联系 ：若联系一方全部参与，则将联系另一方的码作为全部参与一方的属性\n职工\n部门\n管理\n部门 部门号 部门名 管理职工号\n职工 职工号 职工名"
+    },
+    {
+      "slide": 95,
+      "text": [
+        "E-R 模型向关系模式的转换",
+        "弱实体集 ：所对应的关系的码由弱实体集本身的分辩符再加上所依赖的强实体集的码",
+        "产品",
+        "公司",
+        "制造",
+        "产品名",
+        "地址",
+        "价格",
+        "公司名",
+        "联系电话",
+        "产品 产品名 价格 公司名",
+        "公司 公司名 地址 联系电话"
+      ],
+      "joined": "E-R 模型向关系模式的转换\n弱实体集 ：所对应的关系的码由弱实体集本身的分辩符再加上所依赖的强实体集的码\n产品\n公司\n制造\n产品名\n地址\n价格\n公司名\n联系电话\n产品 产品名 价格 公司名\n公司 公司名 地址 联系电话"
+    },
+    {
+      "slide": 96,
+      "text": [
+        "E-R 模型向关系模式的转换",
+        "概括 ：高层实体集和低层实体集分别转为表，低层实体集所对应的关系包括高层实体集的码",
+        "研究生 学号 论文",
+        "本科生",
+        "研究生",
+        "学生",
+        "ISA",
+        "硕士",
+        "ISA",
+        "博士",
+        "姓名",
+        "学号",
+        "Dissertation",
+        "Papers",
+        "军训",
+        "学生 学号 姓名",
+        "本科生 学号 军训"
+      ],
+      "joined": "E-R 模型向关系模式的转换\n概括 ：高层实体集和低层实体集分别转为表，低层实体集所对应的关系包括高层实体集的码\n研究生 学号 论文\n本科生\n研究生\n学生\nISA\n硕士\nISA\n博士\n姓名\n学号\nDissertation\nPapers\n军训\n学生 学号 姓名\n本科生 学号 军训"
+    },
+    {
+      "slide": 97,
+      "text": [
+        "E-R 模型向关系模式的转换",
+        "本科生",
+        "研究生",
+        "学生",
+        "ISA",
+        "硕士",
+        "ISA",
+        "博士",
+        "姓名",
+        "学号",
+        "Dissertation",
+        "Papers",
+        "军训",
+        "研究生 学号 姓名 论文",
+        "本科生 学号 姓名 军训",
+        "如果概括是不相交并且是全部的，即一个高层实体最多并且只能属于一个低层实体集，则可以不为高层实体集建立关系，低层实体集所对应的关系包括上层实体集的的所有属性"
+      ],
+      "joined": "E-R 模型向关系模式的转换\n本科生\n研究生\n学生\nISA\n硕士\nISA\n博士\n姓名\n学号\nDissertation\nPapers\n军训\n研究生 学号 姓名 论文\n本科生 学号 姓名 军训\n如果概括是不相交并且是全部的，即一个高层实体最多并且只能属于一个低层实体集，则可以不为高层实体集建立关系，低层实体集所对应的关系包括上层实体集的的所有属性"
+    },
+    {
+      "slide": 98,
+      "text": [
+        "E-R 模型设计要点",
+        "聚集 vs 三元 一个项目由多个部门资助，一个部门资助多个项目，每个资助协议由一个或多个雇员监督",
+        "项目",
+        "部门",
+        "资助",
+        "雇员"
+      ],
+      "joined": "E-R 模型设计要点\n聚集 vs 三元 一个项目由多个部门资助，一个部门资助多个项目，每个资助协议由一个或多个雇员监督\n项目\n部门\n资助\n雇员"
+    },
+    {
+      "slide": 99,
+      "text": [
+        "E-R 模型设计要点",
+        "每个资助协议最多由一个雇员来监督",
+        "项目",
+        "部门",
+        "资助",
+        "雇员",
+        "监督",
+        "项目",
+        "部门",
+        "资助",
+        "雇员"
+      ],
+      "joined": "E-R 模型设计要点\n每个资助协议最多由一个雇员来监督\n项目\n部门\n资助\n雇员\n监督\n项目\n部门\n资助\n雇员"
+    },
+    {
+      "slide": 100,
+      "text": [
+        "E-R 模型设计要点",
+        "资助有起始时间，监督有截止时间",
+        "项目",
+        "部门",
+        "资助",
+        "雇员",
+        "监督",
+        "起始时间",
+        "截至时间"
+      ],
+      "joined": "E-R 模型设计要点\n资助有起始时间，监督有截止时间\n项目\n部门\n资助\n雇员\n监督\n起始时间\n截至时间"
+    },
+    {
+      "slide": 101,
+      "text": [
+        "职工",
+        "项目",
+        "参加 并 使用",
+        "机器",
+        "职工只能使用一台机器",
+        "职工",
+        "项目",
+        "参加",
+        "使用",
+        "机器",
+        "职工",
+        "项目",
+        "参加",
+        "机器",
+        "使用",
+        "职工参加一个项目最多使用一台机器"
+      ],
+      "joined": "职工\n项目\n参加 并 使用\n机器\n职工只能使用一台机器\n职工\n项目\n参加\n使用\n机器\n职工\n项目\n参加\n机器\n使用\n职工参加一个项目最多使用一台机器"
+    },
+    {
+      "slide": 102,
+      "text": [
+        "E-R 模型向关系模式的转换",
+        "聚集 ： 实体集 A 与 B 以及它们的联系 R 被看成实体集 C，C 与另一实体集 D 构成联系 S， 则 S 所对应的关系的码由 R 和 D 的码构成",
+        "职工",
+        "项目",
+        "参加",
+        "姓名",
+        "工种",
+        "项目名称",
+        "类型",
+        "机器名",
+        "型号",
+        "工时",
+        "使用",
+        "机器"
+      ],
+      "joined": "E-R 模型向关系模式的转换\n聚集 ： 实体集 A 与 B 以及它们的联系 R 被看成实体集 C，C 与另一实体集 D 构成联系 S， 则 S 所对应的关系的码由 R 和 D 的码构成\n职工\n项目\n参加\n姓名\n工种\n项目名称\n类型\n机器名\n型号\n工时\n使用\n机器"
+    },
+    {
+      "slide": 103,
+      "text": [
+        "E-R 模型向关系模式的转换",
+        "项目 项目名称 类型",
+        "职工 职工姓名 工种",
+        "参加 职工姓名 项目名称 工时",
+        "机器 机器名 型号",
+        "使用 职工姓名 项目名称 机器名",
+        "职工",
+        "项目",
+        "参加",
+        "姓名",
+        "工种",
+        "项目名称",
+        "类型",
+        "机器名",
+        "型号",
+        "工时",
+        "使用",
+        "机器"
+      ],
+      "joined": "E-R 模型向关系模式的转换\n项目 项目名称 类型\n职工 职工姓名 工种\n参加 职工姓名 项目名称 工时\n机器 机器名 型号\n使用 职工姓名 项目名称 机器名\n职工\n项目\n参加\n姓名\n工种\n项目名称\n类型\n机器名\n型号\n工时\n使用\n机器"
+    },
+    {
+      "slide": 104,
+      "text": [
+        "End of Chapter 6"
+      ],
+      "joined": "End of Chapter 6"
+    }
+  ]
+}

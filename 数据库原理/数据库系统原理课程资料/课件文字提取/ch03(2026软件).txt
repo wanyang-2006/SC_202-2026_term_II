@@ -1,0 +1,387 @@
+# ch03(2026软件).pptx
+幻灯片数：96
+
+## Slide 1
+Chapter 3: Introduction to SQL
+
+## Slide 2
+Outline
+Overview of The SQL Query Language Data Definition Basic Query Structure Additional Basic Operations Set Operations Null Values Aggregate Functions Nested Subqueries Modification of the Database
+
+## Slide 3
+
+## Slide 4
+SQL 查询语言概览
+
+## Slide 5
+Data Definition Language
+The schema for each relation. The domain of values associated with each attribute. Integrity constraints And as we will see later, also other information such as The set of indices to be maintained for each relations. Security and authorization information for each relation. The physical storage structure of each relation on disk.
+The SQL data-definition language (DDL) allows the specification of information about relations, including:
+
+## Slide 6
+Domain Types in SQL
+char(n). Fixed length character string, with user-specified length n. varchar(n). Variable length character strings, with user-specified maximum length n. int. Integer (a finite subset of the integers that is machine-dependent). smallint. Small integer (a machine-dependent subset of the integer domain type). numeric(p,d). Fixed point number, with user-specified precision of p digits, with d digits to the right of decimal point. (ex., numeric (3,1), allows 44.5 to be stores exactly, but not 444.5 or 0.32) real, double precision. Floating point and double-precision floating point numbers, with machine-dependent precision. float(n). Floating point number, with user-specified precision of at least n digits. More are covered in Chapter 4.
+
+## Slide 7
+Create Table Construct
+An SQL relation is defined using the create table command: create table r ( A 1 D 1 , A 2 D 2 , ..., A n D n , (integrity-constraint 1 ), ..., (integrity-constraint k )) r is the name of the relation each A i is an attribute name in the schema of relation r D i is the data type of values in the domain of attribute A i Example: create table instructor ( ID char (5), name varchar (20) , dept_name varchar (20), salary numeric (8,2))
+
+## Slide 8
+Integrity Constraints in Create Table
+not null primary key ( A 1 , ..., A n ) foreign key ( A m , ..., A n ) references r
+Example: create table instructor ( ID char (5), name varchar (20) not null, dept_name varchar (20), salary numeric (8,2), primary key ( ID ), foreign key (dept_name ) references department);
+primary key declaration on an attribute automatically ensures not null
+
+## Slide 9
+
+## Slide 10
+And a Few More Relation Definitions
+create table student ( ID varchar (5), name varchar (20) not null, dept_name varchar (20), tot_cred numeric (3,0), primary key (ID), foreign key (dept_name ) references department ); create table takes ( ID varchar (5), course_id varchar (8), sec_id varchar (8), semester varchar (6), year numeric (4,0), grade varchar (2), primary key (ID, course_id, sec_id, semester, year) , foreign key ( ID ) references student, foreign key ( course_id, sec_id, semester, year ) references section ); Note: sec_id can be dropped from primary key above, to ensure a student cannot be registered for two sections of the same course in the same semester
+
+## Slide 11
+And more still
+create table course ( course_id varchar (8), title varchar( 50), dept_name varchar (20), credits numeric (2,0), primary key (course_id), foreign key (dept_name ) references department );
+
+## Slide 12
+Updates to tables
+Insert insert into instructor values (‘10211’, ’Smith’, ’Biology’, 66000); Delete Remove all tuples from the student relation delete from student Drop Table drop table r Alter alter table r add A D where A is the name of the attribute to be added to relation r and D is the domain of A. All exiting tuples in the relation are assigned null as the value for the new attribute. alter table r drop A where A is the name of an attribute of relation r Dropping of attributes not supported by many databases.
+
+## Slide 13
+Basic Query Structure
+A typical SQL query has the form: select A 1 , A 2 , ..., A n from r 1 , r 2 , ..., r m where P A i represents an attribute R i represents a relation P is a predicate. The result of an SQL query is a relation.
+
+## Slide 14
+The select Clause
+The select clause lists the attributes desired in the result of a query corresponds to the projection operation of the relational algebra Example: find the names of all instructors: select name from instructor NOTE: SQL names are case insensitive (i.e., you may use upper- or lower-case letters.) E.g., Name ≡ NAME ≡ name Some people use upper case wherever we use bold font.
+
+## Slide 15
+The select Clause (Cont.)
+SQL allows duplicates in relations as well as in query results. To force the elimination of duplicates, insert the keyword distinct after select . Find the department names of all instructors, and remove duplicates select distinct dept_name from instructor The keyword all specifies that duplicates should not be removed. select all dept_name from instructor
+
+## Slide 16
+The select Clause (Cont.)
+An asterisk in the select clause denotes “all attributes” select * from instructor An attribute can be a literal with no from clause select ‘437’ Results is a table with one column and a single row with value “437” Can give the column a name using: select ‘437’ as FOO An attribute can be a literal with from clause select ‘A’ from instructor Result is a table with one column and N rows (number of tuples in the instructors table), each row with value “A”
+
+## Slide 17
+The select Clause (Cont.)
+The select clause can contain arithmetic expressions involving the operation, +, –,  , and /, and operating on constants or attributes of tuples. The query: select ID, name, salary/12 from instructor would return a relation that is the same as the instructor relation, except that the value of the attribute salary is divided by 12. Can rename “s alary/12” using the as clause: select ID, name, salary/12 as monthly_salary
+
+## Slide 18
+
+## Slide 19
+The where Clause
+The where clause specifies conditions that the result must satisfy Corresponds to the selection predicate of the relational algebra. To find all instructors in Comp. Sci. dept select name from instructor where dept_name = ‘ Comp. Sci.' Comparison results can be combined using the logical connectives and, or, and not To find all instructors in Comp. Sci. dept with salary > 80000 select name from instructor where dept_name = ‘ Comp. Sci.' and salary > 80000 Comparisons can be applied to results of arithmetic expressions.
+
+## Slide 20
+The from Clause
+The from clause lists the relations involved in the query Corresponds to the Cartesian product operation of the relational algebra. Find the Cartesian product instructor X teaches select  from instructor, teaches generates every possible instructor – teaches pair, with all attributes from both relations. For common attributes (e.g., ID ), the attributes in the resulting table are renamed using the relation name (e.g., instructor.ID ) Cartesian product not very useful directly, but useful combined with where-clause condition (selection operation in relational algebra).
+
+## Slide 21
+Cartesian Product
+instructor
+teaches
+
+## Slide 22
+The Rename Operation
+The SQL allows renaming relations and attributes using the as clause: old-name as new-name Find the names of all instructors who have a higher salary than some instructor in ‘Comp. Sci’. select distinct T.name from instructor as T, instructor as S where T.salary > S.salary and S.dept_name = ‘Comp. Sci.’ Keyword as is optional and may be omitted instructor as T ≡ instructor T
+
+## Slide 23
+Cartesian Product Example
+Relation emp-super
+Find the supervisor of “Bob” Find the supervisor of the supervisor of “Bob” Find ALL the supervisors (direct and indirect) of “Bob
+person supervisor
+Bob Alice Mary Susan Alice David David Mary
+
+## Slide 24
+String Operations
+SQL includes a string-matching operator for comparisons on character strings. The operator like uses patterns that are described using two special characters: percent ( % ). The % character matches any substring. underscore ( _ ). The _ character matches any character. Find the names of all instructors whose name includes the substring “dar”. se le ct name from instructor where name like ' %dar% ' Match the string “100%” like ‘ 100 \% ' escape ' \ ' in that above we use backslash (\) as the escape character.
+
+## Slide 25
+String Operations (Cont.)
+Patterns are case sensitive. Pattern matching examples: ‘Intro%’ matches any string beginning with “Intro”. ‘%Comp%’ matches any string containing “Comp” as a substring. ‘_ _ _’ matches any string of exactly three characters. ‘_ _ _ %’ matches any string of at least three characters. SQL supports a variety of string operations such as concatenation (using “||”) converting from upper to lower case (and vice versa) finding string length, extracting substrings, etc.
+
+## Slide 26
+Ordering the Display of Tuples
+List in alphabetic order the names of all instructors select distinct name from instructor order by name We may specify desc for descending order or asc for ascending order, for each attribute; ascending order is the default. Example: order by name desc Can sort on multiple attributes Example: order by dept_name, name
+
+## Slide 27
+
+## Slide 28
+
+## Slide 29
+
+## Slide 30
+Where Clause Predicates
+SQL includes a between comparison operator Example: Find the names of all instructors with salary between $90,000 and $100,000 (that is,  $90,000 and  $100,000) select name from instructor where salary between 90000 and 100000 Tuple comparison select name , course_id from instructor , teaches where ( instructor . ID , dept_name ) = ( teaches . ID , ’Biology’);
+
+## Slide 31
+Duplicates
+In relations with duplicates, SQL can define how many copies of tuples appear in the result . Multiset versions of some of the relational algebra operators – given multiset relations r 1 and r 2 : 1.   ( r 1 ): If there are c 1 copies of tuple t 1 in r 1 , and t 1 satisfies selections   , , then there are c 1 copies of t 1 in   ( r 1 ) . 2.  A ( r ): For each copy of tuple t 1 in r 1 , there is a copy of tuple  A ( t 1 ) in  A ( r 1 ) where  A ( t 1 ) denotes the projection of the single tuple t 1 . 3. r 1 x r 2 : If there are c 1 copies of tuple t 1 in r 1 and c 2 copies of tuple t 2 in r 2 , there are c 1 x c 2 copies of the tuple t 1 . t 2 in r 1 x r 2
+
+## Slide 32
+Duplicates (Cont.)
+Example: Suppose multiset relations r 1 ( A, B ) and r 2 ( C ) are as follows: r 1 = {(1, a ) (2, a )} r 2 = {(2), (3), (3)} Then  B ( r 1 ) would be {(a), (a)}, while  B ( r 1 ) x r 2 would be {( a ,2), ( a ,2), ( a ,3), ( a ,3), ( a ,3), ( a ,3)} SQL duplicate semantics: select A 1 , , A 2 , ..., A n from r 1 , r 2 , ..., r m where P is equivalent to the multiset version of the expression:
+
+## Slide 33
+Set Operations
+Find courses that ran in Fall 2009 or in Spring 2010
+Find courses that ran in Fall 2009 but not in Spring 2010
+( select course_id from section where sem = ‘Fall’ and year = 2009) union ( select course_id from section where sem = ‘Spring’ and year = 2010)
+Find courses that ran in Fall 2009 and in Spring 2010
+( select course_id from section where sem = ‘Fall’ and year = 2009) intersect ( select course_id from section where sem = ‘Spring’ and year = 2010)
+( select course_id from section where sem = ‘Fall’ and year = 2009) except ( select course_id from section where sem = ‘Spring’ and year = 2010)
+
+## Slide 34
+Set Operations (Cont.)
+Find the salaries of all instructors that are less than the largest salary. select distinct T.salary from instructor as T, instructor as S where T.salary < S.salary Find all the salaries of all instructors select distinct salary from instructor Find the largest salary of all instructors. ( select “second query” ) except ( select “first query”)
+
+## Slide 35
+Set Operations (Cont.)
+Set operations union , intersect , and except Each of the above operations automatically eliminates duplicates To retain all duplicates use the corresponding multiset versions union all, intersect all and except all . Suppose a tuple occurs m times in r and n times in s, then, it occurs: m + n times in r union all s min( m,n) times in r intersect all s max(0, m – n) times in r except all s
+
+## Slide 36
+Null Values
+It is possible for tuples to have a null value, denoted by null , for some of their attributes null signifies an unknown value or that a value does not exist. The result of any arithmetic expression involving null is null Example: 5 + null returns null The predicate is null can be used to check for null values. Example: Find all instructors whose salary is null . select name from instructor where salary is null
+
+## Slide 37
+Null Values and Three Valued Logic
+Three values – true , false , unknown Any comparison with null returns unknown Example : 5 < null or null <> null or null = null Three-valued logic using the value unknown : OR: ( unknown or true ) = true , ( unknown or false ) = unknown ( unknown or unknown) = unknown AND: (true and unknown) = unknown, (false and unknown) = false, (unknown and unknown) = unknown NOT : ( not unknown) = unknown “ P is unknown ” evaluates to true if predicate P evaluates to unknown Result of where clause predicate is treated as false if it evaluates to unknown
+
+## Slide 38
+
+## Slide 39
+
+## Slide 40
+Aggregate Functions
+These functions operate on the multiset of values of a column of a relation, and return a value avg: average value min: minimum value max: maximum value sum: sum of values count: number of values
+
+## Slide 41
+Aggregate Functions (Cont.)
+Find the average salary of instructors in the Computer Science department select avg ( salary ) from instructor where dept_name = ’Comp. Sci.’; Find the total number of instructors who teach a course in the Spring 2010 semester select count ( distinct ID ) from teaches where semester = ’Spring’ and year = 2010; Find the number of tuples in the course relation select count (*) from course ;
+
+## Slide 42
+
+## Slide 43
+Aggregate Functions – Group By
+Find the average salary of instructors in each department select dept_name , avg ( salary ) as avg_salary from instructor group by dept_name ;
+avg_salary
+
+## Slide 44
+Aggregation (Cont.)
+Attributes in select clause outside of aggregate functions must appear in group by list /* erroneous query */ select dept_name , ID , avg ( salary ) from instructor group by dept_name ;
+
+## Slide 45
+
+## Slide 46
+
+## Slide 47
+
+## Slide 48
+·
+
+## Slide 49
+Aggregate Functions – Having Clause
+Find the names and average salaries of all departments whose average salary is greater than 42000
+Note: predicates in the having clause are applied after the formation of groups whereas predicates in the where clause are applied before forming groups
+select dept_name , avg ( salary ) from instructor group by dept_name having avg ( salary ) > 42000 ;
+
+## Slide 50
+
+## Slide 51
+
+## Slide 52
+
+## Slide 53
+
+## Slide 54
+
+## Slide 55
+
+## Slide 56
+
+## Slide 57
+Null Values and Aggregates
+Total all salaries select sum ( salary ) from instructor Above statement ignores null amounts Result is null if there is no non-null amount All aggregate operations except count(*) ignore tuples with null values on the aggregated attributes What if collection has only null values? count returns 0 all other aggregates return null
+
+## Slide 58
+
+## Slide 59
+Nested Subqueries
+SQL provides a mechanism for the nesting of subqueries. A subquery is a select-from-where expression that is nested within another query. The nesting can be done in the following SQL query select A 1 , A 2 , ..., A n from r 1 , r 2 , ..., r m where P as follows: A i can be replaced be a subquery that generates a single value . r i can be replaced by any valid subquery P can be replaced with an expression of the form: B <operation> (subquery) Where B is an attribute and <operation> to be defined later.
+
+## Slide 60
+Subqueries in the Where Clause
+
+## Slide 61
+
+## Slide 62
+Subqueries in the Where Clause
+A common use of subqueries is to perform tests: For set membership For set comparisons For set cardinality.
+
+## Slide 63
+
+## Slide 64
+Set Membership
+Find courses offered in Fall 2009 and in Spring 2010
+Find courses offered in Fall 2009 but not in Spring 2010
+select distinct course_id from section where semester = ’Fall’ and year = 2009 and course_id in ( select course_id from section where semester = ’Spring’ and year = 2010);
+select distinct course_id from section where semester = ’Fall’ and year = 2009 and course_id not in ( select course_id from section where semester = ’Spring’ and year = 2010);
+
+## Slide 65
+Set Membership (Cont.)
+Find the total number of (distinct) students who have taken course sections taught by the instructor with ID 10101
+Note: Above query can be written in a much simpler manner. The formulation above is simply to illustrate SQL features.
+select count ( distinct ID ) from takes where ( course_id , sec_id , semester , year ) in ( select course_id , sec_id , semester , year from teaches where teaches . ID = 10101);
+
+## Slide 66
+
+## Slide 67
+
+## Slide 68
+
+## Slide 69
+Set Comparison – “some” Clause
+Find names of instructors with salary greater than that of some (at least one) instructor in the Biology department.
+Same query using > some clause
+select name from instructor where salary > some ( select salary from instructor where dept name = ’Biology’);
+select distinct T . name from instructor as T , instructor as S where T.salary > S.salary and S.dept name = ’Biology’;
+
+## Slide 70
+Definition of “some” Clause
+F <comp> some r  t  r such that (F <comp> t ) Where <comp> can be:     
+0
+5
+6
+(5 < some
+) = true
+0
+5
+0
+) = false
+5
+0
+5
+(5  some
+) = true (since 0  5)
+(read: 5 < some tuple in the relation)
+(5 < some
+) = true
+(5 = some
+(= some )  in However, ( some )  not in
+
+## Slide 71
+Set Comparison – “all” Clause
+Find the names of all instructors whose salary is greater than the salary of all instructors in the Biology department.
+select name from instructor where salary > all ( select salary from instructor where dept name = ’Biology’);
+
+## Slide 72
+Definition of “all” Clause
+F <comp> all r  t  r (F <comp> t)
+0
+5
+6
+(5 < all
+) = false
+6
+10
+4
+) = true
+5
+4
+6
+(5  all
+) = true (since 5  4 and 5  6)
+(5 < all
+) = false
+(5 = all
+(  all )  not in However, (= all )  in
+
+## Slide 73
+
+## Slide 74
+
+## Slide 75
+
+## Slide 76
+
+## Slide 77
+
+## Slide 78
+Test for Empty Relations
+The exists construct returns the value true if the argument subquery is nonempty. exists r  r  Ø not exists r  r = Ø
+
+## Slide 79
+Use of “exists” Clause
+Yet another way of specifying the query “Find all courses taught in both the Fall 2009 semester and in the Spring 2010 semester” select course_id from section as S where semester = ’Fall’ and year = 2009 and exists ( select * from section as T where semester = ’Spring’ and year = 2010 and S . course_id = T . course_id ); Correlation name – variable S in the outer query Correlated subquery – the inner query
+
+## Slide 80
+Use of “not exists” Clause
+Find all students who have taken all courses offered in the Biology department.
+select distinct S . ID , S . name from student as S where not exists ( ( select course_id from course where dept_name = ’Biology’) except ( select T . course_id from takes as T where S . ID = T . ID )); First nested query lists all courses offered in Biology Second nested query lists all courses a particular student took
+Note that X – Y = Ø  X  Y Note: Cannot write this query using = all and its variants
+
+## Slide 81
+Test for Absence of Duplicate Tuples
+The unique construct tests whether a subquery has any duplicate tuples in its result. The unique construct evaluates to “true” if a given subquery contains no duplicates . Find all courses that were offered at most once in 2009 select T . course_id from course as T where unique ( select R . course_id from section as R where T . course_id = R . course_id and R . year = 2009);
+
+## Slide 82
+Subqueries in the From Clause
+
+## Slide 83
+Subqueries in the From Clause
+SQL allows a subquery expression to be used in the from clause Find the average instructors’ salaries of those departments where the average salary is greater than $42,000.” select dept_name , avg_salary from ( select dept_name , avg ( salary ) as avg_salary from instructor group by dept_name ) where avg_salary > 42000; Note that we do not need to use the having clause Another way to write above query select dept_name , avg_salary from ( select dept_name , avg ( salary ) from instructor group by dept_name ) as dept_avg ( dept_name , avg_salary ) where avg_salary > 42000;
+
+## Slide 84
+With Clause
+The with clause provides a way of defining a temporary relation whose definition is available only to the query in which the with clause occurs . Find all departments with the maximum budget with max_budget ( value ) as ( select max ( budget ) from department ) select department.name from department , max_budget where department . budget = max_budget.value ;
+
+## Slide 85
+Complex Queries using With Clause
+Find all departments where the total salary is greater than the average of the total salary at all departments
+with dept _total ( dept_name , value ) as ( select dept_name , sum ( salary ) from instructor group by dept_name ), dept_total_avg ( value ) as ( select avg ( value ) from dept_total ) select dept_name from dept_total , dept_total_avg where dept_total.value > dept_total_avg.value ;
+total salary at all departments
+average of the dept_total
+
+## Slide 86
+Subqueries in the Select Clause
+
+## Slide 87
+Scalar Subquery
+Scalar subquery is one which is used where a single value is expected List all departments along with the number of instructors in each department select dept_name , ( select count (*) from instructor where department . dept_name = instructor . dept_name ) as num_instructors from department ; Runtime error if subquery returns more than one result tuple
+
+## Slide 88
+Modification of the Database
+Deletion of tuples from a given relation. Insertion of new tuples into a given relation Updating of values in some tuples in a given relation
+
+## Slide 89
+Deletion
+Delete all instructors delete from instructor Delete all instructors from the Finance department delete from instructor where dept_name = ’Finance’; Delete all tuples in the instructor relation for those instructors associated with a department located in the Watson building. delete from instructor where dept name in ( select dept name from department where building = ’Watson’);
+
+## Slide 90
+Deletion (Cont.)
+Delete all instructors whose salary is less than the average salary of instructors
+delete from instructor where salary < ( select avg ( salary ) from instructor );
+Problem : as we delete tuples from deposit, the average salary changes Solution used in SQL: 1. First, compute avg (salary) and find all tuples to delete 2. Next, delete all tuples found above (without recomputing avg or retesting the tuples)
+
+## Slide 91
+Insertion
+Add a new tuple to course insert into course values (’CS-437’, ’Database Systems’, ’Comp. Sci.’, 4); or equivalently insert into course ( course_id , title , dept_name , credits ) values (’CS-437’, ’Database Systems’, ’Comp. Sci.’, 4); Add a new tuple to student with tot_creds set to null insert into student values (’3003’, ’Green’, ’Finance’, null );
+
+## Slide 92
+Insertion (Cont.)
+Add all instructors to the student relation with tot_creds set to 0 insert into student select ID, name, dept_name, 0 from instructor The select from where statement is evaluated fully before any of its results are inserted into the relation. Otherwise queries like insert into table 1 select * from table 1 would cause problem
+
+## Slide 93
+Updates
+Increase salaries of instructors whose salary is over $100,000 by 3%, and all others by a 5% Write two update statements: update instructor set salary = salary * 1.03 where salary > 100000; update instructor set salary = salary * 1.05 where salary <= 100000; The order is important Can be done better using the case statement (next slide)
+
+## Slide 94
+Case Statement for Conditional Updates
+Same query as before but with case statement update instructor set salary = case when salary <= 100000 then salary * 1.05 else salary * 1.03 end
+
+## Slide 95
+Updates with Scalar Subqueries
+Recompute and update tot_creds value for all students update student S set tot_cred = ( select sum ( credits ) from takes, course where takes.course_id = course.course_id and S . ID = takes . ID. and takes . grade <> ’F’ and takes . grade is not null ); Sets tot_creds to null for students who have not taken any course Instead of sum ( credits ), use: case when sum ( credits ) is not null then sum ( credits ) else 0 end
+
+## Slide 96
+End of Chapter 3

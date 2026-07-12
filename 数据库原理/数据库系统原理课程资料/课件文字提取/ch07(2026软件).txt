@@ -1,0 +1,612 @@
+# ch07(2026软件).pptx
+幻灯片数：118
+
+## Slide 1
+Chapter 7: Relational Database Design
+
+## Slide 2
+Chapter 7: Relational Database Design
+Features of Good Relational Design Atomic Domains and First Normal Form Decomposition Using Functional Dependencies Functional Dependency Theory Algorithms for Functional Dependencies Decomposition Using Multivalued Dependencies More Normal Form Database-Design Process Modeling Temporal Data
+
+## Slide 3
+
+## Slide 4
+Combine Schemas?
+Suppose we combine instructor and department into inst_dept (No connection to relationship set inst_dept) Result is possible repetition of information
+
+## Slide 5
+
+## Slide 6
+A Combined Schema Without Repetition
+Consider combining relations sec_class(sec_id, building, room_number) and section(course_id, sec_id, semester, year) into one relation section(course_id, sec_id, semester, year, building, room_number) No repetition in this case
+
+## Slide 7
+What About Smaller Schemas?
+Suppose we had started with inst_dept. How would we know to split up ( decompose ) it into instructor and department ? Write a rule “ if there were a schema ( dept_name, building, budget ), then dept_name would be a candidate key ” Denote as a functional dependency : dept_name  building, budget In inst_dept , because dept_name is not a candidate key, the building and budget of a department may have to be repeated. This indicates the need to decompose inst_dept Not all decompositions are good. Suppose we decompose employee(ID, name, street, city, salary) into employee1 ( ID , name ) ， employee2 ( name , street, city, salary ) The next slide shows how we lose information -- we cannot reconstruct the original employee relation -- and so, this is a lossy decomposition .
+
+## Slide 8
+A Lossy Decomposition
+
+## Slide 9
+Example of Lossless-Join Decomposition
+Lossless join decomposition Decomposition of R = (A, B, C) ， R 1 = (A, B) R 2 = (B, C)
+A
+B
+ 
+1 2
+A
+ 
+B
+1 2
+r
+ B,C ( r )
+ A (r)  B (r)
+A
+B
+ 
+1 2
+C
+A B
+B
+1 2
+C
+A B
+C
+A B
+ A,B ( r )
+
+## Slide 10
+First Normal Form
+Domain is atomic if its elements are considered to be indivisible units Examples of non-atomic domains: Set of names, composite attributes Identification numbers like CS101 that can be broken up into parts A relational schema R is in first normal form if the domains of all attributes of R are atomic Non-atomic values complicate storage and encourage redundant (repeated) storage of data Example: Set of accounts stored with each customer, and set of owners stored with each account We assume all relations are in first normal form (and revisit this in Chapter 22: Object Based Databases)
+
+## Slide 11
+First Normal Form (Cont ’ d)
+Atomicity is actually a property of how the elements of the domain are used. Example: Strings would normally be considered indivisible Suppose that students are given roll numbers which are strings of the form CS0012 or EE1127 If the first two characters are extracted to find the department, the domain of roll numbers is not atomic. Doing so is a bad idea: leads to encoding of information in application program rather than in the database.
+
+## Slide 12
+Goal — Devise a Theory for the Following
+Decide whether a particular relation R is in “ good ” form. In the case that a relation R is not in “ good ” form, decompose it into a set of relations { R 1 , R 2 , ..., R n } such that each relation is in good form the decomposition is a lossless-join decomposition Our theory is based on: functional dependencies multivalued dependencies
+
+## Slide 13
+不良的模式设计
+范式
+模式分解的要求
+模式分解
+数据冗余、插入异常、删除异常
+1NF 、 2NF 、 3NF 、 BCNF 、 4NF
+无损连接 减少冗余：范式的判定 保持函数依赖 ( 依赖闭包、正则覆盖 )
+分解为 BCNF 范式 分解为 3NF 范式
+去范式的模式设计
+
+## Slide 14
+Functional Dependencies
+Constraints on the set of legal relations. Require that the value for a certain set of attributes determines uniquely the value for another set of attributes. A functional dependency is a generalization of the notion of a key. 函数依赖不是从数据中推导出来，而是客观世界对于数据的约束 . 特定数据属性之间的关系，并不能代表该关系模式所有实例数据之间可能的关系 .
+
+## Slide 15
+Functional Dependencies (Cont.)
+Let R be a relation schema   R and   R The functional dependency    holds on R if and only if for any legal relations r (R), whenever any two tuples t 1 and t 2 of r agree on the attributes , they also agree on the attributes . That is, t 1 [] = t 2 []  t 1 [  ] = t 2 [  ] Example: Consider r (A ,B ) with the following instance of r. On this instance, A  B does NOT hold, but B  A does hold.
+4 1 5 3 7
+
+## Slide 16
+Functional Dependencies (Cont.)
+K is a superkey for relation schema R if and only if K  R K is a candidate key for R if and only if K  R , and for no   K,   R Functional dependencies allow us to express constraints that cannot be expressed using superkeys. Consider the schema: inst_dept ( ID , name, salary, dept_name , building, budget ) . We expect these functional dependencies to hold: dept_name  building and ID  building but would not expect the following to hold: dept_name  salary
+
+## Slide 17
+Use of Functional Dependencies
+We use functional dependencies to: test relations to see if they are legal under a given set of functional dependencies. If a relation r is legal under a set F of functional dependencies, we say that r satisfies F. specify constraints on the set of legal relations We say that F holds on R if all legal relations on R satisfy the set of functional dependencies F. Note: A specific instance of a relation schema may satisfy a functional dependency even if the functional dependency does not hold on all legal instances. For example, a specific instance of instructor may, by chance, satisfy name  ID.
+
+## Slide 18
+Functional Dependencies (Cont.)
+A functional dependency is trivial if it is satisfied by all instances of a relation Example : ID, name  ID name  name In general,    is trivial if   
+
+## Slide 19
+Closure of a Set of Functional Dependencies
+Given a set F of functional dependencies, there are certain other functional dependencies that are logically implied by F . For example: If A  B and B  C , then we can infer that A  C The set of all functional dependencies logically implied by F is the closure of F . We denote the closure of F by F + . F + is a superset of F .
+
+## Slide 20
+Boyce-Codd Normal Form
+   is trivial (i.e.,    )  is a superkey for R
+A relation schema R is in BCNF with respect to a set F of functional dependencies if for all functional dependencies in F + of the form    where   R and   R, at least one of the following holds:
+Example schema not in BCNF: instr_dept (ID, name, salary, dept_name, building, budget ) because dept_name  building, budget holds on instr_dept, but dept_name is not a superkey
+
+## Slide 21
+SQL 中的函数依赖
+除了候选键和主键外， SQL 没有提供函数依赖的支持 ，可以通过 断言 来完成 写一个断言以保证在 R(A, B, C) 上成立 B  C create assertion BtoC check (not exists (select B from R group by B having count(distinct c) > 1 ) )
+SQL 不直接提供函数依赖检验 判定函数依赖需要代价 通过分解表避免不合适的函数依赖
+
+## Slide 22
+Decomposing a Schema into BCNF
+Suppose we have a schema R and a non-trivial dependency    causes a violation of BCNF. We decompose R into: (  U  ) ( R - (  -  ) ) In our example,  = dept_name  = building, budget and inst_dept is replaced by (  U  ) = ( dept_name , building, budget ) ( R - (  -  ) ) = ( ID, name, salary, dept_name )
+dept_name  building, budget
+
+## Slide 23
+BCNF and Dependency Preservation
+表达数据库一致性约束的方式： PK 、 FD 、 Check 、 Assertion 、 Triger Constraints, including functional dependencies, are costly to check in practice unless they pertain to only one relation If it is sufficient to test only those dependencies on each individual relation of a decomposition in order to ensure that all functional dependencies hold, then that decomposition is dependency preserving. 若每次分解都恰好是一个函数依赖，则分解保持依赖 Because it is not always possible to achieve both BCNF and dependency preservation, we consider a weaker normal form, known as third normal form .
+
+## Slide 24
+Third Normal Form
+A relation schema R is in third normal form ( 3NF ) if for all:    in F + at least one of the following holds:    is trivial (i.e.,    )  is a superkey for R Each attribute A in  –  is contained in a candidate key for R NOTE : each attribute may be in a different candidate key If a relation is in BCNF it is in 3NF (since in BCNF one of the first two conditions above must hold). Third condition is a minimal relaxation of BCNF to ensure dependency preservation (will see why later).
+
+## Slide 25
+Goals of Normalization
+Let R be a relation scheme with a set F of functional dependencies. Decide whether a relation scheme R is in “ good ” form. In the case that a relation scheme R is not in “ good ” form, decompose it into a set of relation scheme { R 1 , R 2 , ..., R n } such that each relation scheme is in good form the decomposition is a lossless-join decomposition Preferably, the decomposition should be dependency preserving .
+
+## Slide 26
+How good is BCNF?
+There are database schemas in BCNF that do not seem to be sufficiently normalized Consider a relation inst_info (ID, child_name , phone) where an instructor may have more than one phone and can have multiple children
+ID
+child_name
+phone
+99999 99999 99999 99999
+David David William Willian
+512-555-1234 512-555-4321 512-555-1234 512-555-4321
+inst_info
+
+## Slide 27
+There are no non-trivial functional dependencies and therefore the relation is in BCNF Insertion anomalies – i.e., if we add a phone 981-992-3443 to 99999, we need to add two tuples (99999, David, 981-992-3443) (99999, William, 981-992-3443)
+How good is BCNF? (Cont.)
+
+## Slide 28
+Therefore, it is better to decompose inst_info into:
+This suggests the need for higher normal forms, such as Fourth Normal Form (4NF) , which we shall see later.
+How good is BCNF? (Cont.)
+ID
+child_name
+99999 99999 99999 99999
+David David William Willian
+inst_child
+ID
+phone
+99999 99999 99999 99999
+512-555-1234 512-555-4321 512-555-1234 512-555-4321
+inst_phone
+
+## Slide 29
+How good is BCNF? (Cont.)
+Consider a database classes ( course, teacher, book ) such that (c, t, b)  classes means that t is qualified to teach c, and b is a required textbook for c The database is supposed to list for each course the set of teachers any one of which can be the course’s instructor, and the set of books, all of which are required for the course (no matter who teaches it).
+
+## Slide 30
+There are no non-trivial functional dependencies and therefore the relation is in BCNF Insertion anomalies – i.e., if Marilyn is a new teacher that can teach database, two tuples need to be inserted (database, Marilyn, DB Concepts) (database, Marilyn, Ullman)
+course
+teacher
+book
+database database database database database database operating systems operating systems operating systems operating systems
+Avi Avi Hank Hank Sudarshan Sudarshan Avi Avi Pete Pete
+DB Concepts Ullman DB Concepts Ullman DB Concepts Ullman OS Concepts Stallings OS Concepts Stallings
+classes
+How good is BCNF? (Cont.)
+
+## Slide 31
+Therefore, it is better to decompose classes into:
+course
+teacher
+database database database operating systems operating systems
+Avi Hank Sudarshan Avi Jim
+teaches
+course
+book
+database database operating systems operating systems
+DB Concepts Ullman OS Concepts Shaw
+text
+How good is BCNF? (Cont.)
+next
+
+## Slide 32
+Functional-Dependency Theory
+We now consider the formal theory that tells us which functional dependencies are implied logically by a given set of functional dependencies. We then develop algorithms to generate lossless decompositions into BCNF and 3NF We then develop algorithms to test if a decomposition is dependency-preserving
+
+## Slide 33
+Closure of a Set of Functional Dependencies
+Given a set F set of functional dependencies, there are certain other functional dependencies that are logically implied by F . For example: If A  B and B  C , then we can infer that A  C The set of all functional dependencies logically implied by F is the closure of F . We denote the closure of F by F + . We can find all of F + by applying Armstrong’s Axioms: if   , then    (reflexivity) 自反律 if   , and    , then    (transitivity) 传递律 if   , then      (augmentation) 增广律
+
+
+
+
+
+
+
+
+
+## Slide 34
+Armstrong’s Axioms: Reflexivity ： if   , then    Augmentation ： if   , then      Transitivity ： if   , and    , then    E.g. R (X, Y), F = { X Y } F + = { X   , X X, X Y , X XY , Y   , YY, XY   , XY X, XY Y, XY XY }
+Closure of a Set of Functional Dependencies
+
+## Slide 35
+Closure of a Set of Functional Dependencies
+These rules are A = { f | 可用 Armstrong 公理从 F 中导出的函数依赖 f } B = { f | 被 F 所逻辑蕴涵的函数依赖 f } sound ( 正确性) , generate only functional dependencies that actually hold 用 Armstrong 公理从 F 中导出的函数依赖必为 F 所蕴涵 A  B Complete ( 完备性), generate all functional dependencies that hold. F 所蕴涵的函数依赖都能用 Armstrong 公理从 F 中导出 B  A
+
+## Slide 36
+Example
+R = (A, B, C, G, H, I) F = { A  B ， A  C ， CG  H ， CG  I ， B  H } some members of F + A  H by transitivity from A  B and B  H AG  I by augmenting A  C with G, to get AG  CG and then transitivity with CG  I CG  HI by augmenting CG  I to infer CG  CG I, and augmenting of CG  H to infer CGI  HI, and then transitivity
+
+## Slide 37
+Procedure for Computing F +
+To compute the closure of a set of functional dependencies F: F + = F repeat for each functional dependency f in F + apply reflexivity and augmentation rules on f add the resulting functional dependencies to F + for each pair of functional dependencies f 1 and f 2 in F + if f 1 and f 2 can be combined using transitivity then add the resulting functional dependency to F + until F + does not change any further NOTE : We shall see an alternative procedure for this task later
+
+## Slide 38
+Closure of Functional Dependencies (Cont.)
+Additional rules: If    holds a nd    holds, then     holds ( union ) If     holds, then    holds and    holds ( decomposition ) If    holds a nd     holds, then     holds ( pseudotransitivity ) The above rules can be inferred from Armstrong's axioms.
+
+## Slide 39
+}
+t[X] = s[X] Y  X
+t[Y] = s[Y]
+X  Y
+Reflexivity
+Armstrong 公理系统
+}
+X  Y t[X] = s[X]
+t[Y] = s[Y] Y  Z
+}
+t[Z] = s[Z]
+X  Z
+Transitivity
+
+## Slide 40
+}
+X  Y 增广律
+}
+X  XY
+union rule
+}
+X  Z 增广律
+XY  YZ
+传递律
+X  YZ
+Armstrong 公理系统
+t[XZ] = s[XZ]
+t[X] = s[X]
+X  Y
+}
+t[Y] = s[Y]
+t[XZ] = s[XZ]
+t[Z] = s[Z]
+}
+t[YZ] = s[YZ]
+XZ  YZ
+Augmentation
+
+## Slide 41
+}
+   增广律
+}
+   
+   
+传递律
+   
+pseudotransitivity: If    ,     , then    
+}
+Z  YZ 自反律
+}
+YZ  Z
+Decomposition: X->YZ==> X->Y,X->Z
+X  YZ
+传递律
+X  Z
+Armstrong 公理系统
+next
+
+## Slide 42
+Closure of Attribute Sets
+Given a set of attributes a, define the closure of a under F (denoted by a + ) as the set of attributes that are functionally determined by a under F Algorithm to compute a + , the closure of a under F result := a ; while (changes to result ) do for each    in F do begin if   result then result := result   end
+
+## Slide 43
+Example of Attribute Set Closure
+R = (A, B, C, G, H, I) F = { A  B A  C CG  H CG  I B  H } ( AG) + 1. result = AG 2. result = A BC G (A  C and A  B) 3. result = ABCG H (CG  H and CG  AGBC) 4. result = ABCG H I (CG  I and CG  AGBCH) Is AG a candidate key? Is AG a super key? Does AG  R? == Is (AG) +  R Is any subset of AG a superkey ? Does A  R ? == Is (A) +  R Does G  R ? == Is (G) +  R
+result := a; while (changes to result ) do for each    in F do begin if   result then result := result   end
+
+## Slide 44
+示例2 R< U, F >, U = (A, B, C, D, E), F = {AB C , B D, CE, CEB, ACB}, 计算 ( AB) + 所用依赖 ( AB) + AB C AB C BD AB C D CE AB CD E ( AB) + = ABCDE
+Example of Attribute Set Closure
+
+## Slide 45
+示例3 R< U, F >, U = (A, B, C, D, E, G), F = {A E , BE AG, CEA, GD}, 计算 ( AB) + 所用依赖 ( AB) + A E AB E BEAG ABE G GD ABEG D ( AB) + = ABEGD
+Example of Attribute Set Closure
+next
+
+## Slide 46
+Uses of Attribute Closure
+There are several uses of the attribute closure algorithm: Testing for superkey : To test if  is a superkey , we compute  + , and check if  + contains all attributes of R . Testing functional dependencies To check if a functional dependency    holds (or, in other words, is in F + ), just check if    + . compute  + by using attribute closure, and then check if it contains . Is a simple and cheap test, and very useful Computing closure of F For each   R, we find the closure  + , and for each S   + , we output a functional dependency   S .
+
+## Slide 47
+候选键的计算
+定义 左部属性，只出现在 F 左边的属性 右部属性，只出现在 F 右边的属性 双部属性，出现在 F 两边的属性 外部属性，不出现在 F 中的属性 定理 左部属性一定出现在任何候选码中 右部属性一定不出现在任何候选码中 外部属性一定出现在任何候选码中
+
+## Slide 48
+候选键的计算
+U = (C,T,H,R,S) F = {C→T,HR→C,HT→R,HS→R} 给出 R 的所有候选码： 出现在左边的属性： {C,T,H,R,S} 出现在右边的属性： {C,T,R} 左部属性： {HS} 右部属性： {} 双部属性： {C,T,R}
+
+## Slide 49
+候选键的计算
+U = {A ， B ， C ， D ， E} F = {AE→C,AC→D,CD→B,D→E} 给出 R 的所有候选码 出现在左边的属性： {A ， C ， D ， E} 出现在右边的属性： {B ， C ， D ， E} 左部属性： {A} 右部属性： {B} 双部属性： {C ， D ， E}
+
+## Slide 50
+候选键的计算
+Key-Finding( 求一个候选码 ) 输入：关系模式 <U, F> ； 输出：一个候选码 K Key-Finding(U, F) Begin (1)K := U; (2) 构造一个 FD: K  T, 其中 T  U (3)for 每一个属性 A  K do if Membership(F∪{K  T},(K-A)  T) then K:= K-A return(K) end. Membership(F, X Y): 判断 X Y  F + ?
+
+## Slide 51
+候选键的计算：替换法
+All-Candidate Keys( 求全部候选码 ) 输入：关系模式 R<U,F> 输出： R<U,F> 的全部候选码 begin (1)K:=Key-Finding(U, F) ； (2)K 入队列 Q ； (3)while 队列 Q  do [ K := 队列 Q 的头； W := W ∪{K} ； D := K 中全部双部属性； while D  do [ A := D 中一个双部属性； D := D - {A} ； for 每一个 X  Y  F do if A  Y then [ K’ := (K - A) ∪ {X} ] if K’  Q then K’ 入队列 Q ； ] ] end
+
+## Slide 52
+候选键的计算：替换法
+U={A, B, C, D, E, G} F={AB  C, C  A, C  B, AD  B, BE  G, G  A}
+EDC = Key-Finding(U, F)
+所有双部属性 ={A, B, C, G}
+ED C
+ED A
+AB  C
+ED G
+ED C
+C  A
+G  A
+ED B
+BE  G
+ED C
+C  B
+所有候选码 ={EDC, EDA, EDG, EDB}
+next
+
+## Slide 53
+Canonical Cover
+Sets of functional dependencies may have redundant dependencies that can be inferred from the others For example: A  C is redundant in: { A  B , B  C, A  C } Parts of a functional dependency may be redundant E.g.: on RHS: { A  B , B  C , A  C D } can be simplified to { A  B , B  C , A  D } E.g.: on LHS: {A  B , B  C , A C  D } can be simplified to {A  B , B  C , A  D } Intuitively, a canonical cover of F is a “ minimal ” set of functional dependencies equivalent to F, having no redundant dependencies or redundant parts of dependencies
+
+## Slide 54
+Extraneous Attributes
+Consider a set F of functional dependencies and the functional dependency    in F . Attribute A is extraneous in  if A   and F logically implies ( F – {    })  {( – A )   }. Attribute A is extraneous in  if A   and the set of functional dependencies ( F – {    })  {  (  – A )} logically implies F. Note: implication in the opposite direction is trivial in each of the cases above, since a “ stronger ” functional dependency always implies a weaker one Example: Given F = { A  C , AB  C } B is extraneous in AB  C because { A  C, AB  C } logically implies A  C (I.e. the result of dropping B from AB  C ). Example: Given F = { A  C , AB  C D} C is extraneous in AB  CD since A B  C can be inferred even after deleting C
+
+## Slide 55
+Testing if an Attribute is Extraneous
+Consider a set F of functional dependencies and the functional dependency    in F . To test if attribute A   is extraneous in  compute ( { } – A ) + using the dependencies in F check that ( { } – A ) + contains  ; if it does, A is extraneous in  To test if attribute A   is extraneous in  compute  + using only the dependencies in F’ = ( F – {    })  {  (  – A )}, check that  + contains A; if it does , A is extraneous in 
+
+## Slide 56
+Canonical Cover
+A canonical cover for F is a set of dependencies F c such that F logically implies all dependencies in F c, and F c logically implies all dependencies in F, and No functional dependency in F c contains an extraneous attribute , and Each left side of functional dependency in F c is unique. To compute a canonical cover for F : repeat Use the union rule to replace any dependencies in F  1   1 and  1   2 with  1   1  2 Find a functional dependency    with an extraneous attribute either in  or in  /* Note: test for extraneous attributes done using F c, not F*/ If an extraneous attribute is found, delete it from    until F does not change Note: Union rule may become applicable after some extraneous attributes have been deleted, so it has to be re-applied
+
+## Slide 57
+Computing a Canonical Cover
+R = ( A, B, C) ， F = {A  BC ， B  C ， A  B ， AB  C } Combine A  BC and A  B into A  BC Set is now { A  BC, B  C, AB  C } A is extraneous in AB  C Check if the result of deleting A from AB  C is implied by the other dependencies Yes: in fact, B  C is already present! Set is now { A  BC, B  C } C is extraneous in A  BC Check if A  C is logically implied by A  B and the other dependencies Yes : using transitivity on A  B and B  C. Can use attribute closure of A in more complex cases The canonical cover is: ｛ A  B ， B  C ｝
+B is extraneous in A  BC ？
+
+## Slide 58
+Lossless-join Decomposition
+For the case of R = ( R 1 , R 2 ) , we require that for all possible relations r on schema R r =  R1 ( r )  R2 ( r ) A decomposition of R into R 1 and R 2 is lossless join if at least one of the following dependencies is in F + : R 1  R 2  R 1 R 1  R 2  R 2 The above functional dependencies are a sufficient condition for lossless join decomposition; the dependencies are a necessary condition only if all constraints are functional dependencies
+
+## Slide 59
+Example
+R = (A, B, C) ， F = {A  B, B  C) Can be decomposed in two different ways R 1 = (A, B), R 2 = (B, C) Lossless-join decomposition: R 1  R 2 = { B } and B  BC Dependency preserving R 1 = (A, B), R 2 = (A, C) Lossless-join decomposition: R 1  R 2 = { A } and A  A B Not dependency preserving (cannot check B  C without computing R 1 R 2 )
+
+## Slide 60
+Dependency Preservation
+Let F i be the set of dependencies F + that include only attributes in R i . A decomposition is dependency preserving , if ( F 1  F 2  …  F n ) + = F + If it is not, then checking updates for violation of functional dependencies may require computing joins, which is expensive .
+
+## Slide 61
+Testing for Dependency Preservation
+To check if a dependency    is preserved in a decomposition of R into R 1 , R 2 , …, R n apply the following test (with attribute closure done with respect to F ) result =  while (changes to result ) do for each R i in the decomposition t = ( result  R i ) +  R i result = result  t If result contains all attributes in , then the functional dependency   is preserved. We apply the test on all dependencies in F to check if a decomposition is dependency preserving This procedure takes polynomial time, instead of the exponential time required to compute F + and ( F 1  F 2  …  F n ) +
+
+## Slide 62
+Example
+R = ( A, B, C ) ， F = { A  B ， B  C } Key = { A } R is not in BCNF Decomposition R 1 = ( A, B), R 2 = (B, C) R 1 and R 2 in BCNF Lossless-join decomposition Dependency preserving Decomposition R 1 = (A, B), R 2 = （ A , C) ？
+result =  while (changes to result ) do for each R i in the decomposition t = ( result  R i ) +  R i result = result  t If result contains all attributes in , then the functional dependency    is preserved.
+
+## Slide 63
+Example
+result =  while (changes to result ) do for each R i in the decomposition t = ( result  R i ) +  R i result = result  t If result contains all attributes in , then the functional dependency    is preserved.
+
+## Slide 64
+Testing for BCNF
+To check if a non-trivial dependency   causes a violation of BCNF 1. compute  + (the attribute closure of  ), and 2. verify that it includes all attributes of R , that is, it is a superkey of R . Simplified test : To check if a relation schema R is in BCNF, it suffices to check only the dependencies in the given set F for violation of BCNF, rather than checking all dependencies in F + . If none of the dependencies in F causes a violation of BCNF, then none of the dependencies in F + will cause a violation of BCNF either. However, simplified test using only F is incorrect when testing a relation in a decomposition of R Consider R = ( A, B, C, D, E ), with F = { A  B, BC  D } Decompose R into R 1 = ( A,B ) and R 2 = ( A,C,D, E ) Neither of the dependencies in F contain only attributes from ( A,C,D,E ) so we might be mislead into thinking R 2 satisfies BCNF. In fact, dependency AC  D in F + shows R 2 is not in BCNF.
+
+## Slide 65
+Testing Decomposition for BCNF
+To check if a relation R i in a decomposition of R is in BCNF, Either test R i for BCNF with respect to the restriction of F to R i (that is, all FDs in F + that contain only attributes from R i ) or use the original set of dependencies F that hold on R , but with the following test: 按照 BCNF 的定义判断 R i 是否违反 BCNF 的定义 for every set of attributes   R i , check that  + (the attribute closure of  in F ) either includes no attribute of R i -  , or includes all attributes of R i . If the condition is violated by some   in F , the dependency  ( + - )  R i can be shown to hold on R i , and R i violates BCNF. We use above dependency to decompose R i
+R = ( A, B, C, D, E ), F = { A  B, BC  D } Decompose R into R 1 = ( A,B ) and R 2 = ( A,C,D, E )
+
+## Slide 66
+BCNF Decomposition Algorithm
+result := { R }; done := false; while (not done) do if (there is a schema R i in result that is not in BCNF) then begin let   be a nontrivial functional dependency that holds on R i such that   R i is not in F + , and    = ; result := ( result – R i )  ( R i –  )  ( ,  ); end else done := true; Note: each R i is in BCNF, and decomposition is lossless-join.
+
+## Slide 67
+给定关系 R ( A,B,C,D,E ) ，函数依赖的集合 F={ A → B, BC → D } 判定表不是 BCNF 范式，因为 A → B, A 不是键 分解 R1=(A,B) ， R2=(A,C,D,E) R2 满足 BCNF 吗？ (AC) F + =ACBD ，在 R2 中，存在 AC → D ， 但是 AC 无法决定 R2 的所有属性 继续分解， R3=(ACD), R4=(ACE)
+result := { R }; done := false; while (not done) do if (there is a schema R i in result that is not in BCNF) then begin let   be a nontrivial functional dependency that holds on R i such that   R i is not in F + , and    = ; result := ( result – R i )  ( R i –  )  ( ,  ); end else done := true;
+
+## Slide 68
+Example of BCNF Decomposition
+R = ( A, B, C ) F = { A  B ， B  C } Key = { A } R is not in BCNF ( B  C but B is not superkey) Decomposition R 1 = ( B, C) R 2 = (A,B)
+
+## Slide 69
+Example of BCNF Decomposition
+class ( course_id , title , dept_name , credits , sec_id , semester , year , building , room_number , capacity , time_slot_id ) Functional dependencies: course_id → title , dept_name , credits building , room_number → capacity course_id , sec_id , semester , year → building , room_number , time_slot_id A candidate key { course_id , sec_id , semester , year }. BCNF Decomposition: course_id → title , dept_name , credits holds but course_id is not a superkey. We replace class by: course ( course_id , title , dept_name , credits ) class-1 ( course_id , sec_id , semester , year , building , room_number, capacity , time_slot_id )
+
+## Slide 70
+BCNF Decomposition (Cont.)
+course is in BCNF How do we know this? building , room_number → capacity holds on class-1 but { building , room_number } is not a superkey for class-1 . We replace class-1 by: classroom ( building , room_number , capacity ) section ( course_id , sec_id , semester , year , building , room_number , time_slot_id ) classroom and section are in BCNF.
+
+## Slide 71
+BCNF and Dependency Preservation
+R = ( J, K, L ) F = { JK  L ， L  K } Two candidate keys = JK and JL R is not in BCNF Any decomposition of R will fail to preserve JK  L This implies that testing for JK  L requires a join
+It is not always possible to get a BCNF decomposition that is dependency preserving
+
+## Slide 72
+Third Normal Form: Motivation
+There are some situations where BCNF is not dependency preserving , and efficient checking for FD violation on updates is important Solution: define a weaker normal form, called Third Normal Form (3NF) Allows some redundancy (with resultant problems; we will see examples later) But functional dependencies can be checked on individual relations without computing a join. There is always a lossless-join, dependency-preserving decomposition into 3NF.
+
+## Slide 73
+3NF Example
+Relation dept_advisor : dept_advisor ( s_ID, i_ID, dept_name) F = { s_ID, dept_name  i_ID , i_ID  dept_name } Two candidate keys: s_ID, dept_name , and i_ID, s_ID R is in 3NF s_ID, dept_name  i_ID i_ID is contained in a candidate key { i_ID , s_ID } i_ID  dept_name dept_name is contained in a candidate key { s_ID, dept_name }
+
+## Slide 74
+Redundancy in 3NF
+J
+j 1 j 2 j 3 null
+L
+l 1 l 1 l 1 l 2
+K
+k 1 k 1 k 1 k 2
+repetition of information (e.g., the relationship l 1 , k 1 ) ( i_ID, dept_name) need to use null values (e.g., to represent the relationship l 2 , k 2 where there is no corresponding value for J ). ( i_ID, dept_nameI) if there is no separate relation mapping instructors to departments
+There is some redundancy in this schema Example of problems due to redundancy in 3NF R = ( J, K, L) F = { JK  L, L  K }
+
+## Slide 75
+Testing for 3NF
+Optimization: Need to check only FDs in F, need not check all FDs in F + . Use attribute closure to check for each dependency   , if  is a superkey. If  is not a superkey, we have to verify if each attribute in  is contained in a candidate key of R this test is rather more expensive , since it involve finding candidate keys testing for 3NF has been shown to be NP-hard Interestingly, decomposition into third normal form (described shortly) can be done in polynomial time
+
+## Slide 76
+3NF Decomposition Algorithm
+Let F c be a canonical cover for F; i := 0; for each functional dependency    in F c do if none of the schemas R j , 1  j  i contains   then begin i := i + 1; R i :=   end if none of the schemas R j , 1  j  i contains a candidate key for R then begin i := i + 1; R i := any candidate key for R; end /* Optionally, remove redundant relations */ repeat if any schema R j is contained in another schema R k then /* delete R j */ R j = R;; i=i-1; return (R 1 , R 2 , ..., R i )
+
+## Slide 77
+3NF Decomposition Algorithm (Cont.)
+Above algorithm ensures: each relation schema R i is in 3NF decomposition is dependency preserving and lossless-join Proof of correctness is at end of this presentation (click here)
+
+## Slide 78
+3NF Decomposition: An Example
+Relation schema: cust_banker_branch = ( customer_id, employee_id , branch_name, type ) The functional dependencies for this relation schema are: customer_id, employee_id  branch_name, type employee_id  branch_name customer_id, branch_name  employee_id We first compute a canonical cover branch_name is extraneous in the r.h.s. of the 1 st dependency No other attribute is extraneous, so we get F C ={ customer_id, employee_id  type employee_id  branch_name customer_id, branch_name  employee_id }
+
+## Slide 79
+3NF Decompsition Example (Cont.)
+The for loop generates following 3NF schema: ( customer_id, employee_id, type ) ( employee_id , branch_name ) ( customer_id, branch_name, employee_id) Observe that ( customer_id, employee_id, type ) contains a candidate key of the original schema, so no further relation schema needs be added At end of for loop, detect and delete schemas, such as ( employee_id , branch_name ), which are subsets of other schemas result will not depend on the order in which FDs are considered The resultant simplified 3NF schema is: ( customer_id, employee_id, type ) ( customer_id, branch_name, employee_id)
+
+## Slide 80
+Comparison of BCNF and 3NF
+It is always possible to decompose a relation into a set of relations that are in 3NF such that: the decomposition is lossless the dependencies are preserved It is always possible to decompose a relation into a set of relations that are in BCNF such that: the decomposition is lossless it may not be possible to preserve dependencies.
+
+## Slide 81
+BCNF 分解总结
+BCNF 分解是采取关系模式的逐步分解的策略，最终的结果和考虑函数依赖的次序相关； BCNF 分解过程中需要检查当前模式是否满足 BCNF 的要求，需要测试属性 任意子集的闭包 或者是仅仅包含自身，或者包含当前模式的所有属性，这个测试是指数时间，所以， BCNF 的时间代价为指数的； BCNF 分解过程是无损的 BCNF 分解也许不能保持函数依赖
+
+## Slide 82
+3NF 分解总结
+基于函数依赖集合的正则覆盖，而不是从属性分解的角度来完成。 3NF 的分解模式，自然能够保持依赖。 最终的分解结果和正则覆盖集合相关 一个函数依赖的正则覆盖可能有多个。 能够满足无损连接和保持依赖 不考虑候选键计算代价，分解模式满足 3NF 是多项式时间的。 考虑保持函数依赖，最终产生的关系模式可能较多
+
+## Slide 83
+Design Goals
+Goal for a relational database design is: BCNF. Lossless join. Dependency preservation. If we cannot achieve this, we accept one of Lack of dependency preservation Redundancy due to use of 3NF Interestingly, SQL does not provide a direct way of specifying functional dependencies other than superkeys. Can specify FDs using assertions , but they are expensive to test, (and currently not supported by any of the widely used databases!) Even if we had a dependency preserving decomposition, using SQL we would not be able to efficiently test a functional dependency whose left hand side is not a key.
+
+## Slide 84
+去规范化 Denomalization 设计
+设计过程中需要回答的问题 数据是否是只读的 数据是否是更新频繁的 多个数据表是否经常被同时存取 例如 模式 S(SID,SNAME,DID,AGE,LOCATION) D(DID,DNAME,DEAN) 查询 每天至少发出查询 20000 次 Select SNAME, DNAME From S, D Where S.DID=D.DID
+
+## Slide 85
+去规范化 Denomalization 设计
+考虑性能问题，违反范式 例如 在 S 中增加 DNAME 查询 Select SNAME ， DNAME from S 代价 增加了 DNAME 的存储代价 如果 DNAME 发生变更时，更新代价 收益 提高了每天的检索速度 取舍原则：根据应用系统中数据特性而定
+
+## Slide 86
+
+## Slide 87
+Multivalued Dependencies
+Suppose we record names of children, and phone numbers for instructors: inst_child ( ID , child_name ) inst_phone ( ID , phone_number ) If we were to combine these schemas to get inst_info ( ID , child_name , phone_number ) Example data: (99999, David, 512-555-1234) (99999, David, 512-555-4321) (99999, William, 512-555-1234) (99999, William, 512-555-4321) This relation is in BCNF Why?
+
+## Slide 88
+Multivalued Dependencies (MVDs)
+Let R be a relation schema and let   R and   R. The multivalued dependency    holds on R if in any legal relation r(R), for all pairs for tuples t 1 and t 2 in r such that t 1 [  ] = t 2 [  ], there exist tuples t 3 and t 4 in r such that: t 1 [  ] = t 2 [  ] = t 3 [  ] = t 4 [  ] t 3 [  ] = t 1 [  ] t 3 [ R –  ] = t 2 [ R –  ] t 4 [  ] = t 2 [  ] t 4 [ R –  ] = t 1 [ R –  ]
+
+## Slide 89
+MVD (Cont.)
+Tabular representation of   
+
+## Slide 90
+Example
+Let R be a relation schema with a set of attributes that are partitioned into 3 nonempty subsets. Y, Z, W We say that Y  Z ( Y multidetermines Z ) if and only if for all possible relations r ( R ) < y 1 , z 1 , w 1 >  r and < y 1 , z 2 , w 2 >  r then < y 1 , z 1 , w 2 >  r and < y 1 , z 2 , w 1 >  r Note that since the behavior of Z and W are identical it follows that Y  Z if Y  W
+
+## Slide 91
+Example (Cont.)
+In our example: ID  child_name ID  phone_number The above formal definition is supposed to formalize the notion that given a particular value of Y ( ID ) it has associated with it a set of values of Z (child_name) and a set of values of W (phone_number) , and these two sets are in some sense independent of each other. Note: If Y  Z then Y  Z Indeed we have (in above notation) Z 1 = Z 2 The claim follows.
+
+## Slide 92
+Use of Multivalued Dependencies
+We use multivalued dependencies in two ways: 1. To test relations to determine whether they are legal under a given set of functional and multivalued dependencies 2. To specify constraints on the set of legal relations. We shall thus concern ourselves only with relations that satisfy a given set of functional and multivalued dependencies. If a relation r fails to satisfy a given multivalued dependency, we can construct a relations r  that does satisfy the multivalued dependency by adding tuples to r.
+
+## Slide 93
+Theory of MVDs
+From the definition of multivalued dependency, we can derive the following rule: If    , then    That is, every functional dependency is also a multivalued dependency The closure D + of D is the set of all functional and multivalued dependencies logically implied by D . We can compute D + from D , using the formal definitions of functional dependencies and multivalued dependencies. We can manage with such reasoning for very simple multivalued dependencies, which seem to be most common in practice For complex dependencies, it is better to reason about sets of dependencies using a system of inference rules (see Appendix C).
+
+## Slide 94
+Fourth Normal Form
+A relation schema R is in 4NF with respect to a set D of functional and multivalued dependencies if for all multivalued dependencies in D + of the form    , where   R and   R, at least one of the following hold:    is trivial (i.e.,    or    = R)  is a superkey for schema R If a relation is in 4NF it is in BCNF
+
+## Slide 95
+Restriction of Multivalued Dependencies
+The restriction of D to R i is the set D i consisting of All functional dependencies in D + that include only attributes of R i All multivalued dependencies of the form   (   R i ) where   R i and    is in D +
+
+## Slide 96
+4NF Decomposition Algorithm
+result: = { R }; done := false; compute D + ; Let D i denote the restriction of D + to R i while ( not done ) if (there is a schema R i in result that is not in 4NF) then begin let    be a nontrivial multivalued dependency that holds on R i such that   R i is not in D i , and ; result := ( result - R i )  ( R i - )  (, ); end else done := true; Note: each R i is in 4NF, and decomposition is lossless-join
+
+## Slide 97
+Example
+R =( A, B, C, G, H, I ) F ={ A  B B  HI CG  H } R is not in 4NF since A  B and A is not a superkey for R Decomposition a) R 1 = ( A, B ) ( R 1 is in 4NF) b) R 2 = ( A, C, G, H, I ) ( R 2 is not in 4NF, decompose into R 3 and R 4 ) c) R 3 = ( C, G, H ) ( R 3 is in 4NF) d) R 4 = ( A, C, G, I ) ( R 4 is not in 4NF, decompose into R 5 and R 6 ) A  B and B  HI  A  HI , (MVD transitivity), and and hence A  I (MVD restriction to R 4 ) e) R 5 = ( A, I ) ( R 5 is in 4NF) f) R 6 = (A, C, G) (R 6 is in 4NF)
+
+## Slide 98
+Further Normal Forms
+Join dependencies generalize multivalued dependencies lead to project-join normal form (PJNF) (also called fifth normal form ) A class of even more general constraints, leads to a normal form called domain-key normal form . Problem with these generalized constraints: are hard to reason with, and no set of sound and complete set of inference rules exists. Hence rarely used
+
+## Slide 99
+Overall Database Design Process
+We have assumed schema R is given R could have been generated when converting E-R diagram to a set of tables. R could have been a single relation containing all attributes that are of interest (called universal relation ). Normalization breaks R into smaller relations. R could have been the result of some ad hoc design of relations, which we then test/convert to normal form.
+
+## Slide 100
+ER Model and Normalization
+When an E-R diagram is carefully designed, identifying all entities correctly, the tables generated from the E-R diagram should not need further normalization. However, in a real (imperfect) design, there can be functional dependencies from non-key attributes of an entity to other attributes of the entity Example: an employee entity with attributes department_name and building , and a functional dependency department_name  building Good design would have made department an entity Functional dependencies from non-key attributes of a relationship set possible, but rare --- most relationships are binary
+
+## Slide 101
+Denormalization for Performance
+May want to use non-normalized schema for performance For example, displaying prereqs along with course_id, and title requires join of course with prereq Alternative 1: Use denormalized relation containing attributes of course as well as prereq with all above attributes faster lookup extra space and extra execution time for updates extra coding work for programmer and possibility of error in extra code Alternative 2: use a materialized view defined as course prereq Benefits and drawbacks same as above, except no extra coding work for programmer and avoids possible errors
+
+## Slide 102
+Other Design Issues
+Some aspects of database design are not caught by normalization Examples of bad database design, to be avoided: Instead of earnings ( company_id, year, amount ), use earnings_2004, earnings_2005, earnings_2006 , etc., all on the schema ( company_id, earnings ). Above are in BCNF, but make querying across years difficult and needs new table each year company_year ( company_id, earnings_2004, earnings_2005, earnings_2006 ) Also in BCNF, but also makes querying across years difficult and requires new attribute each year. Is an example of a crosstab , where values for one attribute become column names Used in spreadsheets, and in data analysis tools
+
+## Slide 103
+Modeling Temporal Data
+Temporal data have an association time interval during which the data are valid. A snapshot is the value of the data at a particular point in time Several proposals to extend ER model by adding valid time to attributes, e.g., address of an instructor at different points in time entities, e.g., time duration when a student entity exists relationships, e.g., time during which an instructor was associated with a student as an advisor. But no accepted standard Adding a temporal component results in functional dependencies like ID  street, city not to hold, because the address varies over time A temporal functional dependency X  Y holds on schema R if the functional dependency X  Y holds on all snapshots for all legal instances r ( R ).
+t
+
+## Slide 104
+Modeling Temporal Data (Cont.)
+In practice, database designers may add start and end time attributes to relations E.g., course ( course_id, course_title ) is replaced by course ( course_id, course_title, start, end ) Constraint: no two tuples can have overlapping valid times Hard to enforce efficiently Foreign key references may be to current version of data, or to data at a point in time E.g., student transcript should refer to course information at the time the course was taken
+
+## Slide 105
+End of Chapter
+
+## Slide 106
+Proof of Correctness of 3NF Decomposition Algorithm
+
+## Slide 107
+Correctness of 3NF Decomposition Algorithm
+3NF decomposition algorithm is dependency preserving (since there is a relation for every FD in F c ) Decomposition is lossless A candidate key ( C ) is in one of the relations R i in decomposition Closure of candidate key under F c must contain all attributes in R . Follow the steps of attribute closure algorithm to show there is only one tuple in the join result for each tuple in R i
+
+## Slide 108
+Correctness of 3NF Decomposition Algorithm (Cont ’ d.)
+Claim: if a relation R i is in the decomposition generated by the above algorithm, then R i satisfies 3NF. Let R i be generated from the dependency    Let   B be any non-trivial functional dependency on R i . (We need only consider FDs whose right-hand side is a single attribute.) Now, B can be in either  or  but not in both. Consider each case separately.
+
+## Slide 109
+Correctness of 3NF Decomposition (Cont ’ d.)
+Case 1: If B in  : If  is a superkey, the 2nd condition of 3NF is satisfied Otherwise  must contain some attribute not in  Since   B is in F + it must be derivable from F c , by using attribute closure on  . Attribute closure not have used  . If it had been used,  must be contained in the attribute closure of  , which is not possible, since we assumed  is not a superkey. Now, using  (  - {B}) and   B , we can derive   B (since    , and B   since   B is non-trivial) Then, B is extraneous in the right-hand side of  ; which is not possible since   is in F c . Thus, if B is in  then  must be a superkey, and the second condition of 3NF must be satisfied.
+
+## Slide 110
+Correctness of 3NF Decomposition (Cont ’ d.)
+Case 2: B is in . Since  is a candidate key, the third alternative in the definition of 3NF is trivially satisfied. In fact, we cannot show that  is a superkey. This shows exactly why the third alternative is present in the definition of 3NF. Q.E.D.
+
+## Slide 111
+Figure 8.02
+
+## Slide 112
+Figure 8.03
+
+## Slide 113
+Figure 8.04
+
+## Slide 114
+Figure 8.05
+
+## Slide 115
+Figure 8.06
+
+## Slide 116
+Figure 8.14
+
+## Slide 117
+Figure 8.15
+
+## Slide 118
+Figure 8.17

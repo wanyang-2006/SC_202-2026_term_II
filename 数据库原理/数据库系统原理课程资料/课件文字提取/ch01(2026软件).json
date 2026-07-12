@@ -1,0 +1,523 @@
+{
+  "file": "C:\\Users\\yang\\Desktop\\数据库原理\\数据库系统原理\\数据库系统原理课件\\ch01(2026软件).pptx",
+  "slide_count": 59,
+  "slides": [
+    {
+      "slide": 1,
+      "text": [
+        "Chapter 1: Introduction"
+      ],
+      "joined": "Chapter 1: Introduction"
+    },
+    {
+      "slide": 2,
+      "text": [
+        "Outline",
+        "The Need for Databases Data Models Relational Databases Database Design Storage Manager Query Processing Transaction Manager"
+      ],
+      "joined": "Outline\nThe Need for Databases Data Models Relational Databases Database Design Storage Manager Query Processing Transaction Manager"
+    },
+    {
+      "slide": 3,
+      "text": [
+        "Database Management System (DBMS)",
+        "DBMS contains information about a particular enterprise Collection of interrelated data Set of programs to access the data An environment that is both convenient and efficient to use Database Applications: Banking: transactions Airlines: reservations, schedules Universities: registration, grades Sales: customers, products, purchases Online retailers: order tracking, customized recommendations Manufacturing: production, inventory, orders, supply chain Human resources: employee records, salaries, tax deductions Databases can be very large. Databases touch all aspects of our lives"
+      ],
+      "joined": "Database Management System (DBMS)\nDBMS contains information about a particular enterprise Collection of interrelated data Set of programs to access the data An environment that is both convenient and efficient to use Database Applications: Banking: transactions Airlines: reservations, schedules Universities: registration, grades Sales: customers, products, purchases Online retailers: order tracking, customized recommendations Manufacturing: production, inventory, orders, supply chain Human resources: employee records, salaries, tax deductions Databases can be very large. Databases touch all aspects of our lives"
+    },
+    {
+      "slide": 4,
+      "text": [
+        "数据库的基本概念"
+      ],
+      "joined": "数据库的基本概念"
+    },
+    {
+      "slide": 5,
+      "text": [
+        "University Database Example",
+        "Application program examples Add new students, instructors, and courses Register students for courses, and generate class rosters Assign grades to students, compute grade point averages (GPA) and generate transcripts In the early days, database applications were built directly on top of file systems"
+      ],
+      "joined": "University Database Example\nApplication program examples Add new students, instructors, and courses Register students for courses, and generate class rosters Assign grades to students, compute grade point averages (GPA) and generate transcripts In the early days, database applications were built directly on top of file systems"
+    },
+    {
+      "slide": 6,
+      "text": [
+        "Drawbacks of using file systems to store data",
+        "Data redundancy and inconsistency Multiple file formats, duplication of information in different files Difficulty in accessing data Need to write a new program to carry out each new task Data isolation Multiple files and formats Integrity problems Integrity constraints (e.g., account balance > 0) become “ buried ” in program code rather than being stated explicitly Hard to add new constraints or change existing ones"
+      ],
+      "joined": "Drawbacks of using file systems to store data\nData redundancy and inconsistency Multiple file formats, duplication of information in different files Difficulty in accessing data Need to write a new program to carry out each new task Data isolation Multiple files and formats Integrity problems Integrity constraints (e.g., account balance > 0) become “ buried ” in program code rather than being stated explicitly Hard to add new constraints or change existing ones"
+    },
+    {
+      "slide": 7,
+      "text": [
+        "Drawbacks of using file systems to store data (Cont.)",
+        "Atomicity of updates Failures may leave database in an inconsistent state with partial updates carried out Example: Transfer of funds from one account to another should either complete or not happen at all Concurrent access by multiple users Concurrent access needed for performance Uncontrolled concurrent accesses can lead to inconsistencies Example: Two people reading a balance (say 100) and updating it by withdrawing money (say 50 each) at the same time Security problems Hard to provide user access to some, but not all, data Database systems offer solutions to all the above problems"
+      ],
+      "joined": "Drawbacks of using file systems to store data (Cont.)\nAtomicity of updates Failures may leave database in an inconsistent state with partial updates carried out Example: Transfer of funds from one account to another should either complete or not happen at all Concurrent access by multiple users Concurrent access needed for performance Uncontrolled concurrent accesses can lead to inconsistencies Example: Two people reading a balance (say 100) and updating it by withdrawing money (say 50 each) at the same time Security problems Hard to provide user access to some, but not all, data Database systems offer solutions to all the above problems"
+    },
+    {
+      "slide": 8,
+      "text": [
+        "数据管理的三个阶段"
+      ],
+      "joined": "数据管理的三个阶段"
+    },
+    {
+      "slide": 9,
+      "text": [
+        "文件系统阶段",
+        "补贴",
+        "系别",
+        "姓名",
+        "学号",
+        "劳资科",
+        "住址",
+        "性别",
+        "系别",
+        "姓名",
+        "学号",
+        "房产科",
+        "学位",
+        "学分",
+        "系别",
+        "姓名",
+        "学号",
+        "学籍科",
+        "年龄",
+        "出身",
+        "学位",
+        "性别",
+        "系别",
+        "姓名",
+        "学号",
+        "人事科"
+      ],
+      "joined": "文件系统阶段\n补贴\n系别\n姓名\n学号\n劳资科\n住址\n性别\n系别\n姓名\n学号\n房产科\n学位\n学分\n系别\n姓名\n学号\n学籍科\n年龄\n出身\n学位\n性别\n系别\n姓名\n学号\n人事科"
+    },
+    {
+      "slide": 10,
+      "text": [
+        "数据库系统的特点",
+        "学号",
+        "姓名",
+        "性别",
+        "系别",
+        "年龄",
+        "住址",
+        "出身",
+        "学位",
+        "学分",
+        "补贴",
+        "学籍科",
+        "房产科",
+        "人事科",
+        "劳资科"
+      ],
+      "joined": "数据库系统的特点\n学号\n姓名\n性别\n系别\n年龄\n住址\n出身\n学位\n学分\n补贴\n学籍科\n房产科\n人事科\n劳资科"
+    },
+    {
+      "slide": 11,
+      "text": [
+        "Levels of Abstraction",
+        "Physical level: describes how a record (e.g., instructor) is stored. Logical level: describes data stored in database, and the relationships among the data. type instructor = record ID : string; name : string; dept_name : string; salary : integer; end ; View level: application programs hide details of data types. Views can also hide information (such as an employee ’ s salary) for security purposes."
+      ],
+      "joined": "Levels of Abstraction\nPhysical level: describes how a record (e.g., instructor) is stored. Logical level: describes data stored in database, and the relationships among the data. type instructor = record ID : string; name : string; dept_name : string; salary : integer; end ; View level: application programs hide details of data types. Views can also hide information (such as an employee ’ s salary) for security purposes."
+    },
+    {
+      "slide": 12,
+      "text": [
+        "View of Data",
+        "An architecture for a database system"
+      ],
+      "joined": "View of Data\nAn architecture for a database system"
+    },
+    {
+      "slide": 13,
+      "text": [
+        "Instances and Schemas",
+        "Similar to types and variables in programming languages Logical Schema – the overall logical structure of the database Example: The database consists of information about a set of customers and accounts in a bank and the relationship between them Analogous to type information of a variable in a program Physical schema – the overall physical structure of the database Instance – the actual content of the database at a particular point in time Analogous to the value of a variable Physical Data Independence – the ability to modify the physical schema without changing the logical schema Applications depend on the logical schema In general, the interfaces between the various levels and components should be well defined so that changes in some parts do not seriously influence others."
+      ],
+      "joined": "Instances and Schemas\nSimilar to types and variables in programming languages Logical Schema – the overall logical structure of the database Example: The database consists of information about a set of customers and accounts in a bank and the relationship between them Analogous to type information of a variable in a program Physical schema – the overall physical structure of the database Instance – the actual content of the database at a particular point in time Analogous to the value of a variable Physical Data Independence – the ability to modify the physical schema without changing the logical schema Applications depend on the logical schema In general, the interfaces between the various levels and components should be well defined so that changes in some parts do not seriously influence others."
+    },
+    {
+      "slide": 14,
+      "text": [
+        "Data Models",
+        "A collection of tools for describing Data Data relationships Data semantics Data constraints Relational model Entity-Relationship data model (mainly for database design) Object-based data models (Object-oriented and Object-relational) Semistructured data model (XML) Other older models: Network model Hierarchical model"
+      ],
+      "joined": "Data Models\nA collection of tools for describing Data Data relationships Data semantics Data constraints Relational model Entity-Relationship data model (mainly for database design) Object-based data models (Object-oriented and Object-relational) Semistructured data model (XML) Other older models: Network model Hierarchical model"
+    },
+    {
+      "slide": 15,
+      "text": [
+        "数据库模型：层次数据库和网状数据库"
+      ],
+      "joined": "数据库模型：层次数据库和网状数据库"
+    },
+    {
+      "slide": 16,
+      "text": [
+        "层次模型用树形结构来表示各类实体以及实体间的联系 除根节点以外，其他结点有且只有一个父亲结点 典型代表是 IBM 公司的 IMS （ Information Management System ， IMS ） 数据库",
+        "数据库模型：层次模型与层次数据库"
+      ],
+      "joined": "层次模型用树形结构来表示各类实体以及实体间的联系 除根节点以外，其他结点有且只有一个父亲结点 典型代表是 IBM 公司的 IMS （ Information Management System ， IMS ） 数据库\n数据库模型：层次模型与层次数据库"
+    },
+    {
+      "slide": 17,
+      "text": [
+        "美国通用电气公司发布了世界上第一个网状数据库系统 ——IDS （ Integrated Data Storage ，集成数据存储） 允许一个以上的结点无父亲 一个结点可以有多于一个的父亲",
+        "数据库模型：网状模型和网状数据库"
+      ],
+      "joined": "美国通用电气公司发布了世界上第一个网状数据库系统 ——IDS （ Integrated Data Storage ，集成数据存储） 允许一个以上的结点无父亲 一个结点可以有多于一个的父亲\n数据库模型：网状模型和网状数据库"
+    },
+    {
+      "slide": 18,
+      "text": [
+        "Relational Model",
+        "All the data is stored in various tables. Example of tabular data in the relational model",
+        "Columns",
+        "Rows"
+      ],
+      "joined": "Relational Model\nAll the data is stored in various tables. Example of tabular data in the relational model\nColumns\nRows"
+    },
+    {
+      "slide": 19,
+      "text": [
+        "A Sample Relational Database"
+      ],
+      "joined": "A Sample Relational Database"
+    },
+    {
+      "slide": 20,
+      "text": [
+        "Data Definition Language (DDL)",
+        "Specification notation for defining the database schema Example: create table instructor ( ID char (5), name varchar (20) , dept_name varchar (20), salary numeric (8,2)) DDL compiler generates a set of table templates stored in a data dictionary Data dictionary contains metadata (i.e., data about data) Database schema Integrity constraints Primary key (ID uniquely identifies instructors) Authorization Who can access what"
+      ],
+      "joined": "Data Definition Language (DDL)\nSpecification notation for defining the database schema Example: create table instructor ( ID char (5), name varchar (20) , dept_name varchar (20), salary numeric (8,2)) DDL compiler generates a set of table templates stored in a data dictionary Data dictionary contains metadata (i.e., data about data) Database schema Integrity constraints Primary key (ID uniquely identifies instructors) Authorization Who can access what"
+    },
+    {
+      "slide": 21,
+      "text": [
+        "Data Manipulation Language (DML)",
+        "Language for accessing and manipulating the data organized by the appropriate data model DML also known as query language Two classes of languages Pure – used for proving properties about computational power and for optimization Relational Algebra Tuple relational calculus Domain relational calculus Commercial – used in commercial systems SQL is the most widely used commercial language"
+      ],
+      "joined": "Data Manipulation Language (DML)\nLanguage for accessing and manipulating the data organized by the appropriate data model DML also known as query language Two classes of languages Pure – used for proving properties about computational power and for optimization Relational Algebra Tuple relational calculus Domain relational calculus Commercial – used in commercial systems SQL is the most widely used commercial language"
+    },
+    {
+      "slide": 22,
+      "text": [
+        "SQL",
+        "The most widely used commercial language SQL is NOT a Turing machine equivalent language To be able to compute complex functions SQL is usually embedded in some higher-level language Application programs generally access databases through one of Language extensions to allow embedded SQL Application program interface (e.g., ODBC/JDBC) which allow SQL queries to be sent to a database"
+      ],
+      "joined": "SQL\nThe most widely used commercial language SQL is NOT a Turing machine equivalent language To be able to compute complex functions SQL is usually embedded in some higher-level language Application programs generally access databases through one of Language extensions to allow embedded SQL Application program interface (e.g., ODBC/JDBC) which allow SQL queries to be sent to a database"
+    },
+    {
+      "slide": 23,
+      "text": [
+        "Database Design",
+        "Logical Design – Deciding on the database schema. Database design requires that we find a “ good ” collection of relation schemas. Business decision – What attributes should we record in the database? Computer Science decision – What relation schemas should we have and how should the attributes be distributed among the various relation schemas? Physical Design – Deciding on the physical layout of the database",
+        "The process of designing the general structure of the database:"
+      ],
+      "joined": "Database Design\nLogical Design – Deciding on the database schema. Database design requires that we find a “ good ” collection of relation schemas. Business decision – What attributes should we record in the database? Computer Science decision – What relation schemas should we have and how should the attributes be distributed among the various relation schemas? Physical Design – Deciding on the physical layout of the database\nThe process of designing the general structure of the database:"
+    },
+    {
+      "slide": 24,
+      "text": [
+        "Database Design (Cont.)",
+        "Is there any problem with this relation?"
+      ],
+      "joined": "Database Design (Cont.)\nIs there any problem with this relation?"
+    },
+    {
+      "slide": 25,
+      "text": [
+        "Design Approaches",
+        "Need to come up with a methodology to ensure that each of the relations in the database is “ good ” Two ways of doing so: Entity Relationship Model (Chapter 6) Models an enterprise as a collection of entities and relationships Represented diagrammatically by an entity-relationship diagram: Normalization Theory (Chapter 7) Formalize what designs are bad, and test for them"
+      ],
+      "joined": "Design Approaches\nNeed to come up with a methodology to ensure that each of the relations in the database is “ good ” Two ways of doing so: Entity Relationship Model (Chapter 6) Models an enterprise as a collection of entities and relationships Represented diagrammatically by an entity-relationship diagram: Normalization Theory (Chapter 7) Formalize what designs are bad, and test for them"
+    },
+    {
+      "slide": 26,
+      "text": [
+        "Object-Relational Data Models",
+        "Relational model : flat, “ atomic ” values Object Relational Data Models Extend the relational data model by including object orientation and constructs to deal with added data types. Allow attributes of tuples to have complex types, including non-atomic values such as nested relations. Preserve relational foundations, in particular the declarative access to data, while extending modeling power. Provide upward compatibility with existing relational languages."
+      ],
+      "joined": "Object-Relational Data Models\nRelational model : flat, “ atomic ” values Object Relational Data Models Extend the relational data model by including object orientation and constructs to deal with added data types. Allow attributes of tuples to have complex types, including non-atomic values such as nested relations. Preserve relational foundations, in particular the declarative access to data, while extending modeling power. Provide upward compatibility with existing relational languages."
+    },
+    {
+      "slide": 27,
+      "text": [
+        "XML: Extensible Markup Language",
+        "Defined by the WWW Consortium ( W3C ) Originally intended as a document markup language not a database language The ability to specify new tags, and to create nested tag structures made XML a great way to exchange data , not just documents XML has become the basis for all new generation data interchange formats. A wide variety of tools is available for parsing, browsing and querying XML documents/data"
+      ],
+      "joined": "XML: Extensible Markup Language\nDefined by the WWW Consortium ( W3C ) Originally intended as a document markup language not a database language The ability to specify new tags, and to create nested tag structures made XML a great way to exchange data , not just documents XML has become the basis for all new generation data interchange formats. A wide variety of tools is available for parsing, browsing and querying XML documents/data"
+    },
+    {
+      "slide": 28,
+      "text": [
+        "Database Engine",
+        "Storage manager Query processing Transaction manager"
+      ],
+      "joined": "Database Engine\nStorage manager Query processing Transaction manager"
+    },
+    {
+      "slide": 29,
+      "text": [
+        "Storage Management",
+        "Storage manager is a program module that provides the interface between the low-level data stored in the database and the application programs and queries submitted to the system. The storage manager is responsible to the following tasks: Interaction with the OS file manager Efficient storing, retrieving and updating of data Issues: Storage access File organization Indexing and hashing"
+      ],
+      "joined": "Storage Management\nStorage manager is a program module that provides the interface between the low-level data stored in the database and the application programs and queries submitted to the system. The storage manager is responsible to the following tasks: Interaction with the OS file manager Efficient storing, retrieving and updating of data Issues: Storage access File organization Indexing and hashing"
+    },
+    {
+      "slide": 30,
+      "text": [
+        "Storage Hierarchy",
+        "高速缓冲存储器： 与数据库无关",
+        "快闪存储器： USB 口存取， 与数据库无关"
+      ],
+      "joined": "Storage Hierarchy\n高速缓冲存储器： 与数据库无关\n快闪存储器： USB 口存取， 与数据库无关"
+    },
+    {
+      "slide": 31,
+      "text": [
+        "Magnetic Hard Disk Mechanism"
+      ],
+      "joined": "Magnetic Hard Disk Mechanism"
+    },
+    {
+      "slide": 32,
+      "text": [
+        "Overview of Primary Components",
+        "Instance",
+        "SGA",
+        "Redo log buffer cache",
+        "Shared pool",
+        "Data Dict . cache",
+        "Library cache",
+        "DBWR",
+        "SMON",
+        "PMON",
+        "CKPT",
+        "LGWR",
+        "Others",
+        "User process",
+        "Server process",
+        "PGA",
+        "Control files",
+        "Data files",
+        "Archived log files",
+        "Parameter file",
+        "Password file",
+        "Redo log files",
+        "Database",
+        "Database buffer cache"
+      ],
+      "joined": "Overview of Primary Components\nInstance\nSGA\nRedo log buffer cache\nShared pool\nData Dict . cache\nLibrary cache\nDBWR\nSMON\nPMON\nCKPT\nLGWR\nOthers\nUser process\nServer process\nPGA\nControl files\nData files\nArchived log files\nParameter file\nPassword file\nRedo log files\nDatabase\nDatabase buffer cache"
+    },
+    {
+      "slide": 33,
+      "text": [
+        "存储结构"
+      ],
+      "joined": "存储结构"
+    },
+    {
+      "slide": 34,
+      "text": [
+        "存储结构",
+        "数据块 存储介质上的数据最小存储单位 页面 统一大小来 管理数据 一般为 8KB 、 16KB"
+      ],
+      "joined": "存储结构\n数据块 存储介质上的数据最小存储单位 页面 统一大小来 管理数据 一般为 8KB 、 16KB"
+    },
+    {
+      "slide": 35,
+      "text": [
+        "数据表空间管理",
+        "数据表空间由段（ segment ）、 区（ extent ）、 页（ page ） 组成。 数据段、索引段、回滚段分别存储 一次申请一个区（多个连续页），让相邻页的物理位置也相邻，方便实现顺序 I/O 。"
+      ],
+      "joined": "数据表空间管理\n数据表空间由段（ segment ）、 区（ extent ）、 页（ page ） 组成。 数据段、索引段、回滚段分别存储 一次申请一个区（多个连续页），让相邻页的物理位置也相邻，方便实现顺序 I/O 。"
+    },
+    {
+      "slide": 36,
+      "text": [
+        "申请新页面",
+        "假设所有的页面都满时，要继续插入记录的话就需要申请新的页面 每次申请固定数量的区（ extent ） 为了页面尽量连续"
+      ],
+      "joined": "申请新页面\n假设所有的页面都满时，要继续插入记录的话就需要申请新的页面 每次申请固定数量的区（ extent ） 为了页面尽量连续"
+    },
+    {
+      "slide": 37,
+      "text": [
+        "页面组织",
+        "页面大小为 8KB 或者 16KB ，一般为 2 的整数次幂 一个页面往往包含了多条记录"
+      ],
+      "joined": "页面组织\n页面大小为 8KB 或者 16KB ，一般为 2 的整数次幂 一个页面往往包含了多条记录"
+    },
+    {
+      "slide": 38,
+      "text": [
+        "页面组织： 定长记录 vs 变长记录",
+        "定长记录：长度固定，页面中记录数目固定，易于定位一个页面的记录位置 例如年龄 short ，学号 char （ 10 ） 变长记录：长度可变， 页面中记录数目不固定， 难以直接计算并定位记录位置 例如姓名 varchar ，院系 varchar"
+      ],
+      "joined": "页面组织： 定长记录 vs 变长记录\n定长记录：长度固定，页面中记录数目固定，易于定位一个页面的记录位置 例如年龄 short ，学号 char （ 10 ） 变长记录：长度可变， 页面中记录数目不固定， 难以直接计算并定位记录位置 例如姓名 varchar ，院系 varchar"
+    },
+    {
+      "slide": 39,
+      "text": [
+        "Query Processing",
+        "1. Parsing and translation 2. Optimization 3. Evaluation"
+      ],
+      "joined": "Query Processing\n1. Parsing and translation 2. Optimization 3. Evaluation"
+    },
+    {
+      "slide": 40,
+      "text": [
+        "Query Processing (Cont.)",
+        "Alternative ways of evaluating a given query Equivalent expressions Different algorithms for each operation Cost difference between a good and a bad way of evaluating a query can be enormous Need to estimate the cost of operations Depends critically on statistical information about relations which the database must maintain Need to estimate statistics for intermediate results to compute cost of complex expressions"
+      ],
+      "joined": "Query Processing (Cont.)\nAlternative ways of evaluating a given query Equivalent expressions Different algorithms for each operation Cost difference between a good and a bad way of evaluating a query can be enormous Need to estimate the cost of operations Depends critically on statistical information about relations which the database must maintain Need to estimate statistics for intermediate results to compute cost of complex expressions"
+    },
+    {
+      "slide": 41,
+      "text": [
+        "Transaction Management",
+        "What if the system fails? What if more than one user is concurrently updating the same data? A transaction is a collection of operations that performs a single logical function in a database application Transaction-management component ensures that the database remains in a consistent (correct) state despite system failures (e.g., power failures and operating system crashes) and transaction failures. Concurrency-control manager controls the interaction among the concurrent transactions, to ensure the consistency of the database."
+      ],
+      "joined": "Transaction Management\nWhat if the system fails? What if more than one user is concurrently updating the same data? A transaction is a collection of operations that performs a single logical function in a database application Transaction-management component ensures that the database remains in a consistent (correct) state despite system failures (e.g., power failures and operating system crashes) and transaction failures. Concurrency-control manager controls the interaction among the concurrent transactions, to ensure the consistency of the database."
+    },
+    {
+      "slide": 42,
+      "text": [
+        "Database Users and Administrators",
+        "Database"
+      ],
+      "joined": "Database Users and Administrators\nDatabase"
+    },
+    {
+      "slide": 43,
+      "text": [
+        "Database System Internals"
+      ],
+      "joined": "Database System Internals"
+    },
+    {
+      "slide": 44,
+      "text": [
+        "Database Architecture",
+        "The architecture of a database systems is greatly influenced by the underlying computer system on which the database is running: Centralized Client-server Parallel (multi-processor) Distributed"
+      ],
+      "joined": "Database Architecture\nThe architecture of a database systems is greatly influenced by the underlying computer system on which the database is running: Centralized Client-server Parallel (multi-processor) Distributed"
+    },
+    {
+      "slide": 45,
+      "text": [
+        "数据库架构： 分布式数据库"
+      ],
+      "joined": "数据库架构： 分布式数据库"
+    },
+    {
+      "slide": 46,
+      "text": [
+        "数据库架构： 云托管数据库"
+      ],
+      "joined": "数据库架构： 云托管数据库"
+    },
+    {
+      "slide": 47,
+      "text": [
+        "数据库架构： 云原生数据库"
+      ],
+      "joined": "数据库架构： 云原生数据库"
+    },
+    {
+      "slide": 48,
+      "text": [
+        "数据库架构： 云原生数据库"
+      ],
+      "joined": "数据库架构： 云原生数据库"
+    },
+    {
+      "slide": 49,
+      "text": [
+        "History of Database Systems",
+        "1950s and early 1960s: Data processing using magnetic tapes for storage Tapes provided only sequential access Punched cards for input Late 1960s and 1970s: Hard disks allowed direct access to data Network and hierarchical data models in widespread use Ted Codd defines the relational data model Would win the ACM Turing Award for this work IBM Research begins System R prototype UC Berkeley begins Ingres prototype High-performance (for the era) transaction processing"
+      ],
+      "joined": "History of Database Systems\n1950s and early 1960s: Data processing using magnetic tapes for storage Tapes provided only sequential access Punched cards for input Late 1960s and 1970s: Hard disks allowed direct access to data Network and hierarchical data models in widespread use Ted Codd defines the relational data model Would win the ACM Turing Award for this work IBM Research begins System R prototype UC Berkeley begins Ingres prototype High-performance (for the era) transaction processing"
+    },
+    {
+      "slide": 50,
+      "text": [
+        "History (cont.)",
+        "1980s: Research relational prototypes evolve into commercial systems SQL becomes industrial standard Parallel and distributed database systems Object-oriented database systems 1990s: Large decision support and data-mining applications Large multi-terabyte data warehouses Emergence of Web commerce Early 2000s: XML and XQuery standards Automated database administration Later 2000s: Giant data storage systems Google BigTable, Yahoo PNuts, Amazon, .."
+      ],
+      "joined": "History (cont.)\n1980s: Research relational prototypes evolve into commercial systems SQL becomes industrial standard Parallel and distributed database systems Object-oriented database systems 1990s: Large decision support and data-mining applications Large multi-terabyte data warehouses Emergence of Web commerce Early 2000s: XML and XQuery standards Automated database administration Later 2000s: Giant data storage systems Google BigTable, Yahoo PNuts, Amazon, .."
+    },
+    {
+      "slide": 51,
+      "text": [
+        "数据库模型： NoSQL 数据库类型",
+        "键值数据库 以键值对格式存储数据的数据库，数据访问简单高效 列族数据库 数据列按访问关联性划分成不同族，一个族可视为关系表 文档数据库 以 JSON 等文档格式存取数据，避免应用中数据转换的代价 图数据库 以包含边、节点及属性的图结构来存储数据和建模关联 信息 向量数据库 非结构化数据（文本、图片）转换的向量数据（ embedding 、 vector ）"
+      ],
+      "joined": "数据库模型： NoSQL 数据库类型\n键值数据库 以键值对格式存储数据的数据库，数据访问简单高效 列族数据库 数据列按访问关联性划分成不同族，一个族可视为关系表 文档数据库 以 JSON 等文档格式存取数据，避免应用中数据转换的代价 图数据库 以包含边、节点及属性的图结构来存储数据和建模关联 信息 向量数据库 非结构化数据（文本、图片）转换的向量数据（ embedding 、 vector ）"
+    },
+    {
+      "slide": 52,
+      "text": [
+        "vector",
+        "常见应用：缓存、会话存储、配置存储等（如 Redis ）",
+        "适合 大规模分布式存储和高效查询",
+        "用于自然语言处理或语义搜索",
+        "图神经网络",
+        "特征向量"
+      ],
+      "joined": "vector\n常见应用：缓存、会话存储、配置存储等（如 Redis ）\n适合 大规模分布式存储和高效查询\n用于自然语言处理或语义搜索\n图神经网络\n特征向量"
+    },
+    {
+      "slide": 53,
+      "text": [
+        "数据库模型： NoSQL 数据库主要特点"
+      ],
+      "joined": "数据库模型： NoSQL 数据库主要特点"
+    },
+    {
+      "slide": 54,
+      "text": [
+        "主要 类型 NoSQL 数据库产品（示例） 键值数据库 内存键值存储 Redis, Memcached 最终一致性键值存储 Dynamo 持久化键值存储 LevelDB 、 RocksDB 列族数据库 Cassandra, Hbase , Google BigTable 文档数据库 MongoDB 图数据库 Neo4J 向量数据库 Milvus",
+        "数据库模型： 常见的 NoSQL 数据库"
+      ],
+      "joined": "主要 类型 NoSQL 数据库产品（示例） 键值数据库 内存键值存储 Redis, Memcached 最终一致性键值存储 Dynamo 持久化键值存储 LevelDB 、 RocksDB 列族数据库 Cassandra, Hbase , Google BigTable 文档数据库 MongoDB 图数据库 Neo4J 向量数据库 Milvus\n数据库模型： 常见的 NoSQL 数据库"
+    },
+    {
+      "slide": 55,
+      "text": [
+        "数据库各类应用： OLTP 、 OLAP 与 HTAP 数据库"
+      ],
+      "joined": "数据库各类应用： OLTP 、 OLAP 与 HTAP 数据库"
+    },
+    {
+      "slide": 56,
+      "text": [
+        "数据库各类应用"
+      ],
+      "joined": "数据库各类应用"
+    },
+    {
+      "slide": 57,
+      "text": [],
+      "joined": ""
+    },
+    {
+      "slide": 58,
+      "text": [],
+      "joined": ""
+    },
+    {
+      "slide": 59,
+      "text": [
+        "End of Chapter 1"
+      ],
+      "joined": "End of Chapter 1"
+    }
+  ]
+}

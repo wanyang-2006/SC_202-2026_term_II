@@ -1,0 +1,306 @@
+{
+  "file": "C:\\Users\\yang\\Desktop\\数据库原理\\数据库系统原理\\数据库系统原理课件\\ch05(2026软件).pptx",
+  "slide_count": 38,
+  "slides": [
+    {
+      "slide": 1,
+      "text": [
+        "Chapter 5: Advanced SQL"
+      ],
+      "joined": "Chapter 5: Advanced SQL"
+    },
+    {
+      "slide": 2,
+      "text": [
+        "Outline",
+        "Accessing SQL From a Programming Language Functions and Procedural Constructs Triggers Recursive Queries Advanced Aggregation Features OLAP"
+      ],
+      "joined": "Outline\nAccessing SQL From a Programming Language Functions and Procedural Constructs Triggers Recursive Queries Advanced Aggregation Features OLAP"
+    },
+    {
+      "slide": 3,
+      "text": [
+        "Accessing SQL From a Programming Language"
+      ],
+      "joined": "Accessing SQL From a Programming Language"
+    },
+    {
+      "slide": 4,
+      "text": [
+        "Accessing SQL From a Programming Language",
+        "API (application-program interface) for a program to interact with a database server Application makes calls to Connect with the database server Send SQL commands to the database server Fetch tuples of result one-by-one into program variables Various tools: JDBC (Java Database Connectivity) works with Java ODBC (Open Database Connectivity) works with C, C++, C#, and Visual Basic. Other API ’ s such as ADO.NET sit on top of ODBC Embedded SQL"
+      ],
+      "joined": "Accessing SQL From a Programming Language\nAPI (application-program interface) for a program to interact with a database server Application makes calls to Connect with the database server Send SQL commands to the database server Fetch tuples of result one-by-one into program variables Various tools: JDBC (Java Database Connectivity) works with Java ODBC (Open Database Connectivity) works with C, C++, C#, and Visual Basic. Other API ’ s such as ADO.NET sit on top of ODBC Embedded SQL"
+    },
+    {
+      "slide": 5,
+      "text": [],
+      "joined": ""
+    },
+    {
+      "slide": 6,
+      "text": [
+        "JDBC",
+        "JDBC is a Java API for communicating with database systems supporting SQL. JDBC supports a variety of features for querying and updating data, and for retrieving query results. JDBC also supports metadata retrieval, such as querying about relations present in the database and the names and types of relation attributes. Model for communicating with the database: Open a connection Create a “ statement ” object Execute queries using the Statement object to send queries and fetch results Exception mechanism to handle errors"
+      ],
+      "joined": "JDBC\nJDBC is a Java API for communicating with database systems supporting SQL. JDBC supports a variety of features for querying and updating data, and for retrieving query results. JDBC also supports metadata retrieval, such as querying about relations present in the database and the names and types of relation attributes. Model for communicating with the database: Open a connection Create a “ statement ” object Execute queries using the Statement object to send queries and fetch results Exception mechanism to handle errors"
+    },
+    {
+      "slide": 7,
+      "text": [
+        "ODBC",
+        "Open DataBase Connectivity ( ODBC ) standard standar d for application program to communicate with a database server. application program interface ( API ) to open a connection with a database, send queries and updates, get back results. Applications such as GUI, spreadsheets, etc. can use ODBC"
+      ],
+      "joined": "ODBC\nOpen DataBase Connectivity ( ODBC ) standard standar d for application program to communicate with a database server. application program interface ( API ) to open a connection with a database, send queries and updates, get back results. Applications such as GUI, spreadsheets, etc. can use ODBC"
+    },
+    {
+      "slide": 8,
+      "text": [
+        "Embedded SQL",
+        "The SQL standard defines embeddings of SQL in a variety of programming languages such as C, C++, Java, Fortran, and PL/1 , A language to which SQL queries are embedded is referred to as a host language , and the SQL structures permitted in the host language comprise embedded SQL. The basic form of these languages follows that of the System R embedding of SQL into PL/1. EXEC SQL statement is used to identify embedded SQL request to the preprocessor EXEC SQL <embedded SQL statement >; Note: this varies by language: In some languages, like COBOL, the semicolon is replaced with END-EXEC In Java embedding uses # SQL { …. };"
+      ],
+      "joined": "Embedded SQL\nThe SQL standard defines embeddings of SQL in a variety of programming languages such as C, C++, Java, Fortran, and PL/1 , A language to which SQL queries are embedded is referred to as a host language , and the SQL structures permitted in the host language comprise embedded SQL. The basic form of these languages follows that of the System R embedding of SQL into PL/1. EXEC SQL statement is used to identify embedded SQL request to the preprocessor EXEC SQL <embedded SQL statement >; Note: this varies by language: In some languages, like COBOL, the semicolon is replaced with END-EXEC In Java embedding uses # SQL { …. };"
+    },
+    {
+      "slide": 9,
+      "text": [
+        "Embedded SQL (Cont.)",
+        "Before executing any SQL statements, the program must first connect to the database. This is done using: EXEC-SQL connect to server user user-name using password ; Here, server identifies the server to which a connection is to be established. Variables of the host language can be used within embedded SQL statements. They are preceded by a colon (:) to distinguish from SQL variables (e.g., : credit_amount ) Variables used as above must be declared within DECLARE section, as illustrated below. The syntax for declaring the variables, however, follows the usual host language syntax. EXEC-SQL BEGIN DECLARE SECTION int credit-amount ; EXEC-SQL END DECLARE SECTION;"
+      ],
+      "joined": "Embedded SQL (Cont.)\nBefore executing any SQL statements, the program must first connect to the database. This is done using: EXEC-SQL connect to server user user-name using password ; Here, server identifies the server to which a connection is to be established. Variables of the host language can be used within embedded SQL statements. They are preceded by a colon (:) to distinguish from SQL variables (e.g., : credit_amount ) Variables used as above must be declared within DECLARE section, as illustrated below. The syntax for declaring the variables, however, follows the usual host language syntax. EXEC-SQL BEGIN DECLARE SECTION int credit-amount ; EXEC-SQL END DECLARE SECTION;"
+    },
+    {
+      "slide": 10,
+      "text": [
+        "Embedded SQL (Cont.)",
+        "To write an embedded SQL query, we use the declare c cursor for <SQL query> statement. The variable c is used to identify the query Example: From within a host language, find the ID and name of students who have completed more than the number of credits stored in variable credit_amount in the host langue Specify the query in SQL as follows: EXEC SQL declare c cursor for select ID, name from student where tot_cred > : credit_amount END_EXEC"
+      ],
+      "joined": "Embedded SQL (Cont.)\nTo write an embedded SQL query, we use the declare c cursor for <SQL query> statement. The variable c is used to identify the query Example: From within a host language, find the ID and name of students who have completed more than the number of credits stored in variable credit_amount in the host langue Specify the query in SQL as follows: EXEC SQL declare c cursor for select ID, name from student where tot_cred > : credit_amount END_EXEC"
+    },
+    {
+      "slide": 11,
+      "text": [
+        "Embedded SQL (Cont.)",
+        "Example: From within a host language, find the ID and name of students who have completed more than the number of credits stored in variable credit_amount in the host langue Specify the query in SQL as follows: EXEC SQL declare c cursor for select ID, name from student where tot_cred > : credit_amount END_EXEC The variable c (used in the cursor declaration) is used to identify the query"
+      ],
+      "joined": "Embedded SQL (Cont.)\nExample: From within a host language, find the ID and name of students who have completed more than the number of credits stored in variable credit_amount in the host langue Specify the query in SQL as follows: EXEC SQL declare c cursor for select ID, name from student where tot_cred > : credit_amount END_EXEC The variable c (used in the cursor declaration) is used to identify the query"
+    },
+    {
+      "slide": 12,
+      "text": [
+        "Embedded SQL (Cont.)",
+        "The open statement for our example is as follows: EXEC SQL open c ; This statement causes the database system to execute the query and to save the results within a temporary relation. The query uses the value of the host-language variable credit-amount at the time the open statement is executed . The fetch statement causes the values of one tuple in the query result to be placed on host language variables. EXEC SQL fetch c into : si, :sn END_EXEC Repeated calls to fetch get successive tuples in the query result"
+      ],
+      "joined": "Embedded SQL (Cont.)\nThe open statement for our example is as follows: EXEC SQL open c ; This statement causes the database system to execute the query and to save the results within a temporary relation. The query uses the value of the host-language variable credit-amount at the time the open statement is executed . The fetch statement causes the values of one tuple in the query result to be placed on host language variables. EXEC SQL fetch c into : si, :sn END_EXEC Repeated calls to fetch get successive tuples in the query result"
+    },
+    {
+      "slide": 13,
+      "text": [
+        "Embedded SQL (Cont.)",
+        "A variable called SQLSTATE in the SQL communication area (SQLCA) gets set to ‘ 02000 ’ to indicate no more data is available The close statement causes the database system to delete the temporary relation that holds the result of the query. EXEC SQL close c ; Note: above details vary with language. For example, the Java embedding defines Java iterators to step through result tuples ."
+      ],
+      "joined": "Embedded SQL (Cont.)\nA variable called SQLSTATE in the SQL communication area (SQLCA) gets set to ‘ 02000 ’ to indicate no more data is available The close statement causes the database system to delete the temporary relation that holds the result of the query. EXEC SQL close c ; Note: above details vary with language. For example, the Java embedding defines Java iterators to step through result tuples ."
+    },
+    {
+      "slide": 14,
+      "text": [
+        "Updates Through Embedded SQL",
+        "Embedded SQL expressions for database modification ( update , insert , and delete ) Can update tuples fetched by cursor by declaring that the cursor is for update EXEC SQL declare c cursor for select * from instructor where dept_name = ‘ Music ’ for update We then iterate through the tuples by performing fetch operations on the cursor (as illustrated earlier), and after fetching each tuple we execute the following code: update instructor set salary = salary + 1000 where current of c"
+      ],
+      "joined": "Updates Through Embedded SQL\nEmbedded SQL expressions for database modification ( update , insert , and delete ) Can update tuples fetched by cursor by declaring that the cursor is for update EXEC SQL declare c cursor for select * from instructor where dept_name = ‘ Music ’ for update We then iterate through the tuples by performing fetch operations on the cursor (as illustrated earlier), and after fetching each tuple we execute the following code: update instructor set salary = salary + 1000 where current of c"
+    },
+    {
+      "slide": 15,
+      "text": [
+        "Extensions to SQL"
+      ],
+      "joined": "Extensions to SQL"
+    },
+    {
+      "slide": 16,
+      "text": [
+        "Functions and Procedures",
+        "SQL:1999 supports functions and procedures Functions/procedures can be written in SQL itself, or in an external programming language (e.g., C, Java). Functions written in an external languages are particularly useful with specialized data types such as images and geometric objects. Example: functions to check if polygons overlap, or to compare images for similarity. Some database systems support table-valued functions , which can return a relation as a result. SQL:1999 also supports a rich set of imperative constructs, including Loops, if-then-else, assignment Many databases have proprietary procedural extensions to SQL that differ from SQL:1999."
+      ],
+      "joined": "Functions and Procedures\nSQL:1999 supports functions and procedures Functions/procedures can be written in SQL itself, or in an external programming language (e.g., C, Java). Functions written in an external languages are particularly useful with specialized data types such as images and geometric objects. Example: functions to check if polygons overlap, or to compare images for similarity. Some database systems support table-valued functions , which can return a relation as a result. SQL:1999 also supports a rich set of imperative constructs, including Loops, if-then-else, assignment Many databases have proprietary procedural extensions to SQL that differ from SQL:1999."
+    },
+    {
+      "slide": 17,
+      "text": [
+        "SQL Functions",
+        "Define a function that, given the name of a department, returns the count of the number of instructors in that department. create function dept_count ( dept_name varchar (20)) returns integer begin declare d_count integer; select count ( * ) into d_count from instructor where instructor.dept_name = dept_name return d_count; end The function dept_ count can be used to find the department names and budget of all departments with more that 12 instructors. select dept_name, budget from department where dept_ count ( dept_name ) > 12"
+      ],
+      "joined": "SQL Functions\nDefine a function that, given the name of a department, returns the count of the number of instructors in that department. create function dept_count ( dept_name varchar (20)) returns integer begin declare d_count integer; select count ( * ) into d_count from instructor where instructor.dept_name = dept_name return d_count; end The function dept_ count can be used to find the department names and budget of all departments with more that 12 instructors. select dept_name, budget from department where dept_ count ( dept_name ) > 12"
+    },
+    {
+      "slide": 18,
+      "text": [
+        "存储过程和函数",
+        "存储过程和函数是事先经过编译并存储在数据库中的 一段 SQL 语句的集合 存储过程和函数可以对一段代码进行 封装 ，以便日后调用 数据库中创建 存储过程 的语句为 CREATE PROCEDURE ，并 通过 CALL 语句加存储过程名来调用 存储过程 数据库中创建 函数 的语句为 CREATE FUNCTION ，并 通过函数名来调 用 函数",
+        "存储过程 优势 ： 降低网络开销（存储到 DB 中，不频繁网络交互） 安全性高 性能高，编译一次多次使用",
+        "存储过程 劣势 ： 开发调试难 可移植性差 难以支持分布式数据库"
+      ],
+      "joined": "存储过程和函数\n存储过程和函数是事先经过编译并存储在数据库中的 一段 SQL 语句的集合 存储过程和函数可以对一段代码进行 封装 ，以便日后调用 数据库中创建 存储过程 的语句为 CREATE PROCEDURE ，并 通过 CALL 语句加存储过程名来调用 存储过程 数据库中创建 函数 的语句为 CREATE FUNCTION ，并 通过函数名来调 用 函数\n存储过程 优势 ： 降低网络开销（存储到 DB 中，不频繁网络交互） 安全性高 性能高，编译一次多次使用\n存储过程 劣势 ： 开发调试难 可移植性差 难以支持分布式数据库"
+    },
+    {
+      "slide": 19,
+      "text": [
+        "创建和调用存储过程"
+      ],
+      "joined": "创建和调用存储过程"
+    },
+    {
+      "slide": 20,
+      "text": [
+        "创建和调用存储过程"
+      ],
+      "joined": "创建和调用存储过程"
+    },
+    {
+      "slide": 21,
+      "text": [
+        "创建和调用存储过程"
+      ],
+      "joined": "创建和调用存储过程"
+    },
+    {
+      "slide": 22,
+      "text": [
+        "存储过程与函数",
+        "存储过程和函数都用于提高数据库性能，减少频繁访问数据库和减少网络延迟等方式加速执行效率。 函数 ：简单的计算型任务，例如字符串或日期拼接、返回单个值等。 存储过程 ：复杂的业务逻辑、更新和删除相关操作。 存储过程需要显式地被调用，并且可以包含各种复杂的控制结构和代码块。"
+      ],
+      "joined": "存储过程与函数\n存储过程和函数都用于提高数据库性能，减少频繁访问数据库和减少网络延迟等方式加速执行效率。 函数 ：简单的计算型任务，例如字符串或日期拼接、返回单个值等。 存储过程 ：复杂的业务逻辑、更新和删除相关操作。 存储过程需要显式地被调用，并且可以包含各种复杂的控制结构和代码块。"
+    },
+    {
+      "slide": 23,
+      "text": [
+        "创建和调用函数"
+      ],
+      "joined": "创建和调用函数"
+    },
+    {
+      "slide": 24,
+      "text": [
+        "存储过程和函数的区别",
+        "存储过程可以通过 OUT 或 INOUT 参数返回多个值，而 函数 只能返回 RETURNS 子句中指定的某一类型的单值或表对象。 存储过程的参数可以为 IN 、 OUT 或 INOUT ，而 函数 的参数只能是 IN 类型。 存储过程可以通过 CALL 语句作为一个独立的部分来调用和执行，而 函数 可以作为查询语句的一部分来调用。 由于函数可以返回表对象，因此函数的返回结果也可以用在查询语句的 FROM 子句中。 创建函数时必须指定返回值数据类型，且函数体内必须有一个 RETURNS 语句。 存储过程中可以执行更新表的数据库操作，而函数则不可以。"
+      ],
+      "joined": "存储过程和函数的区别\n存储过程可以通过 OUT 或 INOUT 参数返回多个值，而 函数 只能返回 RETURNS 子句中指定的某一类型的单值或表对象。 存储过程的参数可以为 IN 、 OUT 或 INOUT ，而 函数 的参数只能是 IN 类型。 存储过程可以通过 CALL 语句作为一个独立的部分来调用和执行，而 函数 可以作为查询语句的一部分来调用。 由于函数可以返回表对象，因此函数的返回结果也可以用在查询语句的 FROM 子句中。 创建函数时必须指定返回值数据类型，且函数体内必须有一个 RETURNS 语句。 存储过程中可以执行更新表的数据库操作，而函数则不可以。"
+    },
+    {
+      "slide": 25,
+      "text": [
+        "Triggers"
+      ],
+      "joined": "Triggers"
+    },
+    {
+      "slide": 26,
+      "text": [
+        "Triggers",
+        "A trigger is a statement that is executed automatically by the system as a side effect of a modification to the database. To design a trigger mechanism, we must: Specify the conditions under which the trigger is to be executed. Specify the actions to be taken when the trigger executes. Triggers introduced to SQL standard in SQL:1999, but supported even earlier using non-standard syntax by most databases. Syntax illustrated here may not work exactly on your database system; check the system manuals"
+      ],
+      "joined": "Triggers\nA trigger is a statement that is executed automatically by the system as a side effect of a modification to the database. To design a trigger mechanism, we must: Specify the conditions under which the trigger is to be executed. Specify the actions to be taken when the trigger executes. Triggers introduced to SQL standard in SQL:1999, but supported even earlier using non-standard syntax by most databases. Syntax illustrated here may not work exactly on your database system; check the system manuals"
+    },
+    {
+      "slide": 27,
+      "text": [
+        "Triggering Events and Actions in SQL",
+        "Triggering event can be insert , delete or update Triggers on update can be restricted to specific attributes For example, after update of takes on grade Values of attributes before and after an update can be referenced referencing old row as : for deletes and updates referencing new row as : for inserts and updates Triggers can be activated before an event, which can serve as extra constraints. For example, convert blank grades to null. create trigger setnull_trigger before update of takes referencing new row as nrow for each row when (nrow.grade = ‘ ‘ ) begin atomic set nrow.grade = null; end;"
+      ],
+      "joined": "Triggering Events and Actions in SQL\nTriggering event can be insert , delete or update Triggers on update can be restricted to specific attributes For example, after update of takes on grade Values of attributes before and after an update can be referenced referencing old row as : for deletes and updates referencing new row as : for inserts and updates Triggers can be activated before an event, which can serve as extra constraints. For example, convert blank grades to null. create trigger setnull_trigger before update of takes referencing new row as nrow for each row when (nrow.grade = ‘ ‘ ) begin atomic set nrow.grade = null; end;"
+    },
+    {
+      "slide": 28,
+      "text": [
+        "Trigger to Maintain credits_earned value",
+        "create trigger credits_earned after update of takes on ( grade ) referencing new row as nrow referencing old row as orow for each row when nrow.grade <> ’ F ’ and nrow.grade is not null and ( orow.grade = ’ F ’ or orow.grade is null ) begin atomic update student set tot_cred = tot_cred + ( select credits from course where course . course_id = nrow.course_id ) where student.id = nrow.id ; end ;"
+      ],
+      "joined": "Trigger to Maintain credits_earned value\ncreate trigger credits_earned after update of takes on ( grade ) referencing new row as nrow referencing old row as orow for each row when nrow.grade <> ’ F ’ and nrow.grade is not null and ( orow.grade = ’ F ’ or orow.grade is null ) begin atomic update student set tot_cred = tot_cred + ( select credits from course where course . course_id = nrow.course_id ) where student.id = nrow.id ; end ;"
+    },
+    {
+      "slide": 29,
+      "text": [
+        "Statement Level Triggers",
+        "Instead of executing a separate action for each affected row, a single action can be executed for all rows affected by a transaction Use for each statement instead of for each row Use referencing old table or referencing new table to refer to temporary tables (called transition tables ) containing the affected rows Can be more efficient when dealing with SQL statements that update a large number of rows"
+      ],
+      "joined": "Statement Level Triggers\nInstead of executing a separate action for each affected row, a single action can be executed for all rows affected by a transaction Use for each statement instead of for each row Use referencing old table or referencing new table to refer to temporary tables (called transition tables ) containing the affected rows Can be more efficient when dealing with SQL statements that update a large number of rows"
+    },
+    {
+      "slide": 30,
+      "text": [
+        "触发器可用于以下应用场景中：",
+        "（ 1 ） 数据完整性 。触发器可以用来保证数据完整性。 比如在插入数据之前 检查数据类型 、 唯一性 、 主键约束 ，或者在 数据被更新或删除时，进行级联操作 等。 （ 2 ） 数据审计 。触发器可以用来跟踪数据库中数据的变化，以检查数据变化过程是否 合法 、 规范 ，从而保证业务数据的正确性和合理性。 比如应 确保涨薪后的员工工资高于之前的工资 。 （ 3 ） 数据安全性 。触发器可以用来进行安全性检查 比如在 非工作时间禁止插入新员工 。 （ 4 ） 数据备份和同步 。 触发器可以在数据更新时对数据进行 备份和同步 。"
+      ],
+      "joined": "触发器可用于以下应用场景中：\n（ 1 ） 数据完整性 。触发器可以用来保证数据完整性。 比如在插入数据之前 检查数据类型 、 唯一性 、 主键约束 ，或者在 数据被更新或删除时，进行级联操作 等。 （ 2 ） 数据审计 。触发器可以用来跟踪数据库中数据的变化，以检查数据变化过程是否 合法 、 规范 ，从而保证业务数据的正确性和合理性。 比如应 确保涨薪后的员工工资高于之前的工资 。 （ 3 ） 数据安全性 。触发器可以用来进行安全性检查 比如在 非工作时间禁止插入新员工 。 （ 4 ） 数据备份和同步 。 触发器可以在数据更新时对数据进行 备份和同步 。"
+    },
+    {
+      "slide": 31,
+      "text": [
+        "When Not To Use Triggers",
+        "Triggers were used earlier for tasks such as Maintaining summary data (e.g., total salary of each department) Replicating databases by recording changes to special relations (called change or delta relations) and having a separate process that applies the changes over to a replica There are better ways of doing these now: Databases today provide built in materialized view facilities to maintain summary data Databases provide built-in support for replication Encapsulation facilities can be used instead of triggers in many cases Define methods to update fields Carry out actions as part of the update methods instead of through a trigger"
+      ],
+      "joined": "When Not To Use Triggers\nTriggers were used earlier for tasks such as Maintaining summary data (e.g., total salary of each department) Replicating databases by recording changes to special relations (called change or delta relations) and having a separate process that applies the changes over to a replica There are better ways of doing these now: Databases today provide built in materialized view facilities to maintain summary data Databases provide built-in support for replication Encapsulation facilities can be used instead of triggers in many cases Define methods to update fields Carry out actions as part of the update methods instead of through a trigger"
+    },
+    {
+      "slide": 32,
+      "text": [
+        "When Not To Use Triggers (Cont.)",
+        "Risk of unintended execution of triggers, for example, when Loading data from a backup copy Replicating updates at a remote site Trigger execution can be disabled before such actions. Other risks with triggers: Error leading to failure of critical transactions that set off the trigger Cascading execution"
+      ],
+      "joined": "When Not To Use Triggers (Cont.)\nRisk of unintended execution of triggers, for example, when Loading data from a backup copy Replicating updates at a remote site Trigger execution can be disabled before such actions. Other risks with triggers: Error leading to failure of critical transactions that set off the trigger Cascading execution"
+    },
+    {
+      "slide": 33,
+      "text": [
+        "Recursive Queries",
+        "层次传递闭包 的应用 机构通常由几层组织单元构成 部件又有子部件， 传递闭包 找出自行车中的所有部件 车轮、踏板 轮胎、轮圈、辐条 flights(to,from) ： 表示哪个城市可以从其他城市直接飞达 findAllPrereqs 函数：找到所有从某个给定城市出发通过一次或一系列的飞行到达的城市 可能存在可达关系的环：去掉已见过的城市",
+        "person supervisor",
+        "Bob Alice Mary Susan Alice David David Mary"
+      ],
+      "joined": "Recursive Queries\n层次传递闭包 的应用 机构通常由几层组织单元构成 部件又有子部件， 传递闭包 找出自行车中的所有部件 车轮、踏板 轮胎、轮圈、辐条 flights(to,from) ： 表示哪个城市可以从其他城市直接飞达 findAllPrereqs 函数：找到所有从某个给定城市出发通过一次或一系列的飞行到达的城市 可能存在可达关系的环：去掉已见过的城市\nperson supervisor\nBob Alice Mary Susan Alice David David Mary"
+    },
+    {
+      "slide": 34,
+      "text": [
+        "Recursion in SQL",
+        "SQL:1999 permits recursive view definition Example: find which courses are a prerequisite, whether directly or indirectly, for a specific course with recursive rec_prereq ( course_id , prereq_id ) as ( select course_id , prereq_id from prereq union select rec_prereq . course_id , prereq . prereq_id from rec_rereq , prereq where rec_prereq . prereq_id = prereq . course_id ) select ∗ from rec_prereq ; This example view, rec_prereq , is called the transitive closure of the prereq relation",
+        "prereq",
+        "rec_prere",
+        "基查询",
+        "递归 查询"
+      ],
+      "joined": "Recursion in SQL\nSQL:1999 permits recursive view definition Example: find which courses are a prerequisite, whether directly or indirectly, for a specific course with recursive rec_prereq ( course_id , prereq_id ) as ( select course_id , prereq_id from prereq union select rec_prereq . course_id , prereq . prereq_id from rec_rereq , prereq where rec_prereq . prereq_id = prereq . course_id ) select ∗ from rec_prereq ; This example view, rec_prereq , is called the transitive closure of the prereq relation\nprereq\nrec_prere\n基查询\n递归 查询"
+    },
+    {
+      "slide": 35,
+      "text": [
+        "The Power of Recursion",
+        "Recursive views make it possible to write queries, such as transitive closure queries , that cannot be written without recursion or iteration. Intuition: Without recursion, a non-recursive non-iterative program can perform only a fixed number of joins of prereq with itself This can give only a fixed number of levels of managers Given a fixed non-recursive query, we can construct a database with a greater number of levels of prerequisites on which the query will not work Alternative: write a procedure to iterate as many times as required See procedure findAllPrereqs in book"
+      ],
+      "joined": "The Power of Recursion\nRecursive views make it possible to write queries, such as transitive closure queries , that cannot be written without recursion or iteration. Intuition: Without recursion, a non-recursive non-iterative program can perform only a fixed number of joins of prereq with itself This can give only a fixed number of levels of managers Given a fixed non-recursive query, we can construct a database with a greater number of levels of prerequisites on which the query will not work Alternative: write a procedure to iterate as many times as required See procedure findAllPrereqs in book"
+    },
+    {
+      "slide": 36,
+      "text": [
+        "The Power of Recursion",
+        "Computing transitive closure using iteration, adding successive tuples to rec_prereq The next slide shows a prereq relation Each step of the iterative process constructs an extended version of rec_prereq from its recursive definition. The final result is called the fixed point of the recursive view definition. Recursive views are required to be monotonic if we add tuples to prereq the view rec_prereq contains all of the tuples it contained before, plus possibly more"
+      ],
+      "joined": "The Power of Recursion\nComputing transitive closure using iteration, adding successive tuples to rec_prereq The next slide shows a prereq relation Each step of the iterative process constructs an extended version of rec_prereq from its recursive definition. The final result is called the fixed point of the recursive view definition. Recursive views are required to be monotonic if we add tuples to prereq the view rec_prereq contains all of the tuples it contained before, plus possibly more"
+    },
+    {
+      "slide": 37,
+      "text": [
+        "Example of Fixed-Point Computation",
+        "with recursive rec_prereq ( course_id , prereq_id ) as ( select course_id , prereq_id from prereq union select rec_prereq . course_id , prereq . prereq_id from rec_rereq , prereq where rec_prereq . prereq_id = prereq . course_id ) select ∗ from rec_prereq Where rec_preq.course_id =‘CS-319’ ;"
+      ],
+      "joined": "Example of Fixed-Point Computation\nwith recursive rec_prereq ( course_id , prereq_id ) as ( select course_id , prereq_id from prereq union select rec_prereq . course_id , prereq . prereq_id from rec_rereq , prereq where rec_prereq . prereq_id = prereq . course_id ) select ∗ from rec_prereq Where rec_preq.course_id =‘CS-319’ ;"
+    },
+    {
+      "slide": 38,
+      "text": [
+        "End of Chapter 5"
+      ],
+      "joined": "End of Chapter 5"
+    }
+  ]
+}

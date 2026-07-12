@@ -1,0 +1,510 @@
+{
+  "file": "C:\\Users\\yang\\Desktop\\数据库原理\\数据库系统原理\\数据库系统原理课件\\ch17(2025计算机).pptx",
+  "slide_count": 49,
+  "slides": [
+    {
+      "slide": 1,
+      "text": [
+        "Chapter 17: Transactions"
+      ],
+      "joined": "Chapter 17: Transactions"
+    },
+    {
+      "slide": 2,
+      "text": [
+        "Outline",
+        "Transaction Concept Transaction State Concurrent Executions Serializability Recoverability Implementation of Isolation Transaction Definition in SQL Testing for Serializability."
+      ],
+      "joined": "Outline\nTransaction Concept Transaction State Concurrent Executions Serializability Recoverability Implementation of Isolation Transaction Definition in SQL Testing for Serializability."
+    },
+    {
+      "slide": 3,
+      "text": [
+        "http://research.microsoft.com/~gray/",
+        "TRANSACTION PROCESSING: CONCEPTS AND TECHNIQUES",
+        "James Gray(詹姆斯 • 格雷) 1998 解决保障数据的完整性、安全性、并行性，以及从故障恢复方面发挥了十分关键的作用"
+      ],
+      "joined": "http://research.microsoft.com/~gray/\nTRANSACTION PROCESSING: CONCEPTS AND TECHNIQUES\nJames Gray(詹姆斯 • 格雷) 1998 解决保障数据的完整性、安全性、并行性，以及从故障恢复方面发挥了十分关键的作用"
+    },
+    {
+      "slide": 4,
+      "text": [
+        "Transaction Concept",
+        "A transaction is a unit of program execution that accesses and possibly updates various data items . E.g., transaction to transfer $50 from account A to account B: 1. read ( A ) 2. A := A – 50 3. write ( A ) 4. read ( B ) 5. B := B + 50 6. write ( B) Two main issues to deal with: Failures of various kinds , such as hardware failures and system crashes Concurrent execution of multiple transactions"
+      ],
+      "joined": "Transaction Concept\nA transaction is a unit of program execution that accesses and possibly updates various data items . E.g., transaction to transfer $50 from account A to account B: 1. read ( A ) 2. A := A – 50 3. write ( A ) 4. read ( B ) 5. B := B + 50 6. write ( B) Two main issues to deal with: Failures of various kinds , such as hardware failures and system crashes Concurrent execution of multiple transactions"
+    },
+    {
+      "slide": 5,
+      "text": [
+        "Required Properties of a Transaction",
+        "Transaction to transfer $50 from account A to account B: 1. read ( A ) 2. A := A – 50 3. write ( A ) 4. read ( B ) 5. B := B + 50 6. write ( B) Atomicity requirement If the transaction fails after step 3 and before step 6, money will be “ lost ” leading to an inconsistent database state Failure could be due to software or hardware The system should ensure that updates of a partially executed transaction are not reflected in the database Durability requirement — once the user has been notified that the transaction has completed (i.e., the transfer of the $50 has taken place), the updates to the database by the transaction must persist even if there are software or hardware failures."
+      ],
+      "joined": "Required Properties of a Transaction\nTransaction to transfer $50 from account A to account B: 1. read ( A ) 2. A := A – 50 3. write ( A ) 4. read ( B ) 5. B := B + 50 6. write ( B) Atomicity requirement If the transaction fails after step 3 and before step 6, money will be “ lost ” leading to an inconsistent database state Failure could be due to software or hardware The system should ensure that updates of a partially executed transaction are not reflected in the database Durability requirement — once the user has been notified that the transaction has completed (i.e., the transfer of the $50 has taken place), the updates to the database by the transaction must persist even if there are software or hardware failures."
+    },
+    {
+      "slide": 6,
+      "text": [
+        "Required Properties of a Transaction (Cont.)",
+        "Transaction to transfer $50 from account A to account B: 1. read ( A ) 2. A := A – 50 3. write ( A ) 4. read ( B ) 5. B := B + 50 6. write ( B) Consistency requirement in above example: The sum of A and B is unchanged by the execution of the transaction In general, consistency requirements include Explicitly specified integrity constraints such as primary keys and foreign keys Implicit integrity constraints e.g., sum of balances of all accounts, minus sum of loan amounts must equal value of cash-in-hand A transaction, when starting to execute, must see a consistent database . During transaction execution the database may be temporarily inconsistent . When the transaction completes successfully the database must be consistent Erroneous transaction logic can lead to inconsistency"
+      ],
+      "joined": "Required Properties of a Transaction (Cont.)\nTransaction to transfer $50 from account A to account B: 1. read ( A ) 2. A := A – 50 3. write ( A ) 4. read ( B ) 5. B := B + 50 6. write ( B) Consistency requirement in above example: The sum of A and B is unchanged by the execution of the transaction In general, consistency requirements include Explicitly specified integrity constraints such as primary keys and foreign keys Implicit integrity constraints e.g., sum of balances of all accounts, minus sum of loan amounts must equal value of cash-in-hand A transaction, when starting to execute, must see a consistent database . During transaction execution the database may be temporarily inconsistent . When the transaction completes successfully the database must be consistent Erroneous transaction logic can lead to inconsistency"
+    },
+    {
+      "slide": 7,
+      "text": [
+        "Required Properties of a Transaction (Cont.)",
+        "Isolation requirement — if between steps 3 and 6 (of the fund transfer transaction) , another transaction T2 is allowed to access the partially updated database, it will see an inconsistent database (the sum A + B will be less than it should be). T1 T2 1. read ( A ) 2. A := A – 50 3. write ( A ) read(A), read(B), print(A+B) 4. read ( B ) 5. B := B + 50 6. write ( B Isolation can be ensured trivially by running transactions serially That is, one after the other. However, executing multiple transactions concurrently has significant benefits, as we will see later."
+      ],
+      "joined": "Required Properties of a Transaction (Cont.)\nIsolation requirement — if between steps 3 and 6 (of the fund transfer transaction) , another transaction T2 is allowed to access the partially updated database, it will see an inconsistent database (the sum A + B will be less than it should be). T1 T2 1. read ( A ) 2. A := A – 50 3. write ( A ) read(A), read(B), print(A+B) 4. read ( B ) 5. B := B + 50 6. write ( B Isolation can be ensured trivially by running transactions serially That is, one after the other. However, executing multiple transactions concurrently has significant benefits, as we will see later."
+    },
+    {
+      "slide": 8,
+      "text": [
+        "ACID Properties",
+        "Atomicity . Either all operations of the transaction are properly reflected in the database or none are. Consistency . Execution of a transaction in isolation preserves the consistency of the database. Isolation . Although multiple transactions may execute concurrently, each transaction must be unaware of other concurrently executing transactions. Intermediate transaction results must be hidden from other concurrently executed transactions. That is, for every pair of transactions T i and T j , it appears to T i that either T j , finished execution before T i started, or T j started execution after T i finished. Durability . After a transaction completes successfully, the changes it has made to the database persist, even if there are system failures.",
+        "A transaction is a unit of program execution that accesses and possibly updates various data items. To preserve the integrity of data the database system must ensure:"
+      ],
+      "joined": "ACID Properties\nAtomicity . Either all operations of the transaction are properly reflected in the database or none are. Consistency . Execution of a transaction in isolation preserves the consistency of the database. Isolation . Although multiple transactions may execute concurrently, each transaction must be unaware of other concurrently executing transactions. Intermediate transaction results must be hidden from other concurrently executed transactions. That is, for every pair of transactions T i and T j , it appears to T i that either T j , finished execution before T i started, or T j started execution after T i finished. Durability . After a transaction completes successfully, the changes it has made to the database persist, even if there are system failures.\nA transaction is a unit of program execution that accesses and possibly updates various data items. To preserve the integrity of data the database system must ensure:"
+    },
+    {
+      "slide": 9,
+      "text": [
+        "Transaction State",
+        "Active ( 活跃 ) – the initial state; the transaction stays in this state while it is executing Partially committed （部分提交） – after the final statement has been executed. Failed （失效） -- after the discovery that normal execution can no longer proceed. Aborted （终止） – after the transaction has been rolled back and the database restored to its state prior to the start of the transaction. Two options after it has been aborted: Restart the transaction can be done only if no internal logical error Kill the transaction Committed （提交） – after successful completion."
+      ],
+      "joined": "Transaction State\nActive ( 活跃 ) – the initial state; the transaction stays in this state while it is executing Partially committed （部分提交） – after the final statement has been executed. Failed （失效） -- after the discovery that normal execution can no longer proceed. Aborted （终止） – after the transaction has been rolled back and the database restored to its state prior to the start of the transaction. Two options after it has been aborted: Restart the transaction can be done only if no internal logical error Kill the transaction Committed （提交） – after successful completion."
+    },
+    {
+      "slide": 10,
+      "text": [
+        "Transaction State (Cont.)",
+        "初始状态",
+        "事务无法继 续正常执行",
+        "最后一条语 句被执行后",
+        "成功完成，永 久写入数据库",
+        "事务回滚，数 据库恢复到事 务开始前状态"
+      ],
+      "joined": "Transaction State (Cont.)\n初始状态\n事务无法继 续正常执行\n最后一条语 句被执行后\n成功完成，永 久写入数据库\n事务回滚，数 据库恢复到事 务开始前状态"
+    },
+    {
+      "slide": 11,
+      "text": [
+        "Concurrent Executions",
+        "Multiple transactions are allowed to run concurrently in the system. Advantages are: Increased processor and disk utilization , leading to better transaction throughput E.g. one transaction can be using the CPU while another is reading from or writing to the disk Reduced average response time for transactions: short transactions need not wait behind long ones. Concurrency control schemes – mechanisms to achieve isolation That is, to control the interaction among the concurrent transactions in order to prevent them from destroying the consistency of the database Will study in Chapter 15, after studying notion of correctness of concurrent executions."
+      ],
+      "joined": "Concurrent Executions\nMultiple transactions are allowed to run concurrently in the system. Advantages are: Increased processor and disk utilization , leading to better transaction throughput E.g. one transaction can be using the CPU while another is reading from or writing to the disk Reduced average response time for transactions: short transactions need not wait behind long ones. Concurrency control schemes – mechanisms to achieve isolation That is, to control the interaction among the concurrent transactions in order to prevent them from destroying the consistency of the database Will study in Chapter 15, after studying notion of correctness of concurrent executions."
+    },
+    {
+      "slide": 12,
+      "text": [
+        "Schedules",
+        "Schedule – a sequences of instructions that specify the chronological order in which instructions of concurrent transactions are executed A schedule for a set of transactions must consist of all instructions of those transactions Must preserve the order in which the instructions appear in each individual transaction. A transaction that successfully completes its execution will have a commit instructions as the last statement By default transaction assumed to execute commit instruction as its last step A transaction that fails to successfully complete its execution will have an abort instruction as the last statement"
+      ],
+      "joined": "Schedules\nSchedule – a sequences of instructions that specify the chronological order in which instructions of concurrent transactions are executed A schedule for a set of transactions must consist of all instructions of those transactions Must preserve the order in which the instructions appear in each individual transaction. A transaction that successfully completes its execution will have a commit instructions as the last statement By default transaction assumed to execute commit instruction as its last step A transaction that fails to successfully complete its execution will have an abort instruction as the last statement"
+    },
+    {
+      "slide": 13,
+      "text": [
+        "Schedule 1",
+        "Let T 1 transfer $50 from A to B , and T 2 transfer 10% of the balance from A to B. An example of a serial schedule in which T 1 is followed by T 2 :"
+      ],
+      "joined": "Schedule 1\nLet T 1 transfer $50 from A to B , and T 2 transfer 10% of the balance from A to B. An example of a serial schedule in which T 1 is followed by T 2 :"
+    },
+    {
+      "slide": 14,
+      "text": [
+        "Schedule 2",
+        "A serial schedule in which T 2 is followed by T 1 :"
+      ],
+      "joined": "Schedule 2\nA serial schedule in which T 2 is followed by T 1 :"
+    },
+    {
+      "slide": 15,
+      "text": [
+        "Schedule 3",
+        "Let T 1 and T 2 be the transactions defined previously . The following schedule is not a serial schedule, but it is equivalent to Schedule 1.",
+        "950",
+        "2000",
+        "1000",
+        "2050",
+        "950",
+        "A=950",
+        "B=2050",
+        "temp=95",
+        "855",
+        "A=855",
+        "2050",
+        "2145",
+        "B=2145",
+        "A=950",
+        "A=855",
+        "B=2050",
+        "B=2145"
+      ],
+      "joined": "Schedule 3\nLet T 1 and T 2 be the transactions defined previously . The following schedule is not a serial schedule, but it is equivalent to Schedule 1.\n950\n2000\n1000\n2050\n950\nA=950\nB=2050\ntemp=95\n855\nA=855\n2050\n2145\nB=2145\nA=950\nA=855\nB=2050\nB=2145"
+    },
+    {
+      "slide": 16,
+      "text": [
+        "Schedule 4",
+        "The following concurrent schedule does not preserve the sum of “ A + B ”",
+        "950",
+        "1000",
+        "1000",
+        "100",
+        "900",
+        "A=900",
+        "2000",
+        "A=950",
+        "2000",
+        "2050",
+        "B=2050",
+        "2100",
+        "B=2100"
+      ],
+      "joined": "Schedule 4\nThe following concurrent schedule does not preserve the sum of “ A + B ”\n950\n1000\n1000\n100\n900\nA=900\n2000\nA=950\n2000\n2050\nB=2050\n2100\nB=2100"
+    },
+    {
+      "slide": 17,
+      "text": [
+        "Serializability",
+        "Basic Assumption – Each transaction preserves database consistency. Thus, serial execution of a set of transactions preserves database consistency. A (possibly concurrent) schedule is serializable if it is equivalent to a serial schedule. Different forms of schedule equivalence give rise to the notions of: 1. conflict serializability 2. view serializability"
+      ],
+      "joined": "Serializability\nBasic Assumption – Each transaction preserves database consistency. Thus, serial execution of a set of transactions preserves database consistency. A (possibly concurrent) schedule is serializable if it is equivalent to a serial schedule. Different forms of schedule equivalence give rise to the notions of: 1. conflict serializability 2. view serializability"
+    },
+    {
+      "slide": 18,
+      "text": [
+        "Simplified view of transactions",
+        "We ignore operations other than read and write instructions We assume that transactions may perform arbitrary computations on data in local buffers in between reads and writes. Our simplified schedules consist of only read and write instructions."
+      ],
+      "joined": "Simplified view of transactions\nWe ignore operations other than read and write instructions We assume that transactions may perform arbitrary computations on data in local buffers in between reads and writes. Our simplified schedules consist of only read and write instructions."
+    },
+    {
+      "slide": 19,
+      "text": [
+        "Conflicting Instructions",
+        "Let l i and l j be two Instructions of transactions T i and T j respectively. Instructions l i and l j conflict if and only if there exists some item Q accessed by both l i and l j , and at least one of these instructions wrote Q . 1. l i = read ( Q), l j = read ( Q ). l i and l j don ’ t conflict. 2. l i = read ( Q), l j = write ( Q ). They conflict. 3. l i = write ( Q), l j = read ( Q ). They conflict 4. l i = write ( Q), l j = write ( Q ). They conflict Intuitively, a conflict between l i and l j forces a (logical) temporal order between them. If l i and l j are consecutive in a schedule and they do not conflict, their results would remain the same even if they had been interchanged in the schedule."
+      ],
+      "joined": "Conflicting Instructions\nLet l i and l j be two Instructions of transactions T i and T j respectively. Instructions l i and l j conflict if and only if there exists some item Q accessed by both l i and l j , and at least one of these instructions wrote Q . 1. l i = read ( Q), l j = read ( Q ). l i and l j don ’ t conflict. 2. l i = read ( Q), l j = write ( Q ). They conflict. 3. l i = write ( Q), l j = read ( Q ). They conflict 4. l i = write ( Q), l j = write ( Q ). They conflict Intuitively, a conflict between l i and l j forces a (logical) temporal order between them. If l i and l j are consecutive in a schedule and they do not conflict, their results would remain the same even if they had been interchanged in the schedule."
+    },
+    {
+      "slide": 20,
+      "text": [
+        "Conflict Serializability",
+        "If a schedule S can be transformed into a schedule S´ by a series of swaps of non-conflicting instructions, we say that S and S´ are conflict equivalent . We say that a schedule S is conflict serializable if it is conflict equivalent to a serial schedule"
+      ],
+      "joined": "Conflict Serializability\nIf a schedule S can be transformed into a schedule S´ by a series of swaps of non-conflicting instructions, we say that S and S´ are conflict equivalent . We say that a schedule S is conflict serializable if it is conflict equivalent to a serial schedule"
+    },
+    {
+      "slide": 21,
+      "text": [
+        "Conflict Serializability (Cont.)",
+        "Schedule 3 can be transformed into Schedule 6 -- a serial schedule where T 2 follows T 1 , by a series of swaps of non-conflicting instructions. Therefore, Schedule 3 is conflict serializable.",
+        "Schedule 3",
+        "Schedule 6"
+      ],
+      "joined": "Conflict Serializability (Cont.)\nSchedule 3 can be transformed into Schedule 6 -- a serial schedule where T 2 follows T 1 , by a series of swaps of non-conflicting instructions. Therefore, Schedule 3 is conflict serializable.\nSchedule 3\nSchedule 6"
+    },
+    {
+      "slide": 22,
+      "text": [
+        "Schedule 5 -- Schedule 3 After Swapping A Pair of Instructions"
+      ],
+      "joined": "Schedule 5 -- Schedule 3 After Swapping A Pair of Instructions"
+    },
+    {
+      "slide": 23,
+      "text": [
+        "write( B )",
+        "write( A )",
+        "Schedule 5 -- Schedule 3 After Swapping A Pair of Instructions"
+      ],
+      "joined": "write( B )\nwrite( A )\nSchedule 5 -- Schedule 3 After Swapping A Pair of Instructions"
+    },
+    {
+      "slide": 24,
+      "text": [
+        "write( B )",
+        "write( A )",
+        "Schedule 6 -- A Serial Schedule That is Equivalent to Schedule 3"
+      ],
+      "joined": "write( B )\nwrite( A )\nSchedule 6 -- A Serial Schedule That is Equivalent to Schedule 3"
+    },
+    {
+      "slide": 25,
+      "text": [
+        "Conflict Serializability (Cont.)",
+        "Example of a schedule that is not conflict serializable: We are unable to swap instructions in the above schedule to obtain either the serial schedule < T 3 , T 4 >, or the serial schedule < T 4 , T 3 >."
+      ],
+      "joined": "Conflict Serializability (Cont.)\nExample of a schedule that is not conflict serializable: We are unable to swap instructions in the above schedule to obtain either the serial schedule < T 3 , T 4 >, or the serial schedule < T 4 , T 3 >."
+    },
+    {
+      "slide": 26,
+      "text": [
+        "Other Notions of Serializability",
+        "Schedule 8 (from text) given below produces same outcome as the serial schedule < T 1 , T 5 >, yet is not conflict equivalent or view equivalent to it. Determining such equivalence requires analysis of operations other than read and write .",
+        "1000",
+        "950",
+        "A=950",
+        "2000",
+        "1990",
+        "B=1990",
+        "1990",
+        "2040",
+        "B=2040",
+        "950",
+        "960",
+        "A=960"
+      ],
+      "joined": "Other Notions of Serializability\nSchedule 8 (from text) given below produces same outcome as the serial schedule < T 1 , T 5 >, yet is not conflict equivalent or view equivalent to it. Determining such equivalence requires analysis of operations other than read and write .\n1000\n950\nA=950\n2000\n1990\nB=1990\n1990\n2040\nB=2040\n950\n960\nA=960"
+    },
+    {
+      "slide": 27,
+      "text": [
+        "Precedence Graph",
+        "Consider some schedule of a set of transactions T 1 , T 2 , ..., T n Precedence graph — a direct graph where the vertices are the transactions (names). We draw an arc from T i to T j if the two transaction conflict, and T i accessed the data item on which the conflict arose earlier. We may label the arc by the item that was accessed. Example"
+      ],
+      "joined": "Precedence Graph\nConsider some schedule of a set of transactions T 1 , T 2 , ..., T n Precedence graph — a direct graph where the vertices are the transactions (names). We draw an arc from T i to T j if the two transaction conflict, and T i accessed the data item on which the conflict arose earlier. We may label the arc by the item that was accessed. Example"
+    },
+    {
+      "slide": 28,
+      "text": [
+        "Example Schedule (Schedule A) + Precedence Graph",
+        "T 1 T 2 T 3 T 4 T 5 read(X) read(Y) read(Z) read(V) read(W) read(W) read(Y) write(Y) write(Z) read(U) read(Y) write(Y) read(Z) write(Z) read(U) write(U)",
+        "T 3",
+        "T 4",
+        "T 1",
+        "T 2",
+        "T 5"
+      ],
+      "joined": "Example Schedule (Schedule A) + Precedence Graph\nT 1 T 2 T 3 T 4 T 5 read(X) read(Y) read(Z) read(V) read(W) read(W) read(Y) write(Y) write(Z) read(U) read(Y) write(Y) read(Z) write(Z) read(U) write(U)\nT 3\nT 4\nT 1\nT 2\nT 5"
+    },
+    {
+      "slide": 29,
+      "text": [
+        "Testing for Conflict Serializability",
+        "A schedule is conflict serializable if and only if its precedence graph is acyclic. Cycle-detection algorithms exist which take order n 2 time, where n is the number of vertices in the graph. (Better algorithms take order n + e where e is the number of edges.) If precedence graph is acyclic, the serializability order can be obtained by a topological sorting of the graph. That is, a linear order consistent with the partial order of the graph. For example, a serializability order for the schedule (a) would be one of either (b) or (c)"
+      ],
+      "joined": "Testing for Conflict Serializability\nA schedule is conflict serializable if and only if its precedence graph is acyclic. Cycle-detection algorithms exist which take order n 2 time, where n is the number of vertices in the graph. (Better algorithms take order n + e where e is the number of edges.) If precedence graph is acyclic, the serializability order can be obtained by a topological sorting of the graph. That is, a linear order consistent with the partial order of the graph. For example, a serializability order for the schedule (a) would be one of either (b) or (c)"
+    },
+    {
+      "slide": 30,
+      "text": [
+        "Recoverable Schedules",
+        "Recoverable schedule — if a transaction T j reads a data item previously written by a transaction T i , then the commit operation of T i must appear before the commit operation of T j . The following schedule is not recoverable if T 9 commits immediately after the read(A) operation. If T 8 should abort, T 9 would have read (and possibly shown to the user) an inconsistent database state. Hence, database must ensure that schedules are recoverable."
+      ],
+      "joined": "Recoverable Schedules\nRecoverable schedule — if a transaction T j reads a data item previously written by a transaction T i , then the commit operation of T i must appear before the commit operation of T j . The following schedule is not recoverable if T 9 commits immediately after the read(A) operation. If T 8 should abort, T 9 would have read (and possibly shown to the user) an inconsistent database state. Hence, database must ensure that schedules are recoverable."
+    },
+    {
+      "slide": 31,
+      "text": [
+        "Cascading Rollbacks",
+        "Cascading rollback – a single transaction failure leads to a series of transaction rollbacks. Consider the following schedule where none of the transactions has yet committed (so the schedule is recoverable) If T 10 fails, T 11 and T 12 must also be rolled back. Can lead to the undoing of a significant amount of work"
+      ],
+      "joined": "Cascading Rollbacks\nCascading rollback – a single transaction failure leads to a series of transaction rollbacks. Consider the following schedule where none of the transactions has yet committed (so the schedule is recoverable) If T 10 fails, T 11 and T 12 must also be rolled back. Can lead to the undoing of a significant amount of work"
+    },
+    {
+      "slide": 32,
+      "text": [
+        "Cascadeless Schedules",
+        "Cascadeless schedules — for each pair of transactions T i and T j such that T j reads a data item previously written by T i , the commit operation of T i appears before the read operation of T j . Every cascadeless schedule is also recoverable It is desirable to restrict the schedules to those that are cascadeless Example of a schedule that is NOT cascadeless"
+      ],
+      "joined": "Cascadeless Schedules\nCascadeless schedules — for each pair of transactions T i and T j such that T j reads a data item previously written by T i , the commit operation of T i appears before the read operation of T j . Every cascadeless schedule is also recoverable It is desirable to restrict the schedules to those that are cascadeless Example of a schedule that is NOT cascadeless"
+    },
+    {
+      "slide": 33,
+      "text": [
+        "Concurrency Control",
+        "A database must provide a mechanism that will ensure that all possible schedules are both: Conflict serializable. Recoverable and preferably cascadeless A policy in which only one transaction can execute at a time generates serial schedules, but provides a poor degree of concurrency Concurrency-control schemes tradeoff between the amount of concurrency they allow and the amount of overhead that they incur Testing a schedule for serializability after it has executed is a little too late! Tests for serializability help us understand why a concurrency control protocol is correct Goal – to develop concurrency control protocols that will assure serializability."
+      ],
+      "joined": "Concurrency Control\nA database must provide a mechanism that will ensure that all possible schedules are both: Conflict serializable. Recoverable and preferably cascadeless A policy in which only one transaction can execute at a time generates serial schedules, but provides a poor degree of concurrency Concurrency-control schemes tradeoff between the amount of concurrency they allow and the amount of overhead that they incur Testing a schedule for serializability after it has executed is a little too late! Tests for serializability help us understand why a concurrency control protocol is correct Goal – to develop concurrency control protocols that will assure serializability."
+    },
+    {
+      "slide": 34,
+      "text": [
+        "隔离性的实现",
+        "为保证数据库的一致性 , 调度必须是 冲突 或 视图可串行化 的、 可恢复 的 , 并且最好是 无级联回滚 的 . 一次只允许一个事务执行的策略产生的都是 串行调度 , 但 并发度差 . 某些方案只允许产生 冲突可串行化 的调度 , 而另一些则允许 非冲突可串行化但视图可串行化 的调度 . 如果应用环境对并发一致性要求不高 , 或者应用程序希望自身来保证数据一致性，则可以 放松数据库的一致性的要求 , 设置不同的隔离性级别 。"
+      ],
+      "joined": "隔离性的实现\n为保证数据库的一致性 , 调度必须是 冲突 或 视图可串行化 的、 可恢复 的 , 并且最好是 无级联回滚 的 . 一次只允许一个事务执行的策略产生的都是 串行调度 , 但 并发度差 . 某些方案只允许产生 冲突可串行化 的调度 , 而另一些则允许 非冲突可串行化但视图可串行化 的调度 . 如果应用环境对并发一致性要求不高 , 或者应用程序希望自身来保证数据一致性，则可以 放松数据库的一致性的要求 , 设置不同的隔离性级别 。"
+    },
+    {
+      "slide": 35,
+      "text": [
+        "事务隔离性级别：丢失修改",
+        "T2",
+        "T1",
+        "Time",
+        "X=10",
+        "Read X (10)",
+        "Read X (10)",
+        "Compute X -= 1 (9 )",
+        "Compute X -= 2 (8)",
+        "Write X",
+        "X=9",
+        "X = 8",
+        "Write X",
+        "X=8",
+        "两个事务 T1 和 T2 读入同一数据并修改， T1 提交的结果破坏了 T2 提交的结果，导致 T2 的修改丢失"
+      ],
+      "joined": "事务隔离性级别：丢失修改\nT2\nT1\nTime\nX=10\nRead X (10)\nRead X (10)\nCompute X -= 1 (9 )\nCompute X -= 2 (8)\nWrite X\nX=9\nX = 8\nWrite X\nX=8\n两个事务 T1 和 T2 读入同一数据并修改， T1 提交的结果破坏了 T2 提交的结果，导致 T2 的修改丢失"
+    },
+    {
+      "slide": 36,
+      "text": [
+        "事务隔离性级别：读脏数据",
+        "T2",
+        "T1",
+        "Time",
+        "X=10",
+        "Read X (25)",
+        "Read X (10)",
+        "Compute X+=15 (25)",
+        "X=25",
+        "Write X",
+        "X=10",
+        "Rollback",
+        "使用了从未提交到 数据库中的数据",
+        "事务 T1 修改某一数据，并将其写回磁盘，事务 T2 读取同一数据后， T1 由于某种原因被撤消，这时 T1 已修改过的数据恢复原值， T2 读到的数据与数据库中数据不一致，则 T2 读到的数据就是脏数据"
+      ],
+      "joined": "事务隔离性级别：读脏数据\nT2\nT1\nTime\nX=10\nRead X (25)\nRead X (10)\nCompute X+=15 (25)\nX=25\nWrite X\nX=10\nRollback\n使用了从未提交到 数据库中的数据\n事务 T1 修改某一数据，并将其写回磁盘，事务 T2 读取同一数据后， T1 由于某种原因被撤消，这时 T1 已修改过的数据恢复原值， T2 读到的数据与数据库中数据不一致，则 T2 读到的数据就是脏数据"
+    },
+    {
+      "slide": 37,
+      "text": [
+        "事务隔离性级别：不能重复读",
+        "T2",
+        "T1",
+        "Time",
+        "Read X (10)",
+        "Read X (10)",
+        "Compute X+=15 (25)",
+        "X=25",
+        "Write X",
+        "Commit",
+        "Read X ( 25 )",
+        "X=10",
+        "事务 T2 读取某一数据后，事务 T1 对其做了修改，当 T2 再次读取该数据时，得到与前次不同的值"
+      ],
+      "joined": "事务隔离性级别：不能重复读\nT2\nT1\nTime\nRead X (10)\nRead X (10)\nCompute X+=15 (25)\nX=25\nWrite X\nCommit\nRead X ( 25 )\nX=10\n事务 T2 读取某一数据后，事务 T1 对其做了修改，当 T2 再次读取该数据时，得到与前次不同的值"
+    },
+    {
+      "slide": 38,
+      "text": [
+        "事务隔离性级别：发生幻象",
+        "T2",
+        "T1",
+        "Time",
+        "Select count (*) where rank > 3 2 rows returned",
+        "Insert",
+        "Jones, 6",
+        "Smith, 4",
+        "Brewer, 7",
+        "Jones, 6",
+        "Smith, 4",
+        "Brewer, 7",
+        "Select count (*) where rank > 3",
+        "3 rows returned",
+        "事务 T2 按一定条件读取了某些数据后，事务 T1 插入了一些满足这些条件的数据，当 T2 再次按相同条件读取数据时，发现多了一些记录"
+      ],
+      "joined": "事务隔离性级别：发生幻象\nT2\nT1\nTime\nSelect count (*) where rank > 3 2 rows returned\nInsert\nJones, 6\nSmith, 4\nBrewer, 7\nJones, 6\nSmith, 4\nBrewer, 7\nSelect count (*) where rank > 3\n3 rows returned\n事务 T2 按一定条件读取了某些数据后，事务 T1 插入了一些满足这些条件的数据，当 T2 再次按相同条件读取数据时，发现多了一些记录"
+    },
+    {
+      "slide": 39,
+      "text": [
+        "事务隔离性级别",
+        "SQL 中 隔离性 级别的定义 serializable ： 一个调度的执行必须等价于一个串行调度的结果 repeatable read ： 只允许读取已提交的记录，并要求一个事务对同一记录的两次读取之间，其它事务不能对该记录进行更新 read committed ： 只允许读取已提交的记录，但不要求可重复读 read uncommitted ： 允许读取未提交的记录"
+      ],
+      "joined": "事务隔离性级别\nSQL 中 隔离性 级别的定义 serializable ： 一个调度的执行必须等价于一个串行调度的结果 repeatable read ： 只允许读取已提交的记录，并要求一个事务对同一记录的两次读取之间，其它事务不能对该记录进行更新 read committed ： 只允许读取已提交的记录，但不要求可重复读 read uncommitted ： 允许读取未提交的记录"
+    },
+    {
+      "slide": 40,
+      "text": [
+        "事务隔离性级别",
+        "隔离性 级别",
+        "不一致现象",
+        "Read uncommitted",
+        "读脏数据 不能重复读 幻象",
+        "Read committed",
+        "Repeatable read",
+        "Serializable",
+        "--",
+        "不能重复读 幻象",
+        "幻象"
+      ],
+      "joined": "事务隔离性级别\n隔离性 级别\n不一致现象\nRead uncommitted\n读脏数据 不能重复读 幻象\nRead committed\nRepeatable read\nSerializable\n--\n不能重复读 幻象\n幻象"
+    },
+    {
+      "slide": 41,
+      "text": [
+        "Weak Levels of Consistency",
+        "Some applications are willing to live with weak levels of consistency, allowing schedules that are not serializable E.g., a read-only transaction that wants to get an approximate total balance of all accounts E.g., database statistics computed for query optimization can be approximate (why?) Such transactions need not be serializable with respect to other transactions Tradeoff accuracy for performance"
+      ],
+      "joined": "Weak Levels of Consistency\nSome applications are willing to live with weak levels of consistency, allowing schedules that are not serializable E.g., a read-only transaction that wants to get an approximate total balance of all accounts E.g., database statistics computed for query optimization can be approximate (why?) Such transactions need not be serializable with respect to other transactions Tradeoff accuracy for performance"
+    },
+    {
+      "slide": 42,
+      "text": [
+        "Levels of Consistency in SQL-92",
+        "Serializable — default Repeatable read — only committed records to be read, repeated reads of same record must return same value. However, a transaction may not be serializable – it may find some records inserted by a transaction but not find others. Read committed — only committed records can be read, but successive reads of record may return different (but committed) values. Read uncommitted — even uncommitted records may be read.",
+        "Lower degrees of consistency useful for gathering approximate information about the database Warning: some database systems do not ensure serializable schedules by default E.g., Oracle and PostgreSQL by default support a level of consistency called snapshot isolation (not part of the SQL standard)"
+      ],
+      "joined": "Levels of Consistency in SQL-92\nSerializable — default Repeatable read — only committed records to be read, repeated reads of same record must return same value. However, a transaction may not be serializable – it may find some records inserted by a transaction but not find others. Read committed — only committed records can be read, but successive reads of record may return different (but committed) values. Read uncommitted — even uncommitted records may be read.\nLower degrees of consistency useful for gathering approximate information about the database Warning: some database systems do not ensure serializable schedules by default E.g., Oracle and PostgreSQL by default support a level of consistency called snapshot isolation (not part of the SQL standard)"
+    },
+    {
+      "slide": 43,
+      "text": [
+        "Transaction Definition in SQL",
+        "Data manipulation language must include a construct for specifying the set of actions that comprise a transaction. In SQL, a transaction begins implicitly. A transaction in SQL ends by: Commit work commits current transaction and begins a new one. Rollback work causes current transaction to abort. In almost all database systems, by default, every SQL statement also commits implicitly if it executes successfully Implicit commit can be turned off by a database directive E.g. in JDBC, connection.setAutoCommit(false);"
+      ],
+      "joined": "Transaction Definition in SQL\nData manipulation language must include a construct for specifying the set of actions that comprise a transaction. In SQL, a transaction begins implicitly. A transaction in SQL ends by: Commit work commits current transaction and begins a new one. Rollback work causes current transaction to abort. In almost all database systems, by default, every SQL statement also commits implicitly if it executes successfully Implicit commit can be turned off by a database directive E.g. in JDBC, connection.setAutoCommit(false);"
+    },
+    {
+      "slide": 44,
+      "text": [
+        "Other Notions of Serializability"
+      ],
+      "joined": "Other Notions of Serializability"
+    },
+    {
+      "slide": 45,
+      "text": [
+        "View Serializability",
+        "Let S and S´ be two schedules with the same set of transactions. S and S´ are view equivalent if the following three conditions are met, for each data item Q, If in schedule S, transaction T i reads the initial value of Q , then in schedule S ’ also transaction T i must read the initial value of Q. If in schedule S transaction T i executes read ( Q) , and that value was produced by transaction T j (if any), then in schedule S ’ also transaction T i must read the value of Q that was produced by the same write (Q) operation of transaction T j . The transaction (if any) that performs the final write ( Q ) operation in schedule S must also perform the final write ( Q ) operation in schedule S ’ . As can be seen, view equivalence is also based purely on reads and writes alone."
+      ],
+      "joined": "View Serializability\nLet S and S´ be two schedules with the same set of transactions. S and S´ are view equivalent if the following three conditions are met, for each data item Q, If in schedule S, transaction T i reads the initial value of Q , then in schedule S ’ also transaction T i must read the initial value of Q. If in schedule S transaction T i executes read ( Q) , and that value was produced by transaction T j (if any), then in schedule S ’ also transaction T i must read the value of Q that was produced by the same write (Q) operation of transaction T j . The transaction (if any) that performs the final write ( Q ) operation in schedule S must also perform the final write ( Q ) operation in schedule S ’ . As can be seen, view equivalence is also based purely on reads and writes alone."
+    },
+    {
+      "slide": 46,
+      "text": [
+        "View Serializability (Cont.)",
+        "A schedule S is view serializable if it is view equivalent to a serial schedule. Every conflict serializable schedule is also view serializable. Below is a schedule which is view-serializable but not conflict serializable. What serial schedule is above equivalent to? Every view serializable schedule that is not conflict serializable has blind writes ."
+      ],
+      "joined": "View Serializability (Cont.)\nA schedule S is view serializable if it is view equivalent to a serial schedule. Every conflict serializable schedule is also view serializable. Below is a schedule which is view-serializable but not conflict serializable. What serial schedule is above equivalent to? Every view serializable schedule that is not conflict serializable has blind writes ."
+    },
+    {
+      "slide": 47,
+      "text": [
+        "Test for View Serializability",
+        "The precedence graph test for conflict serializability cannot be used directly to test for view serializability. Extension to test for view serializability has cost exponential in the size of the precedence graph. The problem of checking if a schedule is view serializable falls in the class of NP -complete problems. Thus, existence of an efficient algorithm is extremely unlikely. However ,practical algorithms that just check some sufficient conditions for view serializability can still be used."
+      ],
+      "joined": "Test for View Serializability\nThe precedence graph test for conflict serializability cannot be used directly to test for view serializability. Extension to test for view serializability has cost exponential in the size of the precedence graph. The problem of checking if a schedule is view serializable falls in the class of NP -complete problems. Thus, existence of an efficient algorithm is extremely unlikely. However ,practical algorithms that just check some sufficient conditions for view serializability can still be used."
+    },
+    {
+      "slide": 48,
+      "text": [
+        "More Complex Notions of Serializability",
+        "The schedule below produces the same outcome as the serial schedule < T 1 , T 5 >, yet is not conflict equivalent or view equivalent to it. If we start with A = 1000 and B = 2000, the final result is 960 and 2040 Determining such equivalence requires analysis of operations other than read and write."
+      ],
+      "joined": "More Complex Notions of Serializability\nThe schedule below produces the same outcome as the serial schedule < T 1 , T 5 >, yet is not conflict equivalent or view equivalent to it. If we start with A = 1000 and B = 2000, the final result is 960 and 2040 Determining such equivalence requires analysis of operations other than read and write."
+    },
+    {
+      "slide": 49,
+      "text": [
+        "End of Chapter 14"
+      ],
+      "joined": "End of Chapter 14"
+    }
+  ]
+}

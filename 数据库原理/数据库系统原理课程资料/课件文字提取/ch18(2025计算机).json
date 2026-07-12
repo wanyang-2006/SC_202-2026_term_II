@@ -1,0 +1,832 @@
+{
+  "file": "C:\\Users\\yang\\Desktop\\数据库原理\\数据库系统原理\\数据库系统原理课件\\ch18(2025计算机).pptx",
+  "slide_count": 102,
+  "slides": [
+    {
+      "slide": 1,
+      "text": [
+        "Chapter 18 : Concurrency Control"
+      ],
+      "joined": "Chapter 18 : Concurrency Control"
+    },
+    {
+      "slide": 2,
+      "text": [
+        "Outline",
+        "Lock-Based Protocols Timestamp-Based Protocols Validation-Based Protocols Multiple Granularity Multiversion Schemes Insert and Delete Operations Concurrency in Index Structures"
+      ],
+      "joined": "Outline\nLock-Based Protocols Timestamp-Based Protocols Validation-Based Protocols Multiple Granularity Multiversion Schemes Insert and Delete Operations Concurrency in Index Structures"
+    },
+    {
+      "slide": 3,
+      "text": [
+        "并发控制 概览"
+      ],
+      "joined": "并发控制 概览"
+    },
+    {
+      "slide": 4,
+      "text": [
+        "并发控制 概览",
+        "并发 ： 在同一时间间隔内有多个事件或活动发生 多个事务相继到来： 数量少，间隔久 --> 依次执行 数量多，间隔短 --> 并发控制 考虑要素 事务、语句的执行顺序 数据对象的共享和保护"
+      ],
+      "joined": "并发控制 概览\n并发 ： 在同一时间间隔内有多个事件或活动发生 多个事务相继到来： 数量少，间隔久 --> 依次执行 数量多，间隔短 --> 并发控制 考虑要素 事务、语句的执行顺序 数据对象的共享和保护"
+    },
+    {
+      "slide": 5,
+      "text": [
+        "并发控制 概览"
+      ],
+      "joined": "并发控制 概览"
+    },
+    {
+      "slide": 6,
+      "text": [
+        "并发控制 概览"
+      ],
+      "joined": "并发控制 概览"
+    },
+    {
+      "slide": 7,
+      "text": [
+        "并发控制 概览",
+        "解决冲突的思想 悲观并发控制技术：事前控制，避免冲突发生 两阶段锁 基于图的协议 乐观并发控制技术：事后控制，冲突发生后再处理 时间戳排序协议 乐观并发控制协议",
+        "多版本机制 保存数据项的多个版本，通过空间复用提升并发度 与悲观、乐观并发控制技术相结合 多版本两阶段锁协议 多版本时间戳排序协议 多版本乐观并发控制协议"
+      ],
+      "joined": "并发控制 概览\n解决冲突的思想 悲观并发控制技术：事前控制，避免冲突发生 两阶段锁 基于图的协议 乐观并发控制技术：事后控制，冲突发生后再处理 时间戳排序协议 乐观并发控制协议\n多版本机制 保存数据项的多个版本，通过空间复用提升并发度 与悲观、乐观并发控制技术相结合 多版本两阶段锁协议 多版本时间戳排序协议 多版本乐观并发控制协议"
+    },
+    {
+      "slide": 8,
+      "text": [
+        "Lock-Based Protocols",
+        "A lock is a mechanism to control concurrent access to a data item Data items can be locked in two modes : 1. exclusive ( X ) mode. Data item can be both read as well as written . X-lock is requested using lock-X instruction. 2. shared ( S ) mode. Data item can only be read . S-lock is requested using lock-S instruction. Lock requests are made to concurrency-control manager . Transaction can proceed only after request is granted."
+      ],
+      "joined": "Lock-Based Protocols\nA lock is a mechanism to control concurrent access to a data item Data items can be locked in two modes : 1. exclusive ( X ) mode. Data item can be both read as well as written . X-lock is requested using lock-X instruction. 2. shared ( S ) mode. Data item can only be read . S-lock is requested using lock-S instruction. Lock requests are made to concurrency-control manager . Transaction can proceed only after request is granted."
+    },
+    {
+      "slide": 9,
+      "text": [
+        "Lock-Based Protocols (Cont.)",
+        "Lock-compatibility matrix A transaction may be granted a lock on an item if the requested lock is compatible with locks already held on the item by other transactions Any number of transactions can hold shared locks on an item, but if any transaction holds an exclusive on the item no other transaction may hold any lock on the item. If a lock cannot be granted, the requesting transaction is made to wait till all incompatible locks held by other transactions have been released. The lock is then granted."
+      ],
+      "joined": "Lock-Based Protocols (Cont.)\nLock-compatibility matrix A transaction may be granted a lock on an item if the requested lock is compatible with locks already held on the item by other transactions Any number of transactions can hold shared locks on an item, but if any transaction holds an exclusive on the item no other transaction may hold any lock on the item. If a lock cannot be granted, the requesting transaction is made to wait till all incompatible locks held by other transactions have been released. The lock is then granted."
+    },
+    {
+      "slide": 10,
+      "text": [
+        "Lock-Based Protocols (Cont.)",
+        "Example of a transaction performing locking: T 2 : lock-S (A) ; read (A) ; unlock (A) ; lock-S (B) ; read (B) ; unlock (B) ; display( A+B ) Locking as above is not sufficient to guarantee serializability if A and B get updated in-between the read of A and B , the displayed sum would be wrong. A locking protocol is a set of rules followed by all transactions while requesting and releasing locks. Locking protocols restrict the set of possible schedules.",
+        "T1: lock-X(A); READ(A); A=A-50; unlock(A);"
+      ],
+      "joined": "Lock-Based Protocols (Cont.)\nExample of a transaction performing locking: T 2 : lock-S (A) ; read (A) ; unlock (A) ; lock-S (B) ; read (B) ; unlock (B) ; display( A+B ) Locking as above is not sufficient to guarantee serializability if A and B get updated in-between the read of A and B , the displayed sum would be wrong. A locking protocol is a set of rules followed by all transactions while requesting and releasing locks. Locking protocols restrict the set of possible schedules.\nT1: lock-X(A); READ(A); A=A-50; unlock(A);"
+    },
+    {
+      "slide": 11,
+      "text": [
+        "T 1 T 2 Concurrency-control manager lock-X(B) read(B) B:=B-50 write(B) unlock(B) grant-x(B,T 1 ) lock-S (A); read (A); unlock (A); lock-S (B); read (B); unlock (B); display(A+B) grant-s(A,T 2 ) grant-s(B,T 2 ) lock-X(A) read(A) A:=A+50 write(A) unlock(A) grant-x(A,T 2 )",
+        "100",
+        "50",
+        "B=50",
+        "200",
+        "50",
+        "250",
+        "200",
+        "250",
+        "A=250",
+        "该封锁不足以保证可串行化 : T 1 过早释放锁，导致 T 2 的显示的总和出现错误"
+      ],
+      "joined": "T 1 T 2 Concurrency-control manager lock-X(B) read(B) B:=B-50 write(B) unlock(B) grant-x(B,T 1 ) lock-S (A); read (A); unlock (A); lock-S (B); read (B); unlock (B); display(A+B) grant-s(A,T 2 ) grant-s(B,T 2 ) lock-X(A) read(A) A:=A+50 write(A) unlock(A) grant-x(A,T 2 )\n100\n50\nB=50\n200\n50\n250\n200\n250\nA=250\n该封锁不足以保证可串行化 : T 1 过早释放锁，导致 T 2 的显示的总和出现错误"
+    },
+    {
+      "slide": 12,
+      "text": [
+        "普通锁不能解决可串行化调度问题",
+        "T1: R(A) W(A) R(B) W(B) T2: R(A) R(B)",
+        "T 1 T 2 1 Read(A) 2 Read(A) 3 A=A+1 4 Write(A) 5 Read(B) 6 Read(B) 7 A+ B 8 Commit 9 B=B-1 10 Write(B) 11 Commit",
+        "事务",
+        "T1: R(A) W(A) R(B) W(B) T2: R(A) R(B)",
+        "T 1 T 2 1 X- Lock(A) 2 Read(A) 3 S- Lock(A) 4 Write(A) 5 Unlock(A) 6 Read(A) 7 S-Lock(B) 8 X-Lock(B) 9 Read(B) 10 Unlock(A) 11 Unlock(B) 12 Read(B) Commit 13 Write(B) 14 Unlock(B) 15 Commit",
+        "调度",
+        "不可串行化"
+      ],
+      "joined": "普通锁不能解决可串行化调度问题\nT1: R(A) W(A) R(B) W(B) T2: R(A) R(B)\nT 1 T 2 1 Read(A) 2 Read(A) 3 A=A+1 4 Write(A) 5 Read(B) 6 Read(B) 7 A+ B 8 Commit 9 B=B-1 10 Write(B) 11 Commit\n事务\nT1: R(A) W(A) R(B) W(B) T2: R(A) R(B)\nT 1 T 2 1 X- Lock(A) 2 Read(A) 3 S- Lock(A) 4 Write(A) 5 Unlock(A) 6 Read(A) 7 S-Lock(B) 8 X-Lock(B) 9 Read(B) 10 Unlock(A) 11 Unlock(B) 12 Read(B) Commit 13 Write(B) 14 Unlock(B) 15 Commit\n调度\n不可串行化"
+    },
+    {
+      "slide": 13,
+      "text": [
+        "The Two-Phase Locking Protocol",
+        "This is a protocol which ensures conflict-serializable schedules. Phase 1: Growing Phase transaction may obtain locks transaction may not release locks Phase 2: Shrinking Phase transaction may release locks transaction may not obtain locks The protocol assures serializability . It can be proved that the transactions can be serialized in the order of their lock points (i.e. the point where a transaction acquired its final lock)."
+      ],
+      "joined": "The Two-Phase Locking Protocol\nThis is a protocol which ensures conflict-serializable schedules. Phase 1: Growing Phase transaction may obtain locks transaction may not release locks Phase 2: Shrinking Phase transaction may release locks transaction may not obtain locks The protocol assures serializability . It can be proved that the transactions can be serialized in the order of their lock points (i.e. the point where a transaction acquired its final lock)."
+    },
+    {
+      "slide": 14,
+      "text": [
+        "The Two-Phase Locking Protocol (Cont.)",
+        "There can be conflict serializable schedules that cannot be obtained if two-phase locking is used. However, in the absence of extra information (e.g., ordering of access to data), two-phase locking is needed for conflict serializability in the following sense: Given a transaction T i that does not follow two-phase locking, we can find a transaction T j that uses two-phase locking, and a schedule for T i and T j that is not conflict serializable ."
+      ],
+      "joined": "The Two-Phase Locking Protocol (Cont.)\nThere can be conflict serializable schedules that cannot be obtained if two-phase locking is used. However, in the absence of extra information (e.g., ordering of access to data), two-phase locking is needed for conflict serializability in the following sense: Given a transaction T i that does not follow two-phase locking, we can find a transaction T j that uses two-phase locking, and a schedule for T i and T j that is not conflict serializable ."
+    },
+    {
+      "slide": 15,
+      "text": [],
+      "joined": ""
+    },
+    {
+      "slide": 16,
+      "text": [
+        "Lock Conversions",
+        "Two-phase locking with lock conversions: – First Phase : can take place in only the growing phase can acquire a lock-S on item can acquire a lock-X on item can convert a lock-S to a lock-X ( upgrade ) – Second Phase : can take place in only the shrinking phase can release a lock-S can release a lock-X can convert a lock-X to a lock-S ( downgrade ) This protocol assures serializability . But still relies on the programmer to insert the various locking instructions.",
+        "T1 T2 lock-S(a 1 ) lock-S(a 1 ) lock-S(a 2 ) … … lock-S(a n ) unlock(a 1 ) upgrade(a 1 )",
+        "T1 : read(a 1 ); read(a 2 ); …… read(a n ); write(a 1 ).",
+        "T2: read(a 1 ); ……"
+      ],
+      "joined": "Lock Conversions\nTwo-phase locking with lock conversions: – First Phase : can take place in only the growing phase can acquire a lock-S on item can acquire a lock-X on item can convert a lock-S to a lock-X ( upgrade ) – Second Phase : can take place in only the shrinking phase can release a lock-S can release a lock-X can convert a lock-X to a lock-S ( downgrade ) This protocol assures serializability . But still relies on the programmer to insert the various locking instructions.\nT1 T2 lock-S(a 1 ) lock-S(a 1 ) lock-S(a 2 ) … … lock-S(a n ) unlock(a 1 ) upgrade(a 1 )\nT1 : read(a 1 ); read(a 2 ); …… read(a n ); write(a 1 ).\nT2: read(a 1 ); ……"
+    },
+    {
+      "slide": 17,
+      "text": [
+        "两阶段锁能解决可串行化调度问题",
+        "T1: R(A) W(A) R(B) W(B) T2: R(A) R(B)",
+        "T1: R(A) W(A) R(B) W(B) T2: R(A) R(B)",
+        "T 1 T 2 1 Read(A) 2 Read(A) 3 A=A+1 4 Write(A) 5 Read(B) 6 Read(B) 7 A+ B 8 Commit 9 B=B-1 10 Write(B) 11 Commit",
+        "T 1 T 2 1 X- Lock(A) 2 Read(A) 3 S- Lock(A) 4 Write(A) 5 X-Lock(B) 6 Unlock(A) 7 Read(A) 8 S-Lock(B) 9 Read(B) 10 Write(B) 11 Unlock(B) 12 Commit Read(B) 13 Unlock(A) 14 Unlock(B) 15 Commit",
+        "事务",
+        "调度",
+        "可串行化",
+        "但可能 不可恢复"
+      ],
+      "joined": "两阶段锁能解决可串行化调度问题\nT1: R(A) W(A) R(B) W(B) T2: R(A) R(B)\nT1: R(A) W(A) R(B) W(B) T2: R(A) R(B)\nT 1 T 2 1 Read(A) 2 Read(A) 3 A=A+1 4 Write(A) 5 Read(B) 6 Read(B) 7 A+ B 8 Commit 9 B=B-1 10 Write(B) 11 Commit\nT 1 T 2 1 X- Lock(A) 2 Read(A) 3 S- Lock(A) 4 Write(A) 5 X-Lock(B) 6 Unlock(A) 7 Read(A) 8 S-Lock(B) 9 Read(B) 10 Write(B) 11 Unlock(B) 12 Commit Read(B) 13 Unlock(A) 14 Unlock(B) 15 Commit\n事务\n调度\n可串行化\n但可能 不可恢复"
+    },
+    {
+      "slide": 18,
+      "text": [
+        "严格两阶段锁能解决可串行化调度问题",
+        "The potential for deadlock exists in most locking protocols. Deadlocks are a necessary evil. When a deadlock occurs there is a possibility of cascading roll-backs. Cascading roll-back is possible under two-phase locking. To avoid this, follow a modified protocol called strict two-phase locking -- a transaction must hold all its exclusive locks till it commits/aborts. Rigorous two-phase locking is even stricter. Here, all locks are held till commit/abort. In this protocol transactions can be serialized in the order in which they commit."
+      ],
+      "joined": "严格两阶段锁能解决可串行化调度问题\nThe potential for deadlock exists in most locking protocols. Deadlocks are a necessary evil. When a deadlock occurs there is a possibility of cascading roll-backs. Cascading roll-back is possible under two-phase locking. To avoid this, follow a modified protocol called strict two-phase locking -- a transaction must hold all its exclusive locks till it commits/aborts. Rigorous two-phase locking is even stricter. Here, all locks are held till commit/abort. In this protocol transactions can be serialized in the order in which they commit."
+    },
+    {
+      "slide": 19,
+      "text": [
+        "严格两阶段锁能解决可串行化调度问题",
+        "T1: R(A) W(A) R(B) W(B) T2: R(A) R(B)",
+        "T1: R(A) W(A) R(B) W(B) T2: R(A) R(B)",
+        "T 1 T 2 1 Read(A) 2 Read(A) 3 A=A+1 4 Write(A) 5 Read(B) 6 Read(B) 7 A+ B 8 Commit 9 B=B-1 10 Write(B) 11 Commit",
+        "T 1 T 2 1 X- Lock(A) 2 Read(A) 3 S- Lock(A) 4 Write(A) 5 X-Lock(B) 6 Read(B) 7 Write(B) 8 Commit 9 Unlock(A) 10 Unlock(B) Read(A) 11 S-Lock(B) 12 Read(B) 13 Commit 14 Unlock(A) 15 Unlock(B)",
+        "可串行化",
+        "也可恢复",
+        "事务",
+        "调度"
+      ],
+      "joined": "严格两阶段锁能解决可串行化调度问题\nT1: R(A) W(A) R(B) W(B) T2: R(A) R(B)\nT1: R(A) W(A) R(B) W(B) T2: R(A) R(B)\nT 1 T 2 1 Read(A) 2 Read(A) 3 A=A+1 4 Write(A) 5 Read(B) 6 Read(B) 7 A+ B 8 Commit 9 B=B-1 10 Write(B) 11 Commit\nT 1 T 2 1 X- Lock(A) 2 Read(A) 3 S- Lock(A) 4 Write(A) 5 X-Lock(B) 6 Read(B) 7 Write(B) 8 Commit 9 Unlock(A) 10 Unlock(B) Read(A) 11 S-Lock(B) 12 Read(B) 13 Commit 14 Unlock(A) 15 Unlock(B)\n可串行化\n也可恢复\n事务\n调度"
+    },
+    {
+      "slide": 20,
+      "text": [
+        "两阶段锁的隔离级别",
+        "脏写 不加任何锁 脏读",
+        "隔离级别 技术 脏写 脏读 不可重复读 幻读 无隔离要求 不加锁 是 是 是 是 读未提交 仅写加锁，写完释放锁 否 是 是 是 读已提交 写加行锁，事务提交完释放锁；读加读行锁，读完一次释放 否 否 是 是 可重复读 写加行锁，事务提交完释放锁；读加读行锁，所有读完释放 否 否 否 是 可串行化 写加表锁，提交完释放锁；读加读锁，读完释放 写加行锁，提交完释放锁；读加谓词锁，读完释放 否 否 否 否"
+      ],
+      "joined": "两阶段锁的隔离级别\n脏写 不加任何锁 脏读\n隔离级别 技术 脏写 脏读 不可重复读 幻读 无隔离要求 不加锁 是 是 是 是 读未提交 仅写加锁，写完释放锁 否 是 是 是 读已提交 写加行锁，事务提交完释放锁；读加读行锁，读完一次释放 否 否 是 是 可重复读 写加行锁，事务提交完释放锁；读加读行锁，所有读完释放 否 否 否 是 可串行化 写加表锁，提交完释放锁；读加读锁，读完释放 写加行锁，提交完释放锁；读加谓词锁，读完释放 否 否 否 否"
+    },
+    {
+      "slide": 21,
+      "text": [
+        "Automatic Acquisition of Locks",
+        "A transaction T i issues the standard read/write instruction, without explicit locking calls. The operation read ( D ) is processed as: if T i has a lock on D then read( D ) else begin if necessary wait until no other transaction has a lock-X on D grant T i a lock-S on D ; read( D ) end"
+      ],
+      "joined": "Automatic Acquisition of Locks\nA transaction T i issues the standard read/write instruction, without explicit locking calls. The operation read ( D ) is processed as: if T i has a lock on D then read( D ) else begin if necessary wait until no other transaction has a lock-X on D grant T i a lock-S on D ; read( D ) end"
+    },
+    {
+      "slide": 22,
+      "text": [
+        "Automatic Acquisition of Locks (Cont.)",
+        "write (D) is processed as: if T i has a lock-X on D then write( D ) else begin if necessary wait until no other transaction has any lock on D , if T i has a lock-S on D then upgrade lock on D to lock-X else grant T i a lock-X on D write( D ) end ; All locks are released after commit or abort"
+      ],
+      "joined": "Automatic Acquisition of Locks (Cont.)\nwrite (D) is processed as: if T i has a lock-X on D then write( D ) else begin if necessary wait until no other transaction has any lock on D , if T i has a lock-S on D then upgrade lock on D to lock-X else grant T i a lock-X on D write( D ) end ; All locks are released after commit or abort"
+    },
+    {
+      "slide": 23,
+      "text": [
+        "Deadlocks",
+        "Consider the partial schedule Neither T 3 nor T 4 can make progress — executing lock-S (B) causes T 4 to wait for T 3 to release its lock on B , while executing lock-X (A) causes T 3 to wait for T 4 to release its lock on A . Such a situation is called a deadlock . To handle a deadlock one of T 3 or T 4 must be rolled back and its locks released."
+      ],
+      "joined": "Deadlocks\nConsider the partial schedule Neither T 3 nor T 4 can make progress — executing lock-S (B) causes T 4 to wait for T 3 to release its lock on B , while executing lock-X (A) causes T 3 to wait for T 4 to release its lock on A . Such a situation is called a deadlock . To handle a deadlock one of T 3 or T 4 must be rolled back and its locks released."
+    },
+    {
+      "slide": 24,
+      "text": [
+        "Deadlocks (Cont.)",
+        "Two-phase locking does not ensure freedom from deadlocks. In addition to deadlocks , there is a possibility of starvation. Starvation occurs if the concurrency control manager is badly designed. For example: A transaction may be waiting for an X-lock on an item, while a sequence of other transactions request and are granted an S-lock on the same item. The same transaction is repeatedly rolled back due to deadlocks. Concurrency control manager can be designed to prevent starvation."
+      ],
+      "joined": "Deadlocks (Cont.)\nTwo-phase locking does not ensure freedom from deadlocks. In addition to deadlocks , there is a possibility of starvation. Starvation occurs if the concurrency control manager is badly designed. For example: A transaction may be waiting for an X-lock on an item, while a sequence of other transactions request and are granted an S-lock on the same item. The same transaction is repeatedly rolled back due to deadlocks. Concurrency control manager can be designed to prevent starvation."
+    },
+    {
+      "slide": 25,
+      "text": [
+        "锁带来的问题",
+        "饿死现象 不考虑已在等待的事务， 一直等待无法获得锁"
+      ],
+      "joined": "锁带来的问题\n饿死现象 不考虑已在等待的事务， 一直等待无法获得锁"
+    },
+    {
+      "slide": 26,
+      "text": [
+        "锁带来的问题",
+        "避免饿死 同时考虑相容性和事务到来顺序 先来先服务：优先满足先来的事务"
+      ],
+      "joined": "锁带来的问题\n避免饿死 同时考虑相容性和事务到来顺序 先来先服务：优先满足先来的事务"
+    },
+    {
+      "slide": 27,
+      "text": [
+        "Implementation of Locking",
+        "A lock manager can be implemented as a separate process to which transactions send lock and unlock requests The lock manager replies to a lock request by sending a lock grant messages (or a message asking the transaction to roll back , in case of a deadlock) The requesting transaction waits until its request is answered The lock manager maintains a data-structure called a lock table to record granted locks and pending requests The lock table is usually implemented as an in-memory hash table indexed on the name of the data item being locked"
+      ],
+      "joined": "Implementation of Locking\nA lock manager can be implemented as a separate process to which transactions send lock and unlock requests The lock manager replies to a lock request by sending a lock grant messages (or a message asking the transaction to roll back , in case of a deadlock) The requesting transaction waits until its request is answered The lock manager maintains a data-structure called a lock table to record granted locks and pending requests The lock table is usually implemented as an in-memory hash table indexed on the name of the data item being locked"
+    },
+    {
+      "slide": 28,
+      "text": [
+        "Lock Table",
+        "Dark blue rectangles indicate granted locks; light blue indicate waiting requests Lock table also records the type of lock granted or requested New request is added to the end of the queue of requests for the data item, and granted if it is compatible with all earlier locks Unlock requests result in the request being deleted, and later requests are checked to see if they can now be granted If transaction aborts, all waiting or granted requests of the transaction are deleted lock manager may keep a list of locks held by each transaction, to implement this efficiently"
+      ],
+      "joined": "Lock Table\nDark blue rectangles indicate granted locks; light blue indicate waiting requests Lock table also records the type of lock granted or requested New request is added to the end of the queue of requests for the data item, and granted if it is compatible with all earlier locks Unlock requests result in the request being deleted, and later requests are checked to see if they can now be granted If transaction aborts, all waiting or granted requests of the transaction are deleted lock manager may keep a list of locks held by each transaction, to implement this efficiently"
+    },
+    {
+      "slide": 29,
+      "text": [
+        "锁的数据结构"
+      ],
+      "joined": "锁的数据结构"
+    },
+    {
+      "slide": 30,
+      "text": [
+        "Deadlock Handling",
+        "System is deadlocked if there is a set of transactions such that every transaction in the set is waiting for another transaction in the set. Deadlock prevention protocols ensure that the system will never enter into a deadlock state. Some prevention strategies : Require that each transaction locks all its data items before it begins execution ( predeclaration ). Impose partial ordering of all data items and require that a transaction can lock data items only in the order specified by the partial order."
+      ],
+      "joined": "Deadlock Handling\nSystem is deadlocked if there is a set of transactions such that every transaction in the set is waiting for another transaction in the set. Deadlock prevention protocols ensure that the system will never enter into a deadlock state. Some prevention strategies : Require that each transaction locks all its data items before it begins execution ( predeclaration ). Impose partial ordering of all data items and require that a transaction can lock data items only in the order specified by the partial order."
+    },
+    {
+      "slide": 31,
+      "text": [
+        "死 锁",
+        "处理方法 死锁预防 在协议设计上保证数据库不会进入死锁状态 死锁检测与恢复 允许死锁的发生，但能够及时地意识到死锁的发生并进行处理 锁超时重启 设置事务最长等待时间"
+      ],
+      "joined": "死 锁\n处理方法 死锁预防 在协议设计上保证数据库不会进入死锁状态 死锁检测与恢复 允许死锁的发生，但能够及时地意识到死锁的发生并进行处理 锁超时重启 设置事务最长等待时间"
+    },
+    {
+      "slide": 32,
+      "text": [
+        "死锁预防",
+        "事务时间戳：确定事务顺序 两种算法： 等待死亡 Wait-Die （旧事务等待新事务） 伤害等待 Wound-Wait （新事务等待旧事务）",
+        "Wait-Die Wound-Wait"
+      ],
+      "joined": "死锁预防\n事务时间戳：确定事务顺序 两种算法： 等待死亡 Wait-Die （旧事务等待新事务） 伤害等待 Wound-Wait （新事务等待旧事务）\nWait-Die Wound-Wait"
+    },
+    {
+      "slide": 33,
+      "text": [
+        "More Deadlock Prevention Strategies",
+        "Following schemes use transaction timestamps for the sake of deadlock prevention alone. wait-die scheme — non-preemptive older transaction may wait for younger one to release data item. (older means smaller timestamp) Younger transactions never Younger transactions never wait for older ones; they are rolled back instead. a transaction may die several times before acquiring needed data item wound-wait scheme — preemptive older transaction wounds (forces rollback) of younger transaction instead of waiting for it. Younger transactions may wait for older ones. may be fewer rollbacks than wait-die scheme."
+      ],
+      "joined": "More Deadlock Prevention Strategies\nFollowing schemes use transaction timestamps for the sake of deadlock prevention alone. wait-die scheme — non-preemptive older transaction may wait for younger one to release data item. (older means smaller timestamp) Younger transactions never Younger transactions never wait for older ones; they are rolled back instead. a transaction may die several times before acquiring needed data item wound-wait scheme — preemptive older transaction wounds (forces rollback) of younger transaction instead of waiting for it. Younger transactions may wait for older ones. may be fewer rollbacks than wait-die scheme."
+    },
+    {
+      "slide": 34,
+      "text": [
+        "死锁预防",
+        "假设有事务 和事务 ， 的时间戳更 旧 。 Wait-Die （旧事务 等待新事务 ） 如果事务 持有锁，事务 申请加锁，那么 等待 ； 如果事务 持有锁，事务 申请加锁，那么 被撤销并重启 重启后 的时间戳仍为原来的时间戳 。 Wound-Wait （新事务 等待旧事务 ） 如果事务 持有锁，事务 申请加锁，那么 被撤销并重启，同时释放持有的锁； 重启后 的时间戳仍为原来的时间戳； 如果事务 持有锁，事务 申请加锁，那么 等待 。"
+      ],
+      "joined": "死锁预防\n假设有事务 和事务 ， 的时间戳更 旧 。 Wait-Die （旧事务 等待新事务 ） 如果事务 持有锁，事务 申请加锁，那么 等待 ； 如果事务 持有锁，事务 申请加锁，那么 被撤销并重启 重启后 的时间戳仍为原来的时间戳 。 Wound-Wait （新事务 等待旧事务 ） 如果事务 持有锁，事务 申请加锁，那么 被撤销并重启，同时释放持有的锁； 重启后 的时间戳仍为原来的时间戳； 如果事务 持有锁，事务 申请加锁，那么 等待 。"
+    },
+    {
+      "slide": 35,
+      "text": [
+        "死锁预防",
+        "数据库系统 — 并发控制",
+        "等待顺序 Wait-Die Wound-Wait 持有锁 older 等待 撤销 持有锁 older 撤销 等待",
+        "等待顺序 Wait-Die Wound-Wait",
+        "Wait"
+      ],
+      "joined": "死锁预防\n数据库系统 — 并发控制\n等待顺序 Wait-Die Wound-Wait 持有锁 older 等待 撤销 持有锁 older 撤销 等待\n等待顺序 Wait-Die Wound-Wait\nWait"
+    },
+    {
+      "slide": 36,
+      "text": [
+        "死锁预防",
+        "等待关系 两个算法都只允许一种类型的等待存在 Wait-Die 旧事务等待新事务 Wound-Wait 新事务等待旧事务 事务间的等待关系不会构成环，因此可以防止死锁的发生。",
+        "数据库系统 — 并发控制",
+        "Wait-Die Wound-Wait"
+      ],
+      "joined": "死锁预防\n等待关系 两个算法都只允许一种类型的等待存在 Wait-Die 旧事务等待新事务 Wound-Wait 新事务等待旧事务 事务间的等待关系不会构成环，因此可以防止死锁的发生。\n数据库系统 — 并发控制\nWait-Die Wound-Wait"
+    },
+    {
+      "slide": 37,
+      "text": [
+        "死锁检测与恢复",
+        "基本思想 在出现死锁后进行处理 死锁检测： 等待图（ wait-for graph ， WFG ） 有向图 ，由若干个节点和有向边构成 每个节点都代表一个事务 如果事务 等待事务 释放其所需要的锁，那么在等待图中添加一条从 到 的有向边 ( ) 。",
+        "数据库系统 — 并发控制"
+      ],
+      "joined": "死锁检测与恢复\n基本思想 在出现死锁后进行处理 死锁检测： 等待图（ wait-for graph ， WFG ） 有向图 ，由若干个节点和有向边构成 每个节点都代表一个事务 如果事务 等待事务 释放其所需要的锁，那么在等待图中添加一条从 到 的有向边 ( ) 。\n数据库系统 — 并发控制"
+    },
+    {
+      "slide": 38,
+      "text": [
+        "死锁检测与恢复",
+        "例子 三个相互等待的事务 等待 等待 等待 存在死锁的等待图 等待关系 → → → 构成环"
+      ],
+      "joined": "死锁检测与恢复\n例子 三个相互等待的事务 等待 等待 等待 存在死锁的等待图 等待关系 → → → 构成环"
+    },
+    {
+      "slide": 39,
+      "text": [
+        "死锁检测与恢复",
+        "检测频率 间隔太短 ， 死锁又不经常发生 ， 则会造成资源浪费 间隔太久，出现死锁较长时间才被检测到，影响数据库效率 动态 改变检测间隔 死锁恢复： 撤销一个或多个事务以打破死锁 合理选择“牺牲者”，即需要撤销的事务 ： 事务开始运行的时间戳 事务已经执行的 SQL 语句数量 事务已经加锁的数据项的数量 事务回滚的程度 ：全部回滚 / 部分回滚 避免事务饿死",
+        "数据库系统 — 并发控制"
+      ],
+      "joined": "死锁检测与恢复\n检测频率 间隔太短 ， 死锁又不经常发生 ， 则会造成资源浪费 间隔太久，出现死锁较长时间才被检测到，影响数据库效率 动态 改变检测间隔 死锁恢复： 撤销一个或多个事务以打破死锁 合理选择“牺牲者”，即需要撤销的事务 ： 事务开始运行的时间戳 事务已经执行的 SQL 语句数量 事务已经加锁的数据项的数量 事务回滚的程度 ：全部回滚 / 部分回滚 避免事务饿死\n数据库系统 — 并发控制"
+    },
+    {
+      "slide": 40,
+      "text": [
+        "锁超时重启",
+        "设置 事务 最长等待时间 如果申请加锁的事务在该时间结束时仍未获得锁，即事务 超时 ，那么此时将该事务回滚并重启 当事务之间确实存在死锁时，让死锁中的一个或者多个事务回滚并重启，而其他事务继续执行，解决了死锁问题 适用场景 事务执行时间都比较短 事务长时间的等待大多都是死锁造成的 问题：难以合理设置等待时间"
+      ],
+      "joined": "锁超时重启\n设置 事务 最长等待时间 如果申请加锁的事务在该时间结束时仍未获得锁，即事务 超时 ，那么此时将该事务回滚并重启 当事务之间确实存在死锁时，让死锁中的一个或者多个事务回滚并重启，而其他事务继续执行，解决了死锁问题 适用场景 事务执行时间都比较短 事务长时间的等待大多都是死锁造成的 问题：难以合理设置等待时间"
+    },
+    {
+      "slide": 41,
+      "text": [],
+      "joined": ""
+    },
+    {
+      "slide": 42,
+      "text": [],
+      "joined": ""
+    },
+    {
+      "slide": 43,
+      "text": [
+        "Deadlock prevention (Cont.)",
+        "Both in wait-die and in wound-wait schemes, a rolled back transactions is restarted with its original timestamp . Older transactions thus have precedence over newer ones, and starvation is hence avoided. Timeout-Based Schemes: a transaction waits for a lock only for a specified amount of time. If the lock has not been granted within that time, the transaction is rolled back and restarted, Thus, deadlocks are not possible simple to implement; but starvation is possible. Also difficult to determine good value of the timeout interval."
+      ],
+      "joined": "Deadlock prevention (Cont.)\nBoth in wait-die and in wound-wait schemes, a rolled back transactions is restarted with its original timestamp . Older transactions thus have precedence over newer ones, and starvation is hence avoided. Timeout-Based Schemes: a transaction waits for a lock only for a specified amount of time. If the lock has not been granted within that time, the transaction is rolled back and restarted, Thus, deadlocks are not possible simple to implement; but starvation is possible. Also difficult to determine good value of the timeout interval."
+    },
+    {
+      "slide": 44,
+      "text": [
+        "Deadlock Detection",
+        "Deadlocks can be described as a wait-for graph , which consists of a pair G = ( V , E ), V is a set of vertices (all the transactions in the system) E is a set of edges; each element is an ordered pair T i  T j . If T i  T j is in E , then there is a directed edge from T i to T j , implying that T i is waiting for T j to release a data item. When T i requests a data item currently being held by T j , then the edge T i  T j is inserted in the wait-for graph. This edge is removed only when T j is no longer holding a data item needed by T i . The system is in a deadlock state if and only if the wait-for graph has a cycle. Must invoke a deadlock-detection algorithm periodically to look for cycles."
+      ],
+      "joined": "Deadlock Detection\nDeadlocks can be described as a wait-for graph , which consists of a pair G = ( V , E ), V is a set of vertices (all the transactions in the system) E is a set of edges; each element is an ordered pair T i  T j . If T i  T j is in E , then there is a directed edge from T i to T j , implying that T i is waiting for T j to release a data item. When T i requests a data item currently being held by T j , then the edge T i  T j is inserted in the wait-for graph. This edge is removed only when T j is no longer holding a data item needed by T i . The system is in a deadlock state if and only if the wait-for graph has a cycle. Must invoke a deadlock-detection algorithm periodically to look for cycles."
+    },
+    {
+      "slide": 45,
+      "text": [
+        "Deadlock Detection (Cont.)",
+        "Wait-for graph without a cycle",
+        "Wait-for graph with a cycle"
+      ],
+      "joined": "Deadlock Detection (Cont.)\nWait-for graph without a cycle\nWait-for graph with a cycle"
+    },
+    {
+      "slide": 46,
+      "text": [
+        "Deadlock Recovery",
+        "When deadlock is detected : Some transaction will have to rolled back (made a victim) to break deadlock. Select that transaction as victim that will incur minimum cost. Rollback -- determine how far to roll back transaction Total rollback : Abort the transaction and then restart it. More effective to roll back transaction only as far as necessary to break deadlock. Starvation happens if same transaction is always chosen as victim. Include the number of rollbacks in the cost factor to avoid starvation"
+      ],
+      "joined": "Deadlock Recovery\nWhen deadlock is detected : Some transaction will have to rolled back (made a victim) to break deadlock. Select that transaction as victim that will incur minimum cost. Rollback -- determine how far to roll back transaction Total rollback : Abort the transaction and then restart it. More effective to roll back transaction only as far as necessary to break deadlock. Starvation happens if same transaction is always chosen as victim. Include the number of rollbacks in the cost factor to avoid starvation"
+    },
+    {
+      "slide": 47,
+      "text": [
+        "Multiple Granularity",
+        "Allow data items to be of various sizes and define a hierarchy of data granularities, where the small granularities are nested within larger ones Can be represented graphically as a tree. When a transaction locks a node in the tree explicitly , it implicitly locks all the node's descendents in the same mode. Granularity of locking (level in tree where locking is done): fine granularity (lower in tree): high concurrency, high locking overhead coarse granularity (higher in tree): low locking overhead, low concurrency"
+      ],
+      "joined": "Multiple Granularity\nAllow data items to be of various sizes and define a hierarchy of data granularities, where the small granularities are nested within larger ones Can be represented graphically as a tree. When a transaction locks a node in the tree explicitly , it implicitly locks all the node's descendents in the same mode. Granularity of locking (level in tree where locking is done): fine granularity (lower in tree): high concurrency, high locking overhead coarse granularity (higher in tree): low locking overhead, low concurrency"
+    },
+    {
+      "slide": 48,
+      "text": [
+        "Example of Granularity Hierarchy",
+        "The levels, starting from the coarsest (top) level are database area file record",
+        "域( Area)",
+        "文件( File)",
+        "记录 ( Record)"
+      ],
+      "joined": "Example of Granularity Hierarchy\nThe levels, starting from the coarsest (top) level are database area file record\n域( Area)\n文件( File)\n记录 ( Record)"
+    },
+    {
+      "slide": 49,
+      "text": [
+        "问题：当一个事务申请对某数据项加锁时，系统如何判断是否有锁冲突存在。 例1 事务 T i 已显式 S 封锁了 tab1， 事务 T j 申请对 tup132 加 X 锁。 例2 事务 T i 已显式 X 封锁了 p93 ， 事务 T j 申请对 tab9 加 S 锁。",
+        "18.4 Multiple Granularity"
+      ],
+      "joined": "问题：当一个事务申请对某数据项加锁时，系统如何判断是否有锁冲突存在。 例1 事务 T i 已显式 S 封锁了 tab1， 事务 T j 申请对 tup132 加 X 锁。 例2 事务 T i 已显式 X 封锁了 p93 ， 事务 T j 申请对 tab9 加 S 锁。\n18.4 Multiple Granularity"
+    },
+    {
+      "slide": 50,
+      "text": [
+        "Intention Lock Modes",
+        "In addition to S and X lock modes, there are three additional lock modes with multiple granularity: intention-shared (IS): indicates explicit locking at a lower level of the tree but only with shared locks. intention-exclusive (IX): indicates explicit locking at a lower level with exclusive or shared locks shared and intention-exclusive (SIX): the subtree rooted by that node is locked explicitly in shared mode and explicit locking is being done at a lower level with exclusive-mode locks. intention locks allow a higher level node to be locked in S or X mode without having to check all descendent nodes."
+      ],
+      "joined": "Intention Lock Modes\nIn addition to S and X lock modes, there are three additional lock modes with multiple granularity: intention-shared (IS): indicates explicit locking at a lower level of the tree but only with shared locks. intention-exclusive (IX): indicates explicit locking at a lower level with exclusive or shared locks shared and intention-exclusive (SIX): the subtree rooted by that node is locked explicitly in shared mode and explicit locking is being done at a lower level with exclusive-mode locks. intention locks allow a higher level node to be locked in S or X mode without having to check all descendent nodes."
+    },
+    {
+      "slide": 51,
+      "text": [
+        "Compatibility Matrix with Intention Lock Modes",
+        "The compatibility matrix for all lock modes is:"
+      ],
+      "joined": "Compatibility Matrix with Intention Lock Modes\nThe compatibility matrix for all lock modes is:"
+    },
+    {
+      "slide": 52,
+      "text": [
+        "Multiple Granularity Locking Scheme",
+        "Transaction T i can lock a node Q , using the following rules: The lock compatibility matrix must be observed. The root of the tree must be locked first, and may be locked in any mode. A node Q can be locked by T i in S or IS mode only if the parent of Q is currently locked by T i in either IX or IS mode. A node Q can be locked by T i in X, SIX, or IX mode only if the parent of Q is currently locked by T i in either IX or SIX mode. T i can lock a node only if it has not previously unlocked any node (that is, T i is two-phase). T i can unlock a node Q only if none of the children of Q are currently locked by T i . Observe that locks are acquired in root-to-leaf order, whereas they are released in leaf-to-root order. Lock granularity escalation : in case there are too many locks at a particular level, switch to higher granularity S or X lock"
+      ],
+      "joined": "Multiple Granularity Locking Scheme\nTransaction T i can lock a node Q , using the following rules: The lock compatibility matrix must be observed. The root of the tree must be locked first, and may be locked in any mode. A node Q can be locked by T i in S or IS mode only if the parent of Q is currently locked by T i in either IX or IS mode. A node Q can be locked by T i in X, SIX, or IX mode only if the parent of Q is currently locked by T i in either IX or SIX mode. T i can lock a node only if it has not previously unlocked any node (that is, T i is two-phase). T i can unlock a node Q only if none of the children of Q are currently locked by T i . Observe that locks are acquired in root-to-leaf order, whereas they are released in leaf-to-root order. Lock granularity escalation : in case there are too many locks at a particular level, switch to higher granularity S or X lock"
+    },
+    {
+      "slide": 53,
+      "text": [
+        "Multiple Granularity Locking Scheme"
+      ],
+      "joined": "Multiple Granularity Locking Scheme"
+    },
+    {
+      "slide": 54,
+      "text": [
+        "Multiple Granularity Locking Scheme"
+      ],
+      "joined": "Multiple Granularity Locking Scheme"
+    },
+    {
+      "slide": 55,
+      "text": [],
+      "joined": ""
+    },
+    {
+      "slide": 56,
+      "text": [],
+      "joined": ""
+    },
+    {
+      "slide": 57,
+      "text": [],
+      "joined": ""
+    },
+    {
+      "slide": 58,
+      "text": [],
+      "joined": ""
+    },
+    {
+      "slide": 59,
+      "text": [],
+      "joined": ""
+    },
+    {
+      "slide": 60,
+      "text": [],
+      "joined": ""
+    },
+    {
+      "slide": 61,
+      "text": [],
+      "joined": ""
+    },
+    {
+      "slide": 62,
+      "text": [],
+      "joined": ""
+    },
+    {
+      "slide": 63,
+      "text": [
+        "意向锁",
+        "使用意向锁后，对数据项加锁情况的检查 检查数据项自身的锁是否相容 检查数据项的祖先节点的锁是否相容 不需要检查后代节点"
+      ],
+      "joined": "意向锁\n使用意向锁后，对数据项加锁情况的检查 检查数据项自身的锁是否相容 检查数据项的祖先节点的锁是否相容 不需要检查后代节点"
+    },
+    {
+      "slide": 64,
+      "text": [
+        "隔离级别的支持",
+        "为了提升系统性能，尽量给较小的数据粒度上锁 涉及插入、更新、删除数据的操作时，使用多粒度锁会引发幻读问题",
+        "Sno Sname Sage 2021310721 李博 17 2021310722 赵宇 19 2021310723 张敏 18"
+      ],
+      "joined": "隔离级别的支持\n为了提升系统性能，尽量给较小的数据粒度上锁 涉及插入、更新、删除数据的操作时，使用多粒度锁会引发幻读问题\nSno Sname Sage 2021310721 李博 17 2021310722 赵宇 19 2021310723 张敏 18"
+    },
+    {
+      "slide": 65,
+      "text": [
+        "隔离级别的支持",
+        "幻读问题主要有两种解决方法 谓词锁 SELECT * FROM <table> WHERE <qualification> FOR UPDATE ; 索引区间锁",
+        "Postgres: FOR SHARE MySQL: LOCK IN SHARE MODE"
+      ],
+      "joined": "隔离级别的支持\n幻读问题主要有两种解决方法 谓词锁 SELECT * FROM <table> WHERE <qualification> FOR UPDATE ; 索引区间锁\nPostgres: FOR SHARE MySQL: LOCK IN SHARE MODE"
+    },
+    {
+      "slide": 66,
+      "text": [
+        "Timestamp-Based Protocols",
+        "Each transaction is issued a timestamp when it enters the system. If an old transaction T i has time-stamp TS( T i ), a new transaction T j is assigned time-stamp TS( T j ) such that TS( T i ) <TS( T j ). The protocol manages concurrent execution such that the time-stamps determine the serializability order. In order to assure such behavior, the protocol maintains for each data Q two timestamp values: W-timestamp ( Q ) is the largest time-stamp of any transaction that executed write ( Q ) successfully. R-timestamp ( Q ) is the largest time-stamp of any transaction that executed read ( Q ) successfully."
+      ],
+      "joined": "Timestamp-Based Protocols\nEach transaction is issued a timestamp when it enters the system. If an old transaction T i has time-stamp TS( T i ), a new transaction T j is assigned time-stamp TS( T j ) such that TS( T i ) <TS( T j ). The protocol manages concurrent execution such that the time-stamps determine the serializability order. In order to assure such behavior, the protocol maintains for each data Q two timestamp values: W-timestamp ( Q ) is the largest time-stamp of any transaction that executed write ( Q ) successfully. R-timestamp ( Q ) is the largest time-stamp of any transaction that executed read ( Q ) successfully."
+    },
+    {
+      "slide": 67,
+      "text": [
+        "Timestamp-Based Protocols (Cont.)",
+        "The timestamp ordering protocol ensures that any conflicting read and write operations are executed in timestamp order. Suppose a transaction T i issues a read ( Q ) If TS( T i )  W -timestamp( Q ), then T i needs to read a value of Q that was already overwritten. Hence, the read operation is rejected, and T i is rolled back. If TS( T i )  W -timestamp( Q ), then the read operation is executed, and R-timestamp( Q ) is set to max (R-timestamp( Q ), TS( T i ))."
+      ],
+      "joined": "Timestamp-Based Protocols (Cont.)\nThe timestamp ordering protocol ensures that any conflicting read and write operations are executed in timestamp order. Suppose a transaction T i issues a read ( Q ) If TS( T i )  W -timestamp( Q ), then T i needs to read a value of Q that was already overwritten. Hence, the read operation is rejected, and T i is rolled back. If TS( T i )  W -timestamp( Q ), then the read operation is executed, and R-timestamp( Q ) is set to max (R-timestamp( Q ), TS( T i ))."
+    },
+    {
+      "slide": 68,
+      "text": [
+        "Timestamp-Based Protocols (Cont.)",
+        "Suppose that transaction T i issues write ( Q ). If TS( T i ) < R-timestamp( Q ), then the value of Q that T i is producing was needed previously, and the system assumed that that value would never be produced. Hence, the write operation is rejected, and T i is rolled back. If TS( T i ) < W-timestamp( Q ), then T i is attempting to write an obsolete value of Q . Hence, this write operation is rejected, and T i is rolled back. Otherwise, the write operation is executed, and W-timestamp( Q ) is set to TS( T i )."
+      ],
+      "joined": "Timestamp-Based Protocols (Cont.)\nSuppose that transaction T i issues write ( Q ). If TS( T i ) < R-timestamp( Q ), then the value of Q that T i is producing was needed previously, and the system assumed that that value would never be produced. Hence, the write operation is rejected, and T i is rolled back. If TS( T i ) < W-timestamp( Q ), then T i is attempting to write an obsolete value of Q . Hence, this write operation is rejected, and T i is rolled back. Otherwise, the write operation is executed, and W-timestamp( Q ) is set to TS( T i )."
+    },
+    {
+      "slide": 69,
+      "text": [
+        "Example Use of the Protocol",
+        "A partial schedule for several data items for transactions with timestamps 1, 2, 3, 4, 5"
+      ],
+      "joined": "Example Use of the Protocol\nA partial schedule for several data items for transactions with timestamps 1, 2, 3, 4, 5"
+    },
+    {
+      "slide": 70,
+      "text": [
+        "Correctness of Timestamp-Ordering Protocol",
+        "The timestamp-ordering protocol guarantees serializability since all the arcs in the precedence graph are of the form: Thus, there will be no cycles in the precedence graph Timestamp protocol ensures freedom from deadlock as no transaction ever waits. But the schedule may not be cascade-free, and may not even be recoverable."
+      ],
+      "joined": "Correctness of Timestamp-Ordering Protocol\nThe timestamp-ordering protocol guarantees serializability since all the arcs in the precedence graph are of the form: Thus, there will be no cycles in the precedence graph Timestamp protocol ensures freedom from deadlock as no transaction ever waits. But the schedule may not be cascade-free, and may not even be recoverable."
+    },
+    {
+      "slide": 71,
+      "text": [
+        "Recoverability and Cascade Freedom",
+        "Problem with timestamp-ordering protocol: Suppose T i aborts, but T j has read a data item written by T i Then T j must abort; if T j had been allowed to commit earlier, the schedule is not recoverable. Further, any transaction that has read a data item written by T j must abort This can lead to cascading rollback --- that is, a chain of rollbacks Solution 1: A transaction is structured such that its writes are all performed at the end of its processing All writes of a transaction form an atomic action; no transaction may execute while a transaction is being written A transaction that aborts is restarted with a new timestamp Solution 2: Limited form of locking: wait for data to be committed before reading it Solution 3: Use commit dependencies to ensure recoverability"
+      ],
+      "joined": "Recoverability and Cascade Freedom\nProblem with timestamp-ordering protocol: Suppose T i aborts, but T j has read a data item written by T i Then T j must abort; if T j had been allowed to commit earlier, the schedule is not recoverable. Further, any transaction that has read a data item written by T j must abort This can lead to cascading rollback --- that is, a chain of rollbacks Solution 1: A transaction is structured such that its writes are all performed at the end of its processing All writes of a transaction form an atomic action; no transaction may execute while a transaction is being written A transaction that aborts is restarted with a new timestamp Solution 2: Limited form of locking: wait for data to be committed before reading it Solution 3: Use commit dependencies to ensure recoverability"
+    },
+    {
+      "slide": 72,
+      "text": [
+        "Thomas ’ Write Rule",
+        "Modified version of the timestamp-ordering protocol in which obsolete write operations may be ignored under certain circumstances. When T i attempts to write data item Q , if TS( T i ) < W-timestamp( Q ), then T i is attempting to write an obsolete value of { Q }. Rather than rolling back T i as the timestamp ordering protocol would have done, this { write } operation can be ignored. Otherwise this protocol is the same as the timestamp ordering protocol. Thomas' Write Rule allows greater potential concurrency. Allows some view- serializable schedules that are not conflict- serializable ."
+      ],
+      "joined": "Thomas ’ Write Rule\nModified version of the timestamp-ordering protocol in which obsolete write operations may be ignored under certain circumstances. When T i attempts to write data item Q , if TS( T i ) < W-timestamp( Q ), then T i is attempting to write an obsolete value of { Q }. Rather than rolling back T i as the timestamp ordering protocol would have done, this { write } operation can be ignored. Otherwise this protocol is the same as the timestamp ordering protocol. Thomas' Write Rule allows greater potential concurrency. Allows some view- serializable schedules that are not conflict- serializable ."
+    },
+    {
+      "slide": 73,
+      "text": [
+        "Validation-Based Protocol",
+        "Execution of transaction T i is done in three phases. 1. Read and execution phase : Transaction T i writes only to temporary local variables 2. Validation phase : Transaction T i performs a ''validation test'' to determine if local variables can be written without violating serializability . 3. Write phase : If T i is validated, the updates are applied to the database; otherwise, T i is rolled back. The three phases of concurrently executing transactions can be interleaved, but each transaction must go through the three phases in that order. Assume for simplicity that the validation and write phase occur together, atomically and serially I.e., only one transaction executes validation/write at a time. Also called as optimistic concurrency control since transaction executes fully in the hope that all will go well during validation"
+      ],
+      "joined": "Validation-Based Protocol\nExecution of transaction T i is done in three phases. 1. Read and execution phase : Transaction T i writes only to temporary local variables 2. Validation phase : Transaction T i performs a ''validation test'' to determine if local variables can be written without violating serializability . 3. Write phase : If T i is validated, the updates are applied to the database; otherwise, T i is rolled back. The three phases of concurrently executing transactions can be interleaved, but each transaction must go through the three phases in that order. Assume for simplicity that the validation and write phase occur together, atomically and serially I.e., only one transaction executes validation/write at a time. Also called as optimistic concurrency control since transaction executes fully in the hope that all will go well during validation"
+    },
+    {
+      "slide": 74,
+      "text": [
+        "Validation-Based Protocol (Cont.)",
+        "Each transaction T i has 3 timestamps Start(T i ) : the time when T i started its execution Validation(T i ): the time when T i entered its validation phase Finish(T i ) : the time when T i finished its write phase Serializability order is determined by timestamp given at validation time; this is done to increase concurrency. Thus, TS(T i ) is given the value of Validation(T i ). This protocol is useful and gives greater degree of concurrency if probability of conflicts is low. because the serializability order is not pre-decided, and relatively few transactions will have to be rolled back."
+      ],
+      "joined": "Validation-Based Protocol (Cont.)\nEach transaction T i has 3 timestamps Start(T i ) : the time when T i started its execution Validation(T i ): the time when T i entered its validation phase Finish(T i ) : the time when T i finished its write phase Serializability order is determined by timestamp given at validation time; this is done to increase concurrency. Thus, TS(T i ) is given the value of Validation(T i ). This protocol is useful and gives greater degree of concurrency if probability of conflicts is low. because the serializability order is not pre-decided, and relatively few transactions will have to be rolled back."
+    },
+    {
+      "slide": 75,
+      "text": [
+        "Validation Test for Transaction T j",
+        "If for all T i with TS ( T i ) < TS ( T j ) either one of the following condition holds: finish ( T i ) < start ( T j ) start ( T j ) < finish ( T i ) < validation ( T j ) and the set of data items written by T i does not intersect with the set of data items read by T j . then validation succeeds and T j can be committed. Otherwise, validation fails and T j is aborted. Justification : Either the first condition is satisfied, and there is no overlapped execution, or the second condition is satisfied and the writes of T j do not affect reads of T i since they occur after T i has finished its reads. the writes of T i do not affect reads of T j since T j does not read any item written by T i ."
+      ],
+      "joined": "Validation Test for Transaction T j\nIf for all T i with TS ( T i ) < TS ( T j ) either one of the following condition holds: finish ( T i ) < start ( T j ) start ( T j ) < finish ( T i ) < validation ( T j ) and the set of data items written by T i does not intersect with the set of data items read by T j . then validation succeeds and T j can be committed. Otherwise, validation fails and T j is aborted. Justification : Either the first condition is satisfied, and there is no overlapped execution, or the second condition is satisfied and the writes of T j do not affect reads of T i since they occur after T i has finished its reads. the writes of T i do not affect reads of T j since T j does not read any item written by T i ."
+    },
+    {
+      "slide": 76,
+      "text": [
+        "Schedule Produced by Validation",
+        "Example of schedule produced using validation"
+      ],
+      "joined": "Schedule Produced by Validation\nExample of schedule produced using validation"
+    },
+    {
+      "slide": 77,
+      "text": [
+        "Multiversion Schemes",
+        "Multiversion schemes keep old versions of data item to increase concurrency. Multiversion Timestamp Ordering Multiversion Two-Phase Locking Each successful write results in the creation of a new version of the data item written. Use timestamps to label versions. When a read ( Q ) operation is issued, select an appropriate version of Q based on the timestamp of the transaction, and return the value of the selected version. read s never have to wait as an appropriate version is returned immediately."
+      ],
+      "joined": "Multiversion Schemes\nMultiversion schemes keep old versions of data item to increase concurrency. Multiversion Timestamp Ordering Multiversion Two-Phase Locking Each successful write results in the creation of a new version of the data item written. Use timestamps to label versions. When a read ( Q ) operation is issued, select an appropriate version of Q based on the timestamp of the transaction, and return the value of the selected version. read s never have to wait as an appropriate version is returned immediately."
+    },
+    {
+      "slide": 78,
+      "text": [
+        "Multiversion Timestamp Ordering",
+        "Each data item Q has a sequence of versions < Q 1 , Q 2 ,...., Q m >. Each version Q k contains three data fields: Content -- the value of version Q k . W-timestamp ( Q k ) -- timestamp of the transaction that created (wrote) version Q k R-timestamp ( Q k ) -- largest timestamp of a transaction that successfully read version Q k When a transaction T i creates a new version Q k of Q , Q k 's W-timestamp and R-timestamp are initialized to TS( T i ). R-timestamp of Q k is updated whenever a transaction T j reads Q k , and TS( T j ) > R-timestamp( Q k )."
+      ],
+      "joined": "Multiversion Timestamp Ordering\nEach data item Q has a sequence of versions < Q 1 , Q 2 ,...., Q m >. Each version Q k contains three data fields: Content -- the value of version Q k . W-timestamp ( Q k ) -- timestamp of the transaction that created (wrote) version Q k R-timestamp ( Q k ) -- largest timestamp of a transaction that successfully read version Q k When a transaction T i creates a new version Q k of Q , Q k 's W-timestamp and R-timestamp are initialized to TS( T i ). R-timestamp of Q k is updated whenever a transaction T j reads Q k , and TS( T j ) > R-timestamp( Q k )."
+    },
+    {
+      "slide": 79,
+      "text": [
+        "Multiversion Timestamp Ordering (Cont)",
+        "Suppose that transaction T i issues a read ( Q ) or write ( Q ) operation. Let Q k denote the version of Q whose write timestamp is the largest write timestamp less than or equal to TS( T i ). If transaction T i issues a read ( Q ), then the value returned is the content of version Q k . If transaction T i issues a write ( Q ) if TS( T i ) < R-timestamp( Q k ), then transaction T i is rolled back. if TS( T i ) = W-timestamp( Q k ), the contents of Q k are overwritten else a new version of Q is created. Observe that Reads always succeed A write by T i is rejected if some other transaction T j that (in the serialization order defined by the timestamp values) should read T i 's write, has already read a version created by a transaction older than T i . Protocol guarantees serializability"
+      ],
+      "joined": "Multiversion Timestamp Ordering (Cont)\nSuppose that transaction T i issues a read ( Q ) or write ( Q ) operation. Let Q k denote the version of Q whose write timestamp is the largest write timestamp less than or equal to TS( T i ). If transaction T i issues a read ( Q ), then the value returned is the content of version Q k . If transaction T i issues a write ( Q ) if TS( T i ) < R-timestamp( Q k ), then transaction T i is rolled back. if TS( T i ) = W-timestamp( Q k ), the contents of Q k are overwritten else a new version of Q is created. Observe that Reads always succeed A write by T i is rejected if some other transaction T j that (in the serialization order defined by the timestamp values) should read T i 's write, has already read a version created by a transaction older than T i . Protocol guarantees serializability"
+    },
+    {
+      "slide": 80,
+      "text": [
+        "Multiversion Two-Phase Locking",
+        "Differentiates between read-only transactions and update transactions Update transactions acquire read and write locks, and hold all locks up to the end of the transaction. That is, update transactions follow rigorous two-phase locking. Each successful write results in the creation of a new version of the data item written. Each version of a data item has a single timestamp whose value is obtained from a counter ts -counter that is incremented during commit processing. Read-only transactions are assigned a timestamp by reading the current value of ts -counter before they start execution; they follow the multiversion timestamp-ordering protocol for performing reads."
+      ],
+      "joined": "Multiversion Two-Phase Locking\nDifferentiates between read-only transactions and update transactions Update transactions acquire read and write locks, and hold all locks up to the end of the transaction. That is, update transactions follow rigorous two-phase locking. Each successful write results in the creation of a new version of the data item written. Each version of a data item has a single timestamp whose value is obtained from a counter ts -counter that is incremented during commit processing. Read-only transactions are assigned a timestamp by reading the current value of ts -counter before they start execution; they follow the multiversion timestamp-ordering protocol for performing reads."
+    },
+    {
+      "slide": 81,
+      "text": [
+        "Multiversion Two-Phase Locking (Cont.)",
+        "When an update transaction wants to read a data item: it obtains a shared lock on it, and reads the latest version. When it wants to write an item it obtains X lock on; it then creates a new version of the item and sets this version's timestamp to  . When update transaction T i completes, commit processing occurs: T i sets timestamp on the versions it has created to ts -counter + 1 T i increments ts -counter by 1 Read-only transactions that start after T i increments ts -counter will see the values updated by T i . Read-only transactions that start before T i increments the ts -counter will see the value before the updates by T i . Only serializable schedules are produced."
+      ],
+      "joined": "Multiversion Two-Phase Locking (Cont.)\nWhen an update transaction wants to read a data item: it obtains a shared lock on it, and reads the latest version. When it wants to write an item it obtains X lock on; it then creates a new version of the item and sets this version's timestamp to  . When update transaction T i completes, commit processing occurs: T i sets timestamp on the versions it has created to ts -counter + 1 T i increments ts -counter by 1 Read-only transactions that start after T i increments ts -counter will see the values updated by T i . Read-only transactions that start before T i increments the ts -counter will see the value before the updates by T i . Only serializable schedules are produced."
+    },
+    {
+      "slide": 82,
+      "text": [
+        "MVCC: Implementation Issues",
+        "Creation of multiple versions increases storage overhead Extra tuples Extra space in each tuple for storing version information Versions can, however, be garbage collected E.g. if Q has two versions Q5 and Q9, and the oldest active transaction has timestamp > 9, than Q5 will never be required again"
+      ],
+      "joined": "MVCC: Implementation Issues\nCreation of multiple versions increases storage overhead Extra tuples Extra space in each tuple for storing version information Versions can, however, be garbage collected E.g. if Q has two versions Q5 and Q9, and the oldest active transaction has timestamp > 9, than Q5 will never be required again"
+    },
+    {
+      "slide": 83,
+      "text": [
+        "Snapshot Isolation",
+        "Motivation: Decision support queries that read large amounts of data have concurrency conflicts with OLTP transactions that update a few rows Poor performance results Solution 1: Give logical “ snapshot ” of database state to read only transactions, read-write transactions use normal locking Multiversion 2-phase locking Works well, but how does system know a transaction is read only? Solution 2: Give snapshot of database state to every transaction, updates alone use 2-phase locking to guard against concurrent updates Problem: variety of anomalies such as lost update can result Partial solution: snapshot isolation level (next slide) Proposed by Berenson et al, SIGMOD 1995 Variants implemented in many database systems E.g. Oracle, PostgreSQL , SQL Server 2005"
+      ],
+      "joined": "Snapshot Isolation\nMotivation: Decision support queries that read large amounts of data have concurrency conflicts with OLTP transactions that update a few rows Poor performance results Solution 1: Give logical “ snapshot ” of database state to read only transactions, read-write transactions use normal locking Multiversion 2-phase locking Works well, but how does system know a transaction is read only? Solution 2: Give snapshot of database state to every transaction, updates alone use 2-phase locking to guard against concurrent updates Problem: variety of anomalies such as lost update can result Partial solution: snapshot isolation level (next slide) Proposed by Berenson et al, SIGMOD 1995 Variants implemented in many database systems E.g. Oracle, PostgreSQL , SQL Server 2005"
+    },
+    {
+      "slide": 84,
+      "text": [
+        "Snapshot Isolation",
+        "A transaction T1 executing with Snapshot Isolation takes snapshot of committed data at start always reads/modifies data in its own snapshot updates of concurrent transactions are not visible to T1 writes of T1 complete when it commits First-committer-wins rule : Commits only if no other concurrent transaction has already written data that T1 intends to write.",
+        "T1 T2 T3 W(Y := 1) Commit Start R(X)  0 R(Y)  1 W(X:=2) W(Z:=3) Commit R(Z)  0 R(Y)  1 W(X:=3) Commit-Req Abort",
+        "Concurrent updates not visible Own updates are visible Not first-committer of X Serialization error, T2 is rolled back"
+      ],
+      "joined": "Snapshot Isolation\nA transaction T1 executing with Snapshot Isolation takes snapshot of committed data at start always reads/modifies data in its own snapshot updates of concurrent transactions are not visible to T1 writes of T1 complete when it commits First-committer-wins rule : Commits only if no other concurrent transaction has already written data that T1 intends to write.\nT1 T2 T3 W(Y := 1) Commit Start R(X)  0 R(Y)  1 W(X:=2) W(Z:=3) Commit R(Z)  0 R(Y)  1 W(X:=3) Commit-Req Abort\nConcurrent updates not visible Own updates are visible Not first-committer of X Serialization error, T2 is rolled back"
+    },
+    {
+      "slide": 85,
+      "text": [
+        "Snapshot Read",
+        "Concurrent updates invisible to snapshot read"
+      ],
+      "joined": "Snapshot Read\nConcurrent updates invisible to snapshot read"
+    },
+    {
+      "slide": 86,
+      "text": [
+        "Snapshot Write: First Committer Wins",
+        "Variant: “ First-updater-wins ” Check for concurrent updates when write occurs by locking item But lock should be held till all concurrent transactions have finished (Oracle uses this plus some extra features) Differs only in when abort occurs, otherwise equivalent"
+      ],
+      "joined": "Snapshot Write: First Committer Wins\nVariant: “ First-updater-wins ” Check for concurrent updates when write occurs by locking item But lock should be held till all concurrent transactions have finished (Oracle uses this plus some extra features) Differs only in when abort occurs, otherwise equivalent"
+    },
+    {
+      "slide": 87,
+      "text": [
+        "Benefits of SI",
+        "Reading is never blocked, and also doesn ’ t block other txns activities Performance similar to Read Committed Avoids the usual anomalies No dirty read No lost update No non-repeatable read Predicate based selects are repeatable (no phantoms) Problems with SI SI does not always give serializable executions Serializable: among two concurrent txns, one sees the effects of the other In SI: neither sees the effects of the other Result: Integrity constraints can be violated"
+      ],
+      "joined": "Benefits of SI\nReading is never blocked, and also doesn ’ t block other txns activities Performance similar to Read Committed Avoids the usual anomalies No dirty read No lost update No non-repeatable read Predicate based selects are repeatable (no phantoms) Problems with SI SI does not always give serializable executions Serializable: among two concurrent txns, one sees the effects of the other In SI: neither sees the effects of the other Result: Integrity constraints can be violated"
+    },
+    {
+      "slide": 88,
+      "text": [
+        "Snapshot Isolation",
+        "E.g. of problem with SI T1: x:=y T2: y:= x Initially x = 3 and y = 17 Serial execution: x = ??, y = ?? if both transactions start at the same time, with snapshot isolation: x = ?? , y = ?? Called skew write Skew also occurs with inserts E.g: Find max order number among all orders Create a new order with order number = previous max + 1"
+      ],
+      "joined": "Snapshot Isolation\nE.g. of problem with SI T1: x:=y T2: y:= x Initially x = 3 and y = 17 Serial execution: x = ??, y = ?? if both transactions start at the same time, with snapshot isolation: x = ?? , y = ?? Called skew write Skew also occurs with inserts E.g: Find max order number among all orders Create a new order with order number = previous max + 1"
+    },
+    {
+      "slide": 89,
+      "text": [
+        "Snapshot Isolation Anomalies",
+        "SI breaks serializability when txns modify different items, each based on a previous state of the item the other modified Not very common in practice E.g., the TPC-C benchmark runs correctly under SI when txns conflict due to modifying different data, there is usually also a shared item they both modify too (like a total quantity) so SI will abort one of them But does occur Application developers should be careful about write skew SI can also cause a read-only transaction anomaly, where read-only transaction may see an inconsistent state even if updaters are serializable We omit details Using snapshots to verify primary/foreign key integrity can lead to inconsistency Integrity constraint checking usually done outside of snapshot"
+      ],
+      "joined": "Snapshot Isolation Anomalies\nSI breaks serializability when txns modify different items, each based on a previous state of the item the other modified Not very common in practice E.g., the TPC-C benchmark runs correctly under SI when txns conflict due to modifying different data, there is usually also a shared item they both modify too (like a total quantity) so SI will abort one of them But does occur Application developers should be careful about write skew SI can also cause a read-only transaction anomaly, where read-only transaction may see an inconsistent state even if updaters are serializable We omit details Using snapshots to verify primary/foreign key integrity can lead to inconsistency Integrity constraint checking usually done outside of snapshot"
+    },
+    {
+      "slide": 90,
+      "text": [
+        "SI In Oracle and PostgreSQL",
+        "Warning : SI used when isolation level is set to serializable, by Oracle, and PostgreSQL versions prior to 9.1 PostgreSQL ’ s implementation of SI (versions prior to 9.1) described in Section 26.4.1.3 Oracle implements “ first updater wins ” rule (variant of “ first committer wins ” ) concurrent writer check is done at time of write, not at commit time Allows transactions to be rolled back earlier Oracle and PostgreSQL < 9.1 do not support true serializable execution PostgreSQL 9.1 introduced new protocol called “ Serializable Snapshot Isolation ” (SSI) Which guarantees true serializabilty including handling predicate reads (coming up)"
+      ],
+      "joined": "SI In Oracle and PostgreSQL\nWarning : SI used when isolation level is set to serializable, by Oracle, and PostgreSQL versions prior to 9.1 PostgreSQL ’ s implementation of SI (versions prior to 9.1) described in Section 26.4.1.3 Oracle implements “ first updater wins ” rule (variant of “ first committer wins ” ) concurrent writer check is done at time of write, not at commit time Allows transactions to be rolled back earlier Oracle and PostgreSQL < 9.1 do not support true serializable execution PostgreSQL 9.1 introduced new protocol called “ Serializable Snapshot Isolation ” (SSI) Which guarantees true serializabilty including handling predicate reads (coming up)"
+    },
+    {
+      "slide": 91,
+      "text": [
+        "SI In Oracle and PostgreSQL",
+        "Can sidestep SI for specific queries by using select .. for update in Oracle and PostgreSQL E.g., select max (orderno) from orders for update read value into local variable maxorder insert into orders (maxorder+1, …) Select for update (SFU) treats all data read by the query as if it were also updated, preventing concurrent updates Does not always ensure serializability since phantom phenomena can occur (coming up) In PostgreSQL versions < 9.1, SFU locks the data item, but releases locks when the transaction completes, even if other concurrent transactions are active Not quite same as SFU in Oracle, which keeps locks until all concurrent transactions have completed"
+      ],
+      "joined": "SI In Oracle and PostgreSQL\nCan sidestep SI for specific queries by using select .. for update in Oracle and PostgreSQL E.g., select max (orderno) from orders for update read value into local variable maxorder insert into orders (maxorder+1, …) Select for update (SFU) treats all data read by the query as if it were also updated, preventing concurrent updates Does not always ensure serializability since phantom phenomena can occur (coming up) In PostgreSQL versions < 9.1, SFU locks the data item, but releases locks when the transaction completes, even if other concurrent transactions are active Not quite same as SFU in Oracle, which keeps locks until all concurrent transactions have completed"
+    },
+    {
+      "slide": 92,
+      "text": [
+        "Insert and Delete Operations",
+        "If two-phase locking is used : A delete operation may be performed only if the transaction deleting the tuple has an exclusive lock on the tuple to be deleted. A transaction that inserts a new tuple into the database is given an X-mode lock on the tuple Insertions and deletions can lead to the phantom phenomenon . A transaction that scans a relation (e.g., find sum of balances of all accounts in Perryridge) and a transaction that inserts a tuple in the relation (e.g., insert a new account at Perryridge) (conceptually) conflict in spite of not accessing any tuple in common. If only tuple locks are used, non-serializable schedules can result E.g. the scan transaction does not see the new account, but reads some other tuple written by the update transaction"
+      ],
+      "joined": "Insert and Delete Operations\nIf two-phase locking is used : A delete operation may be performed only if the transaction deleting the tuple has an exclusive lock on the tuple to be deleted. A transaction that inserts a new tuple into the database is given an X-mode lock on the tuple Insertions and deletions can lead to the phantom phenomenon . A transaction that scans a relation (e.g., find sum of balances of all accounts in Perryridge) and a transaction that inserts a tuple in the relation (e.g., insert a new account at Perryridge) (conceptually) conflict in spite of not accessing any tuple in common. If only tuple locks are used, non-serializable schedules can result E.g. the scan transaction does not see the new account, but reads some other tuple written by the update transaction"
+    },
+    {
+      "slide": 93,
+      "text": [
+        "Insert and Delete Operations (Cont.)",
+        "The transaction scanning the relation is reading information that indicates what tuples the relation contains, while a transaction inserting a tuple updates the same information. The conflict should be detected, e.g. by locking the information. One solution: Associate a data item with the relation, to represent the information about what tuples the relation contains. Transactions scanning the relation acquire a shared lock in the data item, Transactions inserting or deleting a tuple acquire an exclusive lock on the data item. (Note: locks on the data item do not conflict with locks on individual tuples.) Above protocol provides very low concurrency for insertions/deletions. Index locking protocols provide higher concurrency while preventing the phantom phenomenon, by requiring locks on certain index buckets."
+      ],
+      "joined": "Insert and Delete Operations (Cont.)\nThe transaction scanning the relation is reading information that indicates what tuples the relation contains, while a transaction inserting a tuple updates the same information. The conflict should be detected, e.g. by locking the information. One solution: Associate a data item with the relation, to represent the information about what tuples the relation contains. Transactions scanning the relation acquire a shared lock in the data item, Transactions inserting or deleting a tuple acquire an exclusive lock on the data item. (Note: locks on the data item do not conflict with locks on individual tuples.) Above protocol provides very low concurrency for insertions/deletions. Index locking protocols provide higher concurrency while preventing the phantom phenomenon, by requiring locks on certain index buckets."
+    },
+    {
+      "slide": 94,
+      "text": [
+        "Index Locking Protocol",
+        "Index locking protocol: Every relation must have at least one index. A transaction can access tuples only after finding them through one or more indices on the relation A transaction T i that performs a lookup must lock all the index leaf nodes that it accesses, in S-mode Even if the leaf node does not contain any tuple satisfying the index lookup (e.g. for a range query, no tuple in a leaf is in the range) A transaction T i that inserts, updates or deletes a tuple t i in a relation r must update all indices to r must obtain exclusive locks on all index leaf nodes affected by the insert/update/delete The rules of the two-phase locking protocol must be observed Guarantees that phantom phenomenon won ’ t occur"
+      ],
+      "joined": "Index Locking Protocol\nIndex locking protocol: Every relation must have at least one index. A transaction can access tuples only after finding them through one or more indices on the relation A transaction T i that performs a lookup must lock all the index leaf nodes that it accesses, in S-mode Even if the leaf node does not contain any tuple satisfying the index lookup (e.g. for a range query, no tuple in a leaf is in the range) A transaction T i that inserts, updates or deletes a tuple t i in a relation r must update all indices to r must obtain exclusive locks on all index leaf nodes affected by the insert/update/delete The rules of the two-phase locking protocol must be observed Guarantees that phantom phenomenon won ’ t occur"
+    },
+    {
+      "slide": 95,
+      "text": [
+        "Next-Key Locking",
+        "Index-locking protocol to prevent phantoms required locking entire leaf Can result in poor concurrency if there are many inserts Alternative: for an index lookup Lock all values that satisfy index lookup (match lookup value, or fall in lookup range) Also lock next key value in index Lock mode: S for lookups, X for insert/delete/update Ensures that range queries will conflict with inserts/deletes/updates Regardless of which happens first, as long as both are concurrent"
+      ],
+      "joined": "Next-Key Locking\nIndex-locking protocol to prevent phantoms required locking entire leaf Can result in poor concurrency if there are many inserts Alternative: for an index lookup Lock all values that satisfy index lookup (match lookup value, or fall in lookup range) Also lock next key value in index Lock mode: S for lookups, X for insert/delete/update Ensures that range queries will conflict with inserts/deletes/updates Regardless of which happens first, as long as both are concurrent"
+    },
+    {
+      "slide": 96,
+      "text": [
+        "Concurrency in Index Structures",
+        "Indices are unlike other database items in that their only job is to help in accessing data. Index-structures are typically accessed very often, much more than other database items. Treating index-structures like other database items, e.g. by 2-phase locking of index nodes can lead to low concurrency. There are several index concurrency protocols where locks on internal nodes are released early, and not in a two-phase fashion. It is acceptable to have nonserializable concurrent access to an index as long as the accuracy of the index is maintained. In particular, the exact values read in an internal node of a B + -tree are irrelevant so long as we land up in the correct leaf node."
+      ],
+      "joined": "Concurrency in Index Structures\nIndices are unlike other database items in that their only job is to help in accessing data. Index-structures are typically accessed very often, much more than other database items. Treating index-structures like other database items, e.g. by 2-phase locking of index nodes can lead to low concurrency. There are several index concurrency protocols where locks on internal nodes are released early, and not in a two-phase fashion. It is acceptable to have nonserializable concurrent access to an index as long as the accuracy of the index is maintained. In particular, the exact values read in an internal node of a B + -tree are irrelevant so long as we land up in the correct leaf node."
+    },
+    {
+      "slide": 97,
+      "text": [
+        "Concurrency in Index Structures (Cont.)",
+        "Example of index concurrency protocol: Use crabbing instead of two-phase locking on the nodes of the B + -tree, as follows. During search/insertion/deletion: First lock the root node in shared mode. After locking all required children of a node in shared mode, release the lock on the node. During insertion/deletion, upgrade leaf node locks to exclusive mode. When splitting or coalescing requires changes to a parent, lock the parent in exclusive mode. Above protocol can cause excessive deadlocks Searches coming down the tree deadlock with updates going up the tree Can abort and restart search, without affecting transaction Better protocols are available; see Section 16.9 for one such protocol, the B-link tree protocol Intuition: release lock on parent before acquiring lock on child And deal with changes that may have happened between lock release and acquire"
+      ],
+      "joined": "Concurrency in Index Structures (Cont.)\nExample of index concurrency protocol: Use crabbing instead of two-phase locking on the nodes of the B + -tree, as follows. During search/insertion/deletion: First lock the root node in shared mode. After locking all required children of a node in shared mode, release the lock on the node. During insertion/deletion, upgrade leaf node locks to exclusive mode. When splitting or coalescing requires changes to a parent, lock the parent in exclusive mode. Above protocol can cause excessive deadlocks Searches coming down the tree deadlock with updates going up the tree Can abort and restart search, without affecting transaction Better protocols are available; see Section 16.9 for one such protocol, the B-link tree protocol Intuition: release lock on parent before acquiring lock on child And deal with changes that may have happened between lock release and acquire"
+    },
+    {
+      "slide": 98,
+      "text": [
+        "Weak Levels of Consistency",
+        "Degree-two consistency : differs from two-phase locking in that S-locks may be released at any time, and locks may be acquired at any time X-locks must be held till end of transaction Serializability is not guaranteed, programmer must ensure that no erroneous database state will occur] Cursor stability : For reads, each tuple is locked, read, and lock is immediately released X-locks are held till end of transaction Special case of degree-two consistency"
+      ],
+      "joined": "Weak Levels of Consistency\nDegree-two consistency : differs from two-phase locking in that S-locks may be released at any time, and locks may be acquired at any time X-locks must be held till end of transaction Serializability is not guaranteed, programmer must ensure that no erroneous database state will occur] Cursor stability : For reads, each tuple is locked, read, and lock is immediately released X-locks are held till end of transaction Special case of degree-two consistency"
+    },
+    {
+      "slide": 99,
+      "text": [
+        "Weak Levels of Consistency in SQL",
+        "SQL allows non-serializable executions Serializable : is the default Repeatable read : allows only committed records to be read, and repeating a read should return the same value (so read locks should be retained) However, the phantom phenomenon need not be prevented T1 may see some records inserted by T2, but may not see others inserted by T2 Read committed : same as degree two consistency, but most systems implement it as cursor-stability Read uncommitted : allows even uncommitted data to be read In many database systems, read committed is the default consistency level has to be explicitly changed to serializable when required set isolation level serializable"
+      ],
+      "joined": "Weak Levels of Consistency in SQL\nSQL allows non-serializable executions Serializable : is the default Repeatable read : allows only committed records to be read, and repeating a read should return the same value (so read locks should be retained) However, the phantom phenomenon need not be prevented T1 may see some records inserted by T2, but may not see others inserted by T2 Read committed : same as degree two consistency, but most systems implement it as cursor-stability Read uncommitted : allows even uncommitted data to be read In many database systems, read committed is the default consistency level has to be explicitly changed to serializable when required set isolation level serializable"
+    },
+    {
+      "slide": 100,
+      "text": [
+        "Transactions across User Interaction",
+        "Many applications need transaction support across user interactions Can ’ t use locking Don ’ t want to reserve database connection per user Application level concurrency control Each tuple has a version number Transaction notes version number when reading tuple select r.balance, r.version into :A, :version from r where acctId =23 When writing tuple, check that current version number is same as the version when tuple was read update r set r.balance = r.balance + :deposit where acctId = 23 and r.version = :version Equivalent to optimistic concurrency control without validating read set Used internally in Hibernate ORM system, and manually in many applications Version numbering can also be used to support first committer wins check of snapshot isolation Unlike SI, reads are not guaranteed to be from a single snapshot"
+      ],
+      "joined": "Transactions across User Interaction\nMany applications need transaction support across user interactions Can ’ t use locking Don ’ t want to reserve database connection per user Application level concurrency control Each tuple has a version number Transaction notes version number when reading tuple select r.balance, r.version into :A, :version from r where acctId =23 When writing tuple, check that current version number is same as the version when tuple was read update r set r.balance = r.balance + :deposit where acctId = 23 and r.version = :version Equivalent to optimistic concurrency control without validating read set Used internally in Hibernate ORM system, and manually in many applications Version numbering can also be used to support first committer wins check of snapshot isolation Unlike SI, reads are not guaranteed to be from a single snapshot"
+    },
+    {
+      "slide": 101,
+      "text": [
+        "End of Module 16"
+      ],
+      "joined": "End of Module 16"
+    },
+    {
+      "slide": 102,
+      "text": [
+        "Deadlocks",
+        "Consider the following two transactions: T 1 : write ( X ) T 2 : write( Y ) write( Y ) write( X ) Schedule with deadlock"
+      ],
+      "joined": "Deadlocks\nConsider the following two transactions: T 1 : write ( X ) T 2 : write( Y ) write( Y ) write( X ) Schedule with deadlock"
+    }
+  ]
+}

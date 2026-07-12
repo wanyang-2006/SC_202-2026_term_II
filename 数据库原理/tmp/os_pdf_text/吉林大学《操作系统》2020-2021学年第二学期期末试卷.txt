@@ -1,0 +1,94 @@
+
+
+===== PAGE 1 =====
+吉林大学 学年春季学期
+2020-2021
+《 操 作 系 统 》 期 末 试 题 试 卷 （ B ）
+( 考 试 形 式 ： 闭 卷 考 试 时 间 : 2 小 时)
+方向： 姓名： ______ 学号：
+出卷： 复核：
+一、Explain following terms (15pts)
+1.Interrupt,
+2. Process,
+3.Virtual Memory,
+4.MMU(Memory Management Unit),
+5.Thrashing
+二、Short Answer（25pts）
+(1) What is virtual memory? What is the maximum capacity of the virtual memory?
+(2) What is address space and storage space?
+(3) What is file directory and directory file?
+(4) What is the difference between job scheduling and process scheduling?
+(5) What is the difference between process and thread?
+三、(10 pts)Consider five job A, B, C, D, E, they almost reach at the same time. Their expected
+running time is 10min, 6min, 2min, 4min, 8min, respectively. And their corresponding
+priorities are 3, 5, 2, 1, 4(5 is the highest priority). For each of the following scheduling
+algorithm, to calculate the turnaround time of each process(Never mind process switching)
+(1) FCFS with a queue A, B, C, D, E.(5 pts)
+(2) RR. Time splice is 2min.(5 pts)
+四、(13 pts)With the banker’s algorithm, consider the following snapshot of a system:
+
+
+
+===== PAGE 2 =====
+resources Allocation Need Available
+processes A B C D A B C D A B C D
+P0 0 0 3 2 0 0 1 2
+P1 1 0 0 0 1 7 5 0
+P2 1 3 5 4 2 3 5 6 1 6 2 2
+P3 0 3 3 2 0 6 5 2
+P4 0 0 1 4 0 6 5 6
+1. Is the system in a safe state?(6 pts)
+2. If a request from process P2 arrives for(1, 2, 2, 2), can the request be granted
+immediately?(7 pts)
+五、(10 pts)A system has a demand-page storage management schemes. 1MB main memory is
+divided into 256 blocks. Each block is 4KB. Consider a job with a following page table:
+Page number Block number State
+0 24 0
+1 26 0
+2 32 0
+3 ― 1
+4 ― 1
+(State 0 means that the corresponding page is in the memory. State 1 means that not.)
+1. Given a logical address, 9016(in decimal), to translate into a physical address.(5 pts)
+2. Given a logical address, 12300(in decimal), to translate into a physical address.(5 pts)
+六、(12 pts)In a demand-page storage management system, consider a reference string: 4, 3, 2, 1,
+4, 3, 5, 4, 3, 2, 1, 5.
+(1) Calculate page fault queue and page fault ratio using FIFO with 4 frames.(6 pts)
+(2) Calculate page fault queue and page fault ratio using LRU with 4 frames.(6 pts)
+七、Please select and answer ONE of the following two questions
+1. (15 pts)Consider a file system using direct index and indirect index. There are 10 pointers of
+disk blocks in a file’s inode. The first 8 of these pointers are the direct block pointers, and the
+next 2 pointers point to the indirect blocks (a single indirect block and a double indirect block).
+Each pointer is 4 bytes size. Each block is 2KB size.
+(1) How many bytes does the largest file in this file system occupy under this method
+
+
+
+===== PAGE 3 =====
+(excluding the block of the inode of the file)?(5 pts)
+(2) Give a file with 128MB size, calculate how many bytes does this file occupy actually
+(excluding the block of the inode of the file)?(10 pts)
+2. (15 pts) Consider some processes share a data area. Some processes (reader) of them just
+read this data area, and the others of processes update this data area. A solution for
+synchronizing tthese processes is shown as below.
+/* program reader_and_writer */ void writer() {
+int readcount; while(true) {
+semaphore x=1,wsem=1; P(wsem);
+void reader() { WRITEUNIT();
+while(true) { V(wsem);
+P(x); }
+readcount++; }
+if (readcount==1) void main() {
+P(wsem); readcount=0;
+v(x); parbegin(reader(), writer());
+READUNIT(); }
+P(x);
+readcount--;
+if (readcount==0)
+V(wsem);
+V(x);
+}
+}
+(1) Demostrate this solution is preferring the readers to the writers by a timeline of some
+concurrent processes. (5 pts)
+(2) Modify this solution to prefer the writers to the readers. (10 pts)
