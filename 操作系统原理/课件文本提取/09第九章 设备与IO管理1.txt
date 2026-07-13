@@ -1,0 +1,1470 @@
+# 09第九章 设备与IO管理1
+
+## Slide 1
+第九章  设备与I/O管理
+设备及其分类
+设备的物理特性
+IO传输方式（查询、中断、通道、DMA）
+设备分配与去配
+设备驱动
+设备调度
+缓冲技术
+输入输出进程
+RAID技术
+虚拟设备
+
+## Slide 2
+9.1 设备及其分类
+用途
+存储型设备
+磁盘，磁带，光盘
+IO型设备
+扫描仪，打印机，mouse，keyboard，monitor，
+网络设备
+网卡，交换机，etc.
+
+## Slide 3
+9.1 设备及其分类
+管理
+共享型设备（块型）
+多个进程的IO操作以块为单位可以交叉
+独占型设备（块型）
+多个进程的IO操作以块为单位不宜交叉
+独占型设备（字符型）
+多个进程的IO操作以字符为单位不能交叉
+
+## Slide 4
+IO设备的物理特性
+传输一字节发生一次中断
+存储设备的物理特性
+磁带的物理特性
+头标   信息块   信息块   信息块        …………….       尾标
+间隙
+操作：反绕，正向查找，反向查找，读，写，…
+地址：一维
+文件：顺序结构（一个文件占若干连续块）
+9.2 设备的物理特性
+
+## Slide 5
+...
+磁盘组的物理特性
+...
+...
+…
+…
+盘面0
+盘面1
+盘面2
+盘面m-1
+扇区1
+扇区0
+扇区n-1
+柱面0
+柱面l-1
+…
+...
+引臂
+
+## Slide 6
+柱面号i
+盘面号j
+扇区号k
+块号b（一维地址）
+（三维地址）
+编址方法：使相邻块物理上最近
+例子：l=2; m=3; n=3
+柱面号：0   0   0   0   0   0   0   0   0   1    1    1   1   1   1   1   1   1
+盘面号：0   0   0   1   1   1   2   2   2   0    0    0   1   1   1   2   2   2
+扇区号：0   1   2   0   1   2   0   1   2   0    1    2   0   1   2   0   1   2
+块    号：0   1   2   3   4   5   6   7   8   9   10  11 12 13 14 15 16 17
+
+## Slide 7
+三维地址一维地址：
+b=imn+jn+k
+一维地址三维地址：
+i=b(mn)
+j=b mod (mn)    n
+k=b mod (mn) mod n
+
+## Slide 8
+未考虑读写延迟的扇区编号：
+扇区0
+扇区7
+扇区6
+扇区5
+扇区4
+扇区3
+扇区2
+扇区1
+
+## Slide 9
+扇区0
+扇区7
+扇区3
+扇区6
+扇区2
+扇区5
+扇区1
+扇区4
+考虑读写延迟的扇区编号(单交错)：
+
+## Slide 10
+扇区0
+扇区5
+扇区2
+扇区7
+扇区4
+扇区1
+扇区6
+扇区3
+考虑读写延迟的扇区编号(双交错)：
+
+## Slide 11
+光盘的物理特性:
+读取原理: pit/land
+螺旋线,22188圈(展开5.6km),
+内侧转速:530转/分; 外侧转速:200转/分(密度均匀,读取速度均匀)
+……
+…
+Data
+ECC
+P
+14个bit构成一个symble
+42个symble构成一个frame
+98个frame构成一个sector
+Sector
+2352bytes
+588bits的frame
+各包含24字节
+Preamble: 16bytes, 前12bytes为: 00FFFFFFFFFFFFFFFFFFFF00
+后随3bytes扇区编号,最后字节为mode
+2048字节
+288字节
+
+## Slide 12
+9.3 I/O 传输方式
+IO操作演变历史
+程序查询方式  (programmed IO) (polling)
+CPU and Device can not work in parallel
+中断方式  (interrupt)
+CPU and device can work in parallel, too many interrupts for CPU
+通道方式  (channel)
+special processor for dealing with io operations
+直接内存方式 (DMA)
+DMA controller in charge of block io
+
+## Slide 13
+9.3.1 程序控制查询方式
+CPU启动设备
+完成
+F
+T
+缺点:
+处理机与设备串行工作;
+消耗大量处理机时间.
+
+## Slide 14
+9.3.2 中断驱动方式
+CPU
+计算
+启动设备
+计算
+…
+计算
+中断处理
+计算
+设备:
+工作
+特点:  CPU与设备并行工作
+设备多时对CPU打扰多
+
+## Slide 15
+9.3.3 DMA方式
+③ 数据传输
+CPU
+DMA
+控制器
+内存
+地  址
+计  数
+控  制
+缓冲
+磁盘
+⑤ 中断
+② DMA请求
+总线
+磁盘
+控制器
+④ 回答
+① DMA编程
+启动
+中断
+状态
+
+## Slide 16
+9.3.3 DMA方式
+.
+①CPU通过设置DMA控制器实现DMA编程，同时启动磁盘控制器由磁盘读入数据至内部缓冲区并进行和校验；
+②DMA控制器向磁盘控制器发出读请求，并将内存地址放在地址总线上；
+③磁盘控制器将字节传到内存指定单元；
+④磁盘控制器向DMA控制器发送回答；
+⑤DMA控制器将内部地址寄存器加1同时将记数减1，重复上述过程②─④直至计数器为0，此时DMA控制器向CPU发出中断信号.
+
+## Slide 17
+9.3.4  通道方式
+通道
+负责IO操作的处理机
+指令系统
+基本操作：控制、读、写、转移、结束
+指令格式：（操作码，传输量，特征位，地址）
+运控部件
+CAW，CCW，CSW，CDW
+存储区域（与CPU共用内存,通道内有缓冲区）
+通道程序，IO数据（channel does have its buffers）
+
+## Slide 18
+通道程序执行过程：
+按CAW取通道命令CCW
+（CAW）+1 CAW
+是通道结束命令
+执行此命令
+F
+向CPU发中断
+一个通道程序可以控制若干设备进行多次IO传输。
+T
+
+## Slide 19
+通道类型
+字节多路通道(byte multiplexer channel)
+多个非分配型子通道，连接低速外围设备
+数组选择通道(block selector channel)
+一个分配型子通道，连接多台高速设备
+数组多路通道(block multiplexer channel)
+多个非分配型子通道，连接多台高速设备
+
+## Slide 20
+设备、通道、内存连接
+选择通道
+磁盘
+字节多路通道
+打印机
+输入机
+内存储器
+处理机
+磁带
+数组多路通道
+
+## Slide 21
+9.4 设备的分配与去配
+独占型设备的分配与去配
+块型独占
+字符型独占
+共享型设备的分配与去配
+块型共享
+
+## Slide 22
+数据结构
+设备控制块(UCB)           通道控制块(CCB)
+设备标识
+设备状态
+相连通道
+占有设备进程
+通道标识
+通道状态
+通道类型
+占有通道进程
+系统设备表(SDT)
+设备类  总数  设备等待队列   UCB表指针
+…      …         …            …
+lp         m              Sm
+UCB
+UCB
+…
+UCB
+…            …                  …                       …
+
+## Slide 23
+独占型设备的分配与去配
+用户使用独占型设备活动：
+申请，使用，使用，…，使用，释放
+申请：(1) 根据设备类查SDT表
+(2) P(Sm)
+(3) 查UCB表找一空闲设备并分配
+使用：(1) 分配通道
+(2) IO传输
+(3) 去配通道
+释放：(1) 找SDT表对应入口
+(2) 查UCB表，去配
+(3) V(Sm)
+
+## Slide 24
+9.4 设备的分配与去配
+共享型设备的分配与去配
+用户使用共享型设备活动
+使用，使用，…，使用
+特征
+来自文件系统；
+每次读（写）一块；
+通常经过缓冲；
+排队优化。
+使用
+分配通道；IO操作；释放通道
+
+## Slide 25
+9.5 设备驱动
+通道程序
+CCW指令序列
+静态编制或动态生成
+设备启动
+通道启动
+中断处理
+通道向CPU发的中断
+
+## Slide 26
+9.5 设备驱动
+设备
+CAW
+CCW
+CDW
+CSW
+CCW1
+CCW2
+…
+CCWi
+...
+CCWn
+数据区
+...
+形成通道程序
+...
+地址CAW
+...
+启动通道
+...
+中断处理
+...
+启动
+中断
+内存
+CPU
+通道
+
+## Slide 27
+9.5 设备驱动
+设备
+CAW
+CCW
+CDW
+CSW
+CCW1
+CCW2
+…
+CCWi
+...
+CCWn
+数据区
+...
+形成通道程序
+...
+地址CAW
+...
+启动通道
+...
+中断处理
+...
+启动
+中断
+内存
+CPU
+通道
+
+## Slide 28
+9.5 设备驱动
+设备
+CAW
+CCW
+CDW
+CSW
+CCW1
+CCW2
+…
+CCWi
+...
+CCWn
+数据区
+...
+形成通道程序
+...
+地址CAW
+...
+启动通道
+...
+中断处理
+...
+启动
+中断
+内存
+CPU
+通道
+
+## Slide 29
+9.5 设备驱动
+设备
+CAW
+CCW
+CDW
+CSW
+CCW1
+CCW2
+…
+CCWi
+...
+CCWn
+数据区
+...
+形成通道程序
+...
+地址CAW
+...
+启动通道
+...
+中断处理
+...
+启动
+中断
+内存
+CPU
+通道
+
+## Slide 30
+9.6 设备调度
+优化服务顺序
+考虑因素
+公平性
+防止饿死
+高效性
+减少磁盘引臂移动量
+
+## Slide 31
+磁盘引臂调度(disk head scheduling)
+先到先服务（FCFS）
+请求序列：130，42，180，15，108，68，97
+0  15     42  53  68       97    108     130             180     199
+移动量: (130-53)+(130-42)+(180-42)+(180-15)+(108-15)+(108-68)+(97-68)=630
+
+## Slide 32
+磁盘引臂调度(disk head scheduling)
+最短寻找时间优先（SSTF）
+请求序列：130，42，180，15，108，68，97
+0  15     42  53  68       97    108     130             180     199
+移动量: (53-42)+(180-42)+(180-15)=314
+
+## Slide 33
+磁盘引臂调度(disk head scheduling)
+SCAN（LOOK）
+请求序列：130，42，180，15，108，68，97
+SCAN移动量: (53-0)+(180-0)=233
+LOOK移动量: (53-15)+(180-15)=203
+0  15     42  53  68      97    108     130           180    199
+Look
+Scan
+
+## Slide 34
+磁盘引臂调度(disk head scheduling)
+C-SCAN（C-LOOK）
+请求序列：130，42，180，15，108，68，97
+特点：所有磁道地位最长等待时间相同
+问题：diskhead stickiness（磁头粘性）
+0  15     42  53  68      97    108     130           180    199
+C-Look
+C-Scan
+
+## Slide 35
+磁盘引臂调度(disk head scheduling)
+N-step SCAN（N步扫描）
+将磁盘请求队列分为若干个长度为N的子队列，每个队列内采用SCAN算法
+例子：磁道由外向内编号0-99,磁头当前位置20,向内移动,N=4
+12, 5, 7, 30, 60, 77, 13, 26, 61, 80, 53, 66
+20→30→12→7→5→13→26→60→77→80→66→61 →53
+当N很大时，接近SCAN算法
+当N=1时，蜕化为FCFS算法
+
+## Slide 36
+磁盘引臂调度(disk head scheduling)
+FSCAN（Freezing SCAN，冻结扫描)
+将磁盘请求分为两个子队列，
+服务队列
+请求队列
+用SCAN算法扫描服务队列，并为请求服务，服务期间新到达的请求入请求队列
+扫描完成后交换两个队列的地位
+
+## Slide 37
+9.6.1 磁盘I/O参数
+首先分析一下读/写一个磁盘块需要多少时间。它一般由如下三个因素确定：
+寻道时间（seek time）：将磁盘引臂移动到指定柱面所需要的时间；
+旋转延迟（rotational delay）：指定扇区旋转到磁头下的时间；
+传输时间（transfer time）：读/写一个扇区的时间。
+
+## Slide 38
+9.6.1 磁盘I/O参数
+寻道时间Ts计算公式如下：
+Ts=m×n﹢s
+其中，n为跨越磁道数，m为跨越一个磁道所用时间，s为启动时间。
+旋转延迟Tr计算公式如下：
+Tr=1/(2r)
+其中，r为磁盘转速。该公式给出的是平均旋转延迟，它是磁盘旋转一周时间的一半，即旋转半周所花费的时间。
+
+## Slide 39
+9.6.1 磁盘I/O参数
+传输时间Tt计算公式如下：
+Tt=b/(rN)
+其中，b为读/写字节数，r为磁盘转速，N为一条磁道上的字节数。
+
+## Slide 40
+9.6.1 磁盘I/O参数
+因此，可将访问时间Ta表示为：
+访问磁盘通常是以扇区（块）为单位的，令M为一个磁道上扇区的个数，则一个扇区的访问时间为：
+
+## Slide 41
+例题
+例8-1．设有一个只有一个移动磁头的磁盘，磁道由外向内编号0、1、2、…、199，磁头移动一个磁道所需时间为1ms，每个磁道有100个扇区，磁盘转速6000r/m。采用CLOOK引臂调度算法，当前引臂位置处于第100磁道，当前移动方向由外向内，并规定引臂向内扫描时为路经请求服务。对于如下磁道请求120、85、70、30，每个请求访问对应磁道上的一个扇区，问：
+(1)给出引臂移动序列，计算引臂移动量和寻道时间，忽略启动时间；
+(2)计算平均旋转延迟时间；
+(3)计算传输时间；
+(4)计算所有访问处理时间。
+
+## Slide 42
+例题
+解答：
+(1)磁盘引臂移动序列为: 100→120→30→70→85，跨越磁道数：20+90+40+15=165。共需寻道时间165×1ms=165ms.
+(2) 1次访盘的旋转延迟为：Tr=1/(2r)=1/(2×(6000/m))=1/(2×(100/s))=5ms，4次访盘的旋转延迟为4×5ms=20ms.
+(3) 1次访盘的传输时间为：Tt=1/(rM)=1/((6000/m)×100)=1/((100/s)×100)=0.1ms，4次访盘的传输时间为4×0.1ms=0.4ms.
+(4)所有访问处理时间=165+20+0.4=185.4(ms)。
+
+## Slide 43
+9.7 缓冲技术
+设备处理数据到达与离开速度不一致所采用的技术。
+Buffering vs. Caching
+buffering: one data copy
+caching: multiple data copy (slow多, fast少)
+硬缓冲与软缓冲
+硬缓冲区通常设在设备中
+软缓冲区通常设在内存系统空间中
+私用缓冲与公共缓冲
+一个缓冲区与一个固定设备相联系，不同设备使用不同的缓冲区
+利用率低
+缓冲区由系统统一管理，按需要动态分派给正在进行I/O传输的设备
+
+## Slide 44
+空缓冲
+空缓冲
+空缓冲
+...
+head
+共n个
+Var buf_num:semaphore; (init n)
+mutex:semaphore; (init 1)
+1. 申请                                   2. 释放
+(1) P(buf_num)                           P(mutex)
+(2) P(mutex)                                空缓冲入链尾
+(3) 取链头空缓冲                       V(mutex)
+(4) V(mutex)                                V(buf_num)
+缓冲池管理
+tail
+
+## Slide 45
+9.7.5  缓冲技术实现：输入设备
+进程空间
+缓冲
+输入设备
+缓冲
+缓冲
+...
+io链
+
+## Slide 46
+进程方面：
+中断方面：
+IO链空
+设备忙
+申请空缓冲
+启动设备
+等待
+由io链取一缓冲
+信息进程空间
+释放空缓冲
+缓冲入io链
+有等待进程
+唤醒
+传输完毕
+申请空缓冲
+启动设备
+F
+T
+F
+T
+F
+T
+T
+F
+
+## Slide 47
+9.7.5  缓冲技术实现：输出设备
+进程空间
+缓冲
+输出设备
+缓冲
+缓冲
+...
+io链
+
+## Slide 48
+进程方面：
+中断方面：
+申请一空缓冲
+信息缓冲
+设备忙
+启动设备
+缓冲入io链
+传输完
+T
+F
+F
+T
+释放空缓冲
+io链空
+取一缓冲
+启动设备
+T
+F
+
+## Slide 49
+9.7.5 输入输出设备：
+(磁带、磁盘)
+缓冲区头
+缓冲区体
+设备块号
+IO标识
+等待进程
+块型缓冲区：
+进程空间
+缓冲
+IO设备
+缓冲
+缓冲
+...
+io链
+
+## Slide 50
+进程方面(输入)：
+进程方面(输出)：
+中断方面：
+申请空缓冲
+填写头部
+设备工作
+入io链尾
+启动设备
+信息进程
+释放缓冲
+申请空缓冲
+填写头部
+信息缓冲
+设备工作
+启动设备
+入io链
+输入
+唤醒等待者
+释放空缓冲
+io链空
+取一缓冲
+启动设备
+F
+T
+F
+T
+T
+F
+F
+T
+等待
+
+## Slide 51
+UNIX缓冲
+字符型缓冲
+100个缓冲区，长度8字节(6字符+2指针)
+组成公共缓冲池，所有字符型设备公用
+缓冲区或属于cfreelist, 或属于某字符设备(eg. tty,lp)
+块型缓冲
+50个缓冲区，长度514字节
+组成公共缓冲池，所有块型设备公用
+缓冲区可属于bfreelist and/or devtab
+预先读入的块(breada)
+延迟写出的块(bdwrite)
+
+## Slide 52
+字符型设备缓冲
+struct cblock {
+struct cblock *c_next;
+char info[6];
+}
+struct cblock *cfreelist;    //free c blocks
+struct clist       //associated with a character device
+{
+int c_cc;    //character count
+int c_cf;    //pointer to first block
+int c_cl;     //pointer to last block
+}
+
+## Slide 53
+struct buf      //actually a buffer header, shared by all mounted disks
+{
+int      b_flags;                //BUSY, ASYNC, DELWRI, DONE...
+struct  buf *b_forw;        //headed by devtab
+struct  buf *b_back;
+struct  buf *av_forw;      //position on free list
+struct  buf *av_back;
+int       b_dev;
+int       b_wcount;            //transfer count
+char    *b_addr;               //low order core (buffer) address
+char    *b_xmem;            //high order core (buffer) address
+char    *b_blkno              //block # on device
+char     b_error;
+char     *b_resid;             //word not transferred after error
+}buf[NBUF]
+块型设备缓冲（头部）
+
+## Slide 54
+15  14  13  12  11  10   9    8    7    6    5    4    3    2    1    0
+B_READ/B_WRITE
+B_DONE
+B_ERROR
+B_BUSY
+B_WANTED
+B_RELOC
+B_ASYNC
+B_DELWRI
+b_flag:
+
+## Slide 55
+struct devtab   //设备IO队列
+{
+char      d_active;              //busy flag
+char      d_errcnt;              //error count
+struct      buf  *b_forw;      //first buffer for this dev
+struct      buf  *b_back;      //last buffer for this dev
+struct      buf  *d_actf;        //head of IO queue
+struct      buf  *d_actl;        //tail of IO queue
+}
+char  buffers[NBUF][514];   //块型缓冲区
+struct buf bfreelist;   //缓冲区头部的链头
+
+## Slide 56
+struct devtab{
+char d_active;
+char d_errcnt;
+struct buf *b_forw;
+struct buf *b_back;
+struct buf *d_actf;
+struct buf *d_actl;
+}
+18
+21
+bfreelist
+35
+65
+83
+68
+
+## Slide 57
+相关操作：
+getblk(dev,blkno)    //assign a buffer for the given block
+bread(dev,blkno)     //read a block(if necessary), return buf pointer
+breada(dev,blkno,rablkno)    //read in first block, like read;
+but also start io on second block
+bwrite(bp)     //write the buffer, wait for completion, then release
+bawrite(bp)    //start the io, release buffer, no wait for completion
+bdwrite(bp)   //release buffer, mark it so that if it is grabbed for
+another purpose, it will be written out before
+being given up
+brelse(bp)      //release the buffer, with no io implied
+
+## Slide 58
+getblk(dev,blkno)
+参数： dev:设备号，blkno: 设备块号
+返回：缓冲区指针bp
+步骤：
+块在b链中，且当前空闲
+由av链摘除，标记BUSY, 返回缓冲块指针
+块在b链中，但BUSY(其它进程在用)
+sleep(空闲事件发生)，返回缓冲块指针
+不在b的链中，在av链上取到延迟写的块
+写出该块，分配下一个缓冲区
+不在b的链中，av链已空
+等待任意缓冲区变空闲的事件
+不在b的链中，在av链上得到空缓冲
+填写头部，由av链摘除，出旧b链，如新b链，返回缓冲块指针
+
+## Slide 59
+brelse(bp)
+参数：bp: 缓冲区头指针
+返回：无
+步骤：
+If 有等待者(b_flag&B_WANTED!=0),唤醒;
+Else
+bfreelist上有等待者,唤醒
+bp入av链
+
+## Slide 60
+bread(dev,blkno)
+参数：dev:设备号，blkno: 设备块号
+返回：载有信息的缓冲区bp
+步骤：
+bp=getblk(dev,blkno)
+if (缓冲区数据有效)
+return(bp)        //在cache中得到
+启动磁盘读(d_actf/d_actl链)
+sleep(等待读盘完成事件)
+中断
+唤醒
+return(bp)
+
+## Slide 61
+breada(dev,blkno,rablkno)
+参数：dev:设备号，blkno:读块号，rablkno:预读块号
+返回：blk缓冲块指针rbp
+步骤：
+rbp=getblk(dev,blkno)
+if(信息无效)
+启动设备读入(d_actf/d_actl链)
+rabp=getblk(dev,rablkno)
+if (B_DONE)    //缓冲区从b链得到
+brelse(rabp)  //入av链
+else    //缓冲区从av链得到
+启动设备读入(d_actf/d_actl链)    //中断时入av链
+iowait(rbp)
+return(rbp)
+
+## Slide 62
+bwrite(bp)
+参数：bp：缓冲区指针
+步骤：
+入设备d_act队列(若设备不忙启动设备)
+if(! B_ASYNC)
+sleep(等待IO完成事件)
+中断
+唤醒
+brelse(bp), (bp入av链)
+
+## Slide 63
+bdwrite(bp)
+参数: bp: 缓冲区指针
+返回: 无
+步骤：
+标记b_flags =| B_DELWRI | B_DONE
+brelse(bp), (bp入av链)
+
+## Slide 64
+bawrite(bp)
+参数：bp: 缓冲区头指针
+返回：无
+步骤：
+bp->b_flag =| B_ASYNC
+bwrite(bp)
+中断
+入av队列
+
+## Slide 65
+9.8 输入输出进程
+专门负责IO传输的进程
+另外一种IO模式—服务模式
+C/S Model
+特点
+界面清晰,方便使用
+两次进程切换,速度问题
+
+## Slide 66
+9.9 RAID技术
+RAID:
+Redundant Array of Inexpensive Disks
+compared with SLEDs (Single Large Expensive Disks)
+Redundant Array of Independent Disks //独立磁盘冗余阵列
+Proposed by researchers at UC Berkeley
+David A. Patterson
+Background
+disk access speed increases slowly compared with CPU
+solution: multiple parallel component
+Objective
+enhanced performance
+high reliability
+
+## Slide 67
+RAID技术
+RAID
+RAID is a set of physical disks viewed by the operating system as a single logical drive
+Data are distributed across an array of physical drives
+Redundant disk capacity is used to store parity information, which guarantees data recoverability in case of disk failure
+Hardware RAID vs. Software RAID
+hardware based: special controller
+Windows NT, 2000, UNIX support software RAID
+SCSI RAID vs. IDE RAID
+performance: SCSI outperforms IDE
+price: IDE beats SCSI
+
+## Slide 68
+9.9.1 RAID级别
+RAID级别:  行业标准规定的数据在多个磁盘上的存放方法。
+常见RAID级别: level0, …, level5;
+RAID分条(stripping)数据存储方式
+位级分条(bit-level stripping)
+块级分条(block-level stripping)
+RAID衡量指标
+速  度: 是否支持多个访问同时进行;
+可靠性: 是否能够发现和改正错误;
+成  本: 是否有额外的开销和开销的大小.
+How to organize data across multiple disks?
+Industry standards scheme
+
+## Slide 69
+Level0(数据分条)
+数据分条以块为单位, 连续的数据条循环存放在多个磁盘上。
+访问速度快；
+经济，空间利用率100％；
+无容错能力，可靠性差。
+block0
+block4
+block8
+……
+Disk1
+block1
+block5
+block9
+……
+Disk2
+block2
+block6
+block10
+……
+Disk3
+block3
+block7
+block11
+……
+Disk4
+控 制 器
+(4,5)
+(2,3)
+读请求
+写请求
+
+## Slide 70
+Level1 (镜像,mirroring):
+数据分条以块为单位, 采用分布镜像方式存储, 即完全相同的数据重复存放在两个盘上。
+访问速度快; 读一个盘、写两个盘;
+可靠性(恢复性)高;
+费用高, 是无镜像磁盘数的2倍,
+空间利用率50％。
+block0
+block3
+block6
+……
+Disk1
+block1
+block4
+block7
+……
+Disk2
+block2
+block5
+block8
+……
+Disk3
+控 制 器
+(3,4)
+(8)
+读请求
+写请求
+block0
+block3
+block6
+……
+Disk4
+block1
+block4
+block7
+……
+Disk5
+block2
+block5
+block8
+……
+Disk6
+
+## Slide 71
+Level2 (位级汉明纠错码校验与恢复):
+数据以位(bit)为单位分条, 分布存放在多个数据磁盘上, 汉明纠错码存放在纠错磁盘上。
+bit0
+……
+Disk1
+bit1
+……
+Disk2
+bit2
+……
+Disk3
+控 制 器
+(3,4,5)
+写请求
+bit3
+……
+Disk4
+bit4
+……
+Disk5
+bit5
+……
+Disk6
+bit6
+……
+Disk7
+
+## Slide 72
+Level2 (位级汉明纠错码校验与恢复):
+纠错能力强, 可靠性高;
+发现2个错误, 纠正1个错误.
+需要较多纠错盘存放汉明纠错码, 成本较高;
+不能同时为多个请求服务, 速度较慢:
+读操作:  所有磁盘同时访问, 数据与错误校验码被送到磁盘阵列控制器;
+写操作:  必须同时访问所有数据盘和纠错盘。
+
+## Slide 73
+数据以位(bit)为单位分条, 分布存放在多个数据磁盘上;只用一个冗余磁盘存放奇偶校验位。
+bit0
+……
+Disk1
+bit1
+……
+Disk2
+bit2
+……
+Disk3
+bit3
+……
+Disk4
+奇偶校验
+……
+Disk5
+有一定容错能力;
+存储代价较低;
+读写需要访问所有盘, 多个读写不能并行。
+控 制 器
+(0,1)
+等待
+(3)
+写请求
+写请求
+Level3 (位级单个奇偶校验)
+
+## Slide 74
+Level4 (块级异或校验):
+数据分条以块为单位, 用异或运算产生校验信息,
+校验信息保存在单独的磁盘上。
+block0
+block4
+block8
+……
+Disk1
+block1
+block5
+block9
+……
+Disk2
+block2
+block6
+block10
+……
+Disk3
+block3
+block7
+block11
+……
+Disk4
+P0-3
+P4-7
+P8-11
+……
+Disk5
+控 制 器
+(5,6)
+(11)
+读请求
+读请求
+
+## Slide 75
+Level 4 (Cont.)
+读操作不进行异或校验, 可以并行;
+写操作要更新异或校验信息, 都访问校验盘, 不能并行; 写操作时校验信息更新:
+P’4~7=(block4 xor block4’)xor p4~7
+异或校验信息用于磁盘发生故障时数据块的恢复。
+例如:  若block7所在的Disk4发生故障, 要恢复block7。
+block7= p4~7 XOR (block4 XOR block5 XOR block6)
+
+## Slide 76
+Level5 (块级分布式异或校验)
+数据分条以块为单位, 异或校验信息分散循环保存在各磁盘上。
+block0
+block4
+block8
+block12
+P16~19
+……
+Disk1
+控 制 器
+(1)
+(6)
+写请求
+写请求
+block1
+block5
+block9
+P12~15
+block16
+……
+Disk2
+block2
+block6
+P8~11
+block13
+block17
+……
+Disk3
+block3
+P4-7
+block10
+block14
+block18
+……
+Disk4
+P0~3
+block7
+block11
+block15
+block19
+……
+Disk5
+
+## Slide 77
+Level5 (块级分布式异或校验)
+校验码计算:
+p4~7=block4 XOR block5 XOR block6 XOR block7
+若block7发生故障，可通过下式恢复
+block7=p4~7 XOR block4 XOR block5 XOR block6
+
+## Slide 78
+Level 5 (Cont.)
+磁盘数量至少为3个;
+读操作可并行;
+不涉及相同数据盘和校验盘的写操作可以并行;
+对于单盘容量为S、数量为N的磁盘阵列,
+有效存储容量为:   S×(N-1)
+磁盘利用率为:   (N-1)/N
+任意磁盘发生故障, 均可根据其它N-1个磁盘恢复;
+
+## Slide 79
+9.9.1  RAID级别(Cont.)
+表8-1    RAID 级别的比较
+Level
+分条粒度
+读并发性
+写并发性
+冗余(容错/开销)
+0
+块
+支持
+支持
+无
+1
+块
+支持
+不支持
+镜像
+2
+位
+不支持
+不支持
+汉明纠错码奇偶校验与恢复
+3
+位
+不支持
+不支持
+单个奇偶校验
+4
+块
+支持
+不支持
+块级异或校验
+5
+块
+支持
+支持
+块级分布式异或校验
+
+## Slide 80
+9.9.2 Remark on Software RAID
+Pros:
+cost less
+simplicity
+Cons:
+performance
+boot volume limitation  //导引卷不能是RAID
+level support: only 0,1,5 are supported
+OS compatibility: multiple problem
+other software compatibility
+reliability
+software bugs
+
+## Slide 81
+Benefit from RAID
+Increased read/write speed
+Improved data reliability
+Enlarged storage capacity
+multiple disks viewed as a single volume
+
+## Slide 82
+9.10 虚拟设备
+概念
+利用共享型设备实现的数量较多、速度较快的独占型设备
+引入
+用户直接使用独占型设备效率低
+实现
+输入型虚拟设备
+输出型虚拟设备
+虚拟设备的例子
+SPOOLing输入
+SPOOLing输出
+
+## Slide 83
+9.7.1 虚拟设备引入
+用户使用独占型设备活动：
+申请，使用，使用，…，使用，释放
+缺点：
+速度：CPU与设备速度不匹配
+设备利用率：占有期间不一定一直使用
+进程独占此设备
+
+## Slide 84
+方法：
+在进程与独占型设备之间增加共享设备缓冲
+虚拟
+设备
+虚拟
+设备
+虚拟
+设备
+虚拟
+设备
+进程
+独占设备
+共享设备（如磁盘）
+间断传输
+连续传输
+…
+…
+
+## Slide 85
+9.10.2 虚拟设备的实现
+输入型虚拟设备的实现
+申请：
+分配一虚设备
+分配一实设备
+信息由实设备虚设备
+去配该实设备
+使用：
+信息由虚设备进程空间
+释放：
+去配虚设备
+
+## Slide 86
+输出型虚拟设备的实现
+申请：
+分配一虚设备
+使用：
+信息由进程空间虚设备
+释放：
+分配一实设备
+信息由虚设备实设备
+去配实设备
+去配虚设备
+9.10.2 虚拟设备的实现
+
+## Slide 87
+9.10.3 虚拟设备的例子
+SPOOLing输入
+作业预输入（输入机输入井）
+SPOOLing输出
+作业缓输出（输出井输出机）
+SPOOLing
+Simultaneous Peripheral Operation On-Line
+由SPOOLing程序控制通道完成
+
+## Slide 88
+作业控制块(Job Control Block)
+作业存在标志，其中保存系统管理作业需要的全部信息。
+JCB内容：
+作业标识
+用户标识
+作业状态
+调度参数
+作业位置
+资源需求
+进入时间
+处理时间
+记账信息
+
+## Slide 89
+...
+...
+job11
+job1m
+...
+输入井
+预输入进程
+输入机
+预输入进程
+通道
+通道
+内存
+...
+SPOOLing输入程序（1）vs. SPOOLing输入进程（n）
+输入机
+
+## Slide 90
+有待输入作业
+有空闲作业表
+等待
+等待
+取一“空闲”作业表为JCB
+作业状态改为“提交”
+申请输入井空间
+作业内容输入井
+填写JCB
+作业状态改为“后备”
+作业调度1等待
+“后备”作业
+唤醒
+SPOOLing 输入程序
+F
+T
+F
+T
+F
+T
+
+## Slide 91
+F
+T
+内存中已有N道作业
+等待
+输入井中有后备作业
+等待
+访问磁盘中的作业表
+根据JCB中的调度参数
+按照作业调度算法选一后备作业
+作业状态标记为“执行”
+为该作业建立作业控制进程
+F
+作业调度程序（1）
+T
+
+## Slide 92
+F
+T
+F
+有终止的作业控制进程
+等待
+取一终止的作业控制进程
+撤销该作业控制进程并作善后处理
+对应作业状态改为“完成”
+作业调度程序(1)因内存有N道作业而等待
+唤醒
+有等待“完成”作业的假脱机输出程序
+唤醒一个
+T
+F
+作业调度程序（2）
+T
+
+## Slide 93
+...
+...
+通道
+通道
+job11
+job1n
+...
+输出井
+缓输出进程
+缓输出进程
+内存
+输出机
+输出机
+SPOOLing输出程序（1）vs. SPOOLing输出进程（n）
+
+## Slide 94
+输出作业结果
+释放输出井空间
+状态改为“空闲”
+有等空闲JCB的预输入进程
+唤醒一个
+输出井有“完成”作业
+取一“完成”作业
+状态改为“退出”
+等待
+SPOOLing 输出程序
+F
+T
+T
+F
+
+## Slide 95
+9.11 稳定存储器(stable storage)
+定义
+不丢失信息的存储器称为稳定存储器
+实现
+不存在绝对可靠的存储介质
+策略：冗余
+在两种失效独立的介质上构建
+保存
+将信息写到第一个存储块
+上述操作成功后，将相同信息写到第二存储块
+仅当第二次传输也成功时，整个保存操作完成
+
+## Slide 96
+9.11 稳定存储器(stable storage)
+实现
+恢复
+鉴别两个数据块内容
+一对信息完全相同，且无检测到错误，正常
+其中一块检测到错误，用另一块取代
+两块均未检测到错误，但内容不同，用第二块内容取代第一块内容
+
+## Slide 97
+9.12 系统举例－Linux
+涉及内容
+设备驱动，设备缓冲，文件管理
+主要特点
+允许系统管理员动态添加或删除设备，其相应的驱动程序通常以DLL的形式动态加载，设备驱动程序可以采用高级语言编写，移植性好．
+除NTFS外，支持多种可装卸的文件系统，如FAT32、OS/2、HPFS、CDFS等．支持映像文件I/O．
+设备管理子系统以I/O请求包(I/O Request Package，IRP)方式驱动，每个I/O请求均以表示为I/O请求包，I/O管理器负责协调所有各组成部分之间的相互作用．
+通过系统进程(线程)提供异步I/O，在I/O请求的进程(线程)不需要等待I/O传输结果的情况下，请求者可以立即返回，具体I/O操作由系统线程负责完成．异步I/O是通过异步过程调用(Asynchronous Procedure Call，APC)实现的．
+
+## Slide 98
+应用程序
+系统服务
+IO管理
+程序
+文件系统
+磁盘驱动
+光盘驱动
+磁带驱动
+…
+Windows 10 IO子系统

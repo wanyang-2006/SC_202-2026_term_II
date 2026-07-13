@@ -1,0 +1,1105 @@
+# 02第二章 进程线程与作业1
+
+## Slide 1
+第二章 进程、线程与作业
+2.1 多道程序设计
+Multi-programming
+2.2 进程的引入
+Process
+2.3 线程与轻进程
+Thread and light-weighted process
+2.4 作业
+Job
+Active objects
+
+## Slide 2
+2.1 多道程序设计
+2.1.1 单道程序设计的缺点
+2.1.2 多道程序设计的提出
+2.1.3 多道程序设计的问题
+Multi-programming
+
+## Slide 3
+多道程序设计目标
+提高系统效率(吞吐量)
+
+## Slide 4
+2.1.1 单道程序设计的缺点
+处理机利用率低
+设备利用率低
+内存利用率低
+运行程序A
+CPU
+设备1
+运行程序A
+t
+t1
+t2
+t5
+t6
+设备2
+
+## Slide 5
+2.1.2 多道程序设计的提出
+CPU
+设备1
+程序A
+t
+t1
+t2
+t5
+t6
+设备2
+程序B
+提高处理机、设备、内存等各种资源的利用率，从而提高系统效率。
+程序A
+t3
+t4
+
+## Slide 6
+2.1.2 多道程序设计的提出(Cont.)
+增加同时运行程序的道数可以提高资源利用率，从而提高系统效率，但道数应与系统资源数量相当。
+道数过少，系统资源利用率低。
+道数过多，系统开销(system overhead)增大，程序响应速度下降。
+
+## Slide 7
+2.1.3 多道程序设计的问题
+处理机资源的管理
+程序个数处理机个数(如何分配?)
+存储资源的管理
+地址空间的相对独立性、共享性
+内存、外存(swap space)的分配与去配
+设备资源管理
+分配策略
+IO控制
+
+## Slide 8
+2.2 进程的引入
+2.2.1 进程的概念
+2.2.2 进程状态及状态转换
+2.2.3 进程控制块
+2.2.4 进程的组成与上下文
+2.2.5 进程的队列
+2.2.6 进程的类型与特征
+2.2.7 进程间相互联系与相互作用
+2.2.8 进程的创建与撤销
+2.2.9 进程与程序间的联系与差别
+
+## Slide 9
+多道系统中的程序：
+推进，暂停，推进，暂停，…….
+暂停：保存现场(PSW+PC，寄存器）
+推进：恢复现场(寄存器，PSW+PC)
+暂停原因：(1) 自身原因：等待资源，启动IO
+(2) 剥夺CPU—给其它程序运行机会
+2.2 进程的引入(Cont.)
+
+## Slide 10
+2.2.1 进程的概念
+定义：
+可参与并发执行的程序称为进程。
+进程是具有一定独立功能的程序关于一个数据集合的一次运行活动。
+定义强调两个方面：
+动态：执行中的程序;
+并发：可与其他进程同时执行。
+
+## Slide 11
+并发 vs. 并行
+并发：concurrent
+宏观同时，“交替执行”，不要求多个CPU
+并行：parallel
+微观同时，要求多个CPU
+“并行算法”
+
+## Slide 12
+2.2.2 进程状态及状态转换
+2.2.2.1 进程状态(基本状态)
+运行态(RUN): 占有CPU正在向前推进
+就绪态(READY): 可以运行，但未得到CPU
+等待态(WAIT): 等待某一事件发生
+2.2.2.2 状态转换
+就绪运行：获得处理机
+运行就绪：剥夺处理机
+运行等待：申请资源未得到，启动IO
+等待就绪：得到资源，IO中断
+
+## Slide 13
+就绪
+等待
+运行
+获得处理机
+剥夺处理机
+等待事件
+事件发生
+2.2.2.2 进程状态转换图
+Keep in Mind
+进程状态转换由操作系统完成，对用户是透明的；
+进程在其生存期内经过多次状态转换，体现了进程的动态性和并发性。
+
+## Slide 14
+2.2.3 进程控制块(PCB)
+标志进程存在的数据结构，其中保存系统管理进程所需的全部信息
+PCB内容：(不同系统不尽相同)
+进程标识(pid)         用户标识(uid)
+进程状态                 调度参数
+现场信息                 家族信息
+程序地址                 打开文件
+消息队列指针          资源使用情况
+进程队列指针
+Process Control Block
+
+## Slide 15
+2.2.3 进程控制块(续)
+PCB作用
+当调度某进程执行时，需要从该进程的PCB中查询其状态及优先级等参数
+当调度到某进程后，根据PCB中的现场信息恢复现场，并根据PCB中的程序和数据的内存地址找到程序和数据
+进程执行过程中，当需要与其它进程通信时，也要访问PCB
+当进程发生进程切换时，需要将现场信息从系统栈弹出，保存于PCB中
+系统建立进程时建立PCB，撤销进程时撤销PCB.
+
+## Slide 16
+2.2.4 进程的组成与上下文
+进程的组成
+进程控制块(process control block)
+建立进程建立PCB
+撤销PCB撤销进程
+PCB存放在系统空间，用户不能访问
+程序
+代码(code)
+数据(data)
+静态变量
+动态栈：保存返回点、参数、返回值、局部变量
+动态堆：动态变量
+
+## Slide 17
+2.2.4 进程的组成与上下文
+进程的表记
+PCB
+程序
+PCB
+代码
+数据
++
+堆栈
+表记1
+表记2
+系统空间
+用户空间
+定义：进程的程序(代码和数据)称为进程影像(Process Image)。
+
+## Slide 18
+2.2.4 进程的组成与上下文
+进程上下文（process context)
+进程的物理实体与支持进程运行的物理环境统称为进程上下文
+PCB+程序
+系统环境：地址空间，系统栈，打开文件表，…
+上下文切换（context switch)
+由一个进程的上下文转到另外一个进程的上下文
+系统开销（system overhead)
+运行操作系统程序完成系统管理工作所花费的时间和空间
+
+## Slide 19
+2.2.4 进程的组成与上下文（续）
+进程切换时需要保存的现场信息
+地址寄存器
+保存当前CPU所访问的内存单元的地址
+通用寄存器
+用于传送和暂存数据，也可参与算术逻辑运算，并保存运算结果
+浮点寄存器
+用于存储浮点数字，它决定着计算机的计算精度。
+SP(系统栈指针)
+PSW(程序状态字)
+PC(指令计数器)
+打开文件表
+
+## Slide 20
+2.2.5 进程的队列
+PCB
+PCB
+PCB
+……
+head
+1. 就绪队列：系统一个或若干个（根据调度算法确定）
+2. 等待队列：每个等待事件一个
+3. 运行指示字：每个处理机一个
+PCB构成的队列：（不一定FIFO，单向或双向）
+
+## Slide 21
+进程队列模型
+就绪队列
+等待队列1
+等待队列2
+等待队列n
+…
+CPU
+创建
+完成
+时间片用完
+等待事件1
+等待事件2
+等待事件n
+事件1发生
+事件2发生
+事件n发生
+
+## Slide 22
+2.2.6 进程的类型与特征
+进程类型
+系统进程
+运行操作系统程序，完成系统管理(服务)功能，管态.
+一个系统进程所完成的内容相对独立和具体，在进程生存周期保持不变，因而它们通常对应一个无限循环程序，在系统启动后便一直存在，直到系统关闭
+例如：UNIX    #0 -- sched,   #1 -- init
+用户进程
+在操作系统之上运行的所有程序
+运行用户(应用)程序，为用户服务，不一定是用户自己编写的程序（例如：UNIX   vi, shell, cc）。
+
+## Slide 23
+2.2.6 进程的类型与特征(Cont.)
+进程的特征
+并发性：可以与其它进程一道向前推进；
+动态性：动态产生、消亡，生存期内状态动态变化；
+独立性：一个进程是可以调度的基本单位；
+交往性：同时运行的进程可能发生相互作用；
+异步性：进程以各自独立，不可预知的速度向前推进；
+结构性：每个进程有一个PCB。
+
+## Slide 24
+2.2.7 进程间相互联系与相互作用
+相互联系
+相关进程
+同一家族的进程
+可以共享文件，需要相互通讯，协调推进速度…
+父进程可以监视子进程，子进程完成父进程交给的任务。
+无关进程
+没有逻辑关系、同时执行的进程。
+有资源竞争关系，互斥、死锁、饿死。
+
+## Slide 25
+2.2.7 进程间相互联系与相互作用
+相互作用（并发进程间相互制约关系）
+1. 直接相互作用：发生在相关进程之间
+2. 间接相互作用：发生在任何进程之间
+R
+P2
+P1
+sync
+send
+receive
+P1:
+P2:
+hold
+wait
+
+## Slide 26
+2.2.8 进程的创建与撤销
+进程的创建
+建立PCB，分配内存，加载程序，入就绪链
+UNIX：pid=fork()，exec(prog,args)
+引起进程创建的事件
+用户登录
+作业调度
+提供服务
+应用请求
+
+## Slide 27
+2.2.8 进程的创建与撤销
+进程的撤销
+去配资源，撤销PCB，通知父进程
+UNIX：exit()  vs. kill
+引起进程撤销的事件
+正常结束
+异常结束
+外界干预
+除初始进程外，其它进程由(父)进程创建，并形成进程家族。
+
+## Slide 28
+2.2.8 进程的创建与撤销（续）
+进程等待
+停止当前进程的执行，由于该进程正处于执行状态，故应停止该进程的执行
+保存该进程的现场信息。为了使进程以后能够重新调度运行，应将进程的现场信息送入其PCB中保存
+将进程状态改为等待
+
+## Slide 29
+2.2.8 进程的创建与撤销（续）
+引起进程等待事件
+请求系统服务
+当正在执行的进程请求操作系统服务时，而操作系统由于某种原因并不能立即满足该进程的要求时，该进程只能转为等待状态
+启动某种操作
+当进程启动某种操作且该进程必须在该操作完成之后才能继续执行，必须先将进程等待
+新数据尚未到达
+对于相互合作的进程，如果其中一个进程需要首先获取另一进程提供的数据才能继续，而其所需数据尚未到达
+无新工作可做
+对于系统设置的具有特定功能的系统进程，在其完成任务后，会把状态设置为“等待”，以等待新任务的到达.
+
+## Slide 30
+2.2.8 进程的创建与撤销（续）
+进程唤醒
+将被唤醒进程从相应的等待队列中移除
+将进程状态改为就绪，并将该进程插入就绪队列.
+
+## Slide 31
+考虑生灭的进程状态转换图
+就绪
+等待
+运行
+获得处理机
+剥夺处理机
+等待事件
+事件发生
+初创
+终止
+创建
+结束
+
+## Slide 32
+2.2.9 进程与程序的联系与差别
+进程与程序的联系
+进程包括一个程序
+进程存在的目的就是执行这个程序
+进程与程序的差别
+程序静态，进程动态
+程序可长期保存，进程有生存期
+一个程序可对应多个进程，一个进程只能执行一个程序
+
+## Slide 33
+2.2.10 UNIX系统
+内核
+操作系统，向上层软件提供的界面是系统调用。
+外壳
+命令解释程序，为终端用户提供的界面是交互终端命令。
+
+## Slide 34
+2.2.10 UNIX进程
+进程控制块
+Proc结构，常驻内存
+User结构，可交换
+程序
+多个进程可共享的代码
+进程私用的数据和堆栈
+
+## Slide 35
+2.2.10 UNIX进程组成(映像)
+Proc 结构
+Text结构
+系统空间
+用户空间
+User结构
+系统栈
+进程堆栈
+进程数据
+进程代码
+常驻内存部分
+内外存交换部分
+系统空间
+
+## Slide 36
+struct proc
+{
+char p_stat;
+char p_flag;
+char p_pri;
+char p_sig;     //signal received
+char p_uid;     //user id
+char p_time;    //resident time for scheduling
+char p_cpu;     //cpu usage
+char p_nice;    //nice for scheduling
+char p_ttyp;    //controlling tty
+int  p_pid;     //unique process id
+int  p_ppid;    //parent process id
+int  p_addr;    //address of swappable image
+int  p_size;    //size of swappable image (*64bytes)
+int  p_wchan    //event process is waiting
+int *p_textp;   //pointer to text structure
+}
+
+## Slide 37
+struct user
+{
+int   u_rsav[2]
+int   u_fsav[25]
+……
+char  u_uid;         // effective user id
+char  u_gid;         // effective group id
+char  u_ruid;        // real user id
+char  u_rgid;        // real group id
+int   u_procp;       // pointer to proc structure
+int   *u_base;       // base address for IO
+int   *u_count;      // bytes remaining for IO
+int   *u_offset[2];  // offset in file for IO
+int   *u_cdir;       // pointer to inode of current dir
+int   *u_pdir;       // inode of parent directory
+int   u_uisa[16];    // prototype segmentation address
+
+## Slide 38
+int   u_uisd[16];    // prototype segmentation descript
+int   u_ofile[NOFILE];   // pointers to file struct
+int   u_arg[5];          // arguments to system call
+int   u_tsize;           // text size (*64)
+int   u_dsize;           // data size (*64)
+int   u_sszie;           // stack size (*64)
+int   u_utime;           // this process user time
+int   u_stime;           // this process system time
+int   u_cutime[2];       // child process user time
+int   u_cstime[2];       // child process system time
+……
+}
+
+## Slide 39
+struct text
+{
+int      x_daddr;            //disk address of segment
+int      x_caddr;            //core address if loaded
+int      x_size;               //*64
+int      *x_iptr;               //inode of prototype
+char    x_count;            //reference count
+char    x_ccount;          //number of loaded references
+}
+
+## Slide 40
+进程状态及其转换
+换出
+结束跟踪
+结束跟踪
+换入/出
+换出
+唤醒
+fork
+处理机分派
+跟踪
+等待
+终止
+置PSW
+SRUN
+LOAD
+user
+SRUN
+LOAD
+kernel
+SIDL
+中断
+睡眠
+换出
+唤醒
+内存够
+内存不够
+SZOMB
+SSLEEP
+LOAD
+SWAIT
+LOAD
+SRUN
+LOAD
+SSTOP
+LOAD
+SSLEEP
+SWAP
+SWAIT
+SWAP
+SRUN
+SWAP
+SSTOP
+SWAP
+唤醒
+结束跟踪
+唤醒
+结束跟踪
+
+## Slide 41
+2.2. 11UNIX进程的创建与撤销
+相关系统调用
+创建子进程
+Pid = fork()
+子进程是父进程的复制品
+返回值：父进程为子进程编号，子进程为0
+加载并执行新程序
+execl(prog, arg0,…,argn-1,0)
+以arg0,…,argn-1为参数执行prog
+覆盖原来程序，从第一条指令开始执行
+
+## Slide 42
+2.2. 11UNIX进程的创建与撤销
+进程自我结束
+exit(status)
+Status为终止状态
+唤醒父进程
+等待子进程终止
+pid=wait(&status)
+返回终止子进程编号
+参数为子进程的终止状态
+
+## Slide 43
+proc结构
+p_pid=9
+p_ppid=5
+user结构
+pid = fork();
+if(pid == 0) /*成立*/
+{
+/*子进程代码*/
+}else{
+/*父进程代码*/
+}
+…
+proc结构
+p_pid=12
+p_ppid=9
+user结构
+复制
+父进程
+子进程
+fork() 创建子进程
+联系
+子进程号(>0整数)
+pid = fork();
+if(pid == 0) /*不成立*/
+{
+/*子进程代码*/
+}else{
+/*父进程代码*/
+}
+…
+恒为0
+
+## Slide 44
+pid=fork();
+if(pid==0) /*不成立*/
+{
+execl(“P”,0);
+}else{
+/*父进程代码*/
+}
+…
+proc结构
+p_pid=9
+p_ppid=5
+user结构
+pid=fork();
+if(pid==0) /*成立*/
+{
+execl(“P”,0);
+}else{
+/*父进程代码*/
+}
+…
+proc结构
+p_pid=12
+p_ppid=9
+user结构
+父进程
+子进程
+execl() 加载并执行新程序
+
+## Slide 45
+pid=fork();
+if(pid==0) /*不成立*/
+{
+execl(“P”,0);
+}else{
+/*父进程代码*/
+}
+…
+proc结构
+p_pid=9
+p_ppid=5
+user结构
+程序P (覆盖原来程序)
+proc结构
+p_pid=12
+p_ppid=9
+user结构
+父进程
+子进程
+execl() 加载并执行新程序
+
+## Slide 46
+pid=fork();
+if(pid==0) /*不成立*/
+{
+execl(“P”,0);
+}else{
+/*父进程代码*/
+id=wait(&s)
+}
+…
+proc结构
+p_pid=9
+p_ppid=5
+user结构
+程序P (覆盖原来程序)
+exit(2)
+proc结构
+p_pid=12
+p_ppid=9
+user结构
+父进程
+子进程
+exit() 进程自我终止
+
+## Slide 47
+P1
+P2              P3              P4
+P5         P6
+P7
+P8
+例子: 设有8个程序，执行次序如下图所示，试用fork,execl,wait,exit系统调用描述之．
+
+## Slide 48
+main()
+{
+int pid1,pid2,pid3,pid4,pid5,pid6,pid7,pid8;
+int  end_p1=end_p2=end_p3=end_p4=end_p5=…=end_p8=0;
+int pid, status;
+if((pid1=fork())= =0) execl("P1",0);
+wait(&status);
+if((pid2=fork())= =0) execl("P2",0);
+if((pid3=fork())= =0) execl("P3",0);
+if((pid4=fork())= =0) execl("P4",0);
+do{        //等待P2结束
+pid=wait(&status);
+if(pid= =pid2) end_p2=1;
+if(pid= =pid3) end_p3=1;
+if(pid= =pid4) end_p4=1;
+}while(end_p2= =0);
+
+## Slide 49
+if((pid5=fork())= =0) execl("P5",0);
+if((pid6=fork())= =0) execl("P6",0);
+do{        //等待P3和P6结束
+pid=wait(&status);
+if(pid= =pid3) end_p3=1;
+if(pid= =pid4) end_p4=1;
+if(pid= =pid5) end_p5=1;
+if(pid= =pid6) end_p6=1;
+}while(end_p3= =0||end_p6= =0);
+if((pid7=fork())= =0) execl("P7",0);
+do{        //等待P4,P5,P7结束
+pid=wait(&status);
+if(pid= =pid4) end_p4=1;
+if(pid= =pid5) end_p5=1;
+if(pid= =pid7) end_p7=1;
+}while(end_p4= =0||end_p5= =0||end_p7= =0);
+if((pid8=fork())= =0) execl("P8",0);
+wait(&status);
+exit(0);
+}
+
+## Slide 50
+2.3 线程与轻进程
+2.3.1 线程的引入
+2.3.2 线程的概念
+2.3.3 线程的结构
+2.3.4 线程控制块
+2.3.5 线程的实现
+2.3.6 线程的应用
+2.3.7 Java线程
+Thread
+Light-weighted process
+
+## Slide 51
+2.3.1 线程的引入
+进程切换
+上下文涉及内容多，开销大，“笨重”
+PCB+程序
+系统环境：地址空间，系统栈，打开文件表，
+相关进程之间耦合关系差
+解决方案
+Multi-threading
+同一进程中包含多个线程
+上下文只涉及寄存器和用户栈，切换速度快
+相关线程之间通讯方便、快捷
+
+## Slide 52
+2.3.2 线程的概念
+进程中一个相对独立的执行流。
+进程 vs.线程
+进程是资源分配单位
+线程是执行单位
+多线程优点
+切换速度快（地址空间不变）(light weighted)
+系统开销小
+通讯容易（共享数据空间）
+
+## Slide 53
+2.3.3 线程结构
+多进程结构（用户视图）
+静态数据
+程序代码
+栈
+寄存器
+进程2
+动  态  堆
+内存
+静态数据
+程序代码
+栈
+寄存器
+进程１
+动  态  堆
+内存
+
+## Slide 54
+2.3.3 线程结构
+静态数据
+程序代码
+寄存器
+寄存器
+线程1：
+线程2：
+进程
+动  态  堆
+内存
+多线程结构（用户视图）
+栈
+栈
+
+## Slide 55
+2.3.3 线程结构（另一种表示）
+text segment
+data segment
+Program counter
+Task:
+
+## Slide 56
+2.3.4 线程控制块
+TCB（Thread control block)
+标志线程存在的数据结构，其中包含对线程管理需要的全部信息．
+内容
+线程标识
+线程状态
+调度参数
+现场(通用寄存器,PC,SP)
+链接指针
+存放位置
+用户级线程：目态空间（运行时系统）
+核心级线程：系统空间
+
+## Slide 57
+2.3.5 线程的实现
+2.3.1 用户级别线程
+User-level thread
+2.3.2 核心级别线程
+Kernel-level thread
+2.3.3 混合线程
+Hybrid approach
+
+## Slide 58
+2.3.5.1 用户级别线程
+实现方法：
+基于library函数，系统不可见
+线程创建、撤销、状态转换在目态完成
+TCB在用户空间，每个进程一个系统栈
+优点：
+不依赖于操作系统，调度灵活
+同一进程中多线程切换速度快(不需进入操作系统)
+缺点：
+同一进程中多个线程不能真正并行
+一个线程进入系统受阻，进程中其它线程不能执行
+
+## Slide 59
+2.3.5.1 用户级别线程
+运行系统
+TCB
+进程
+线程
+核心栈
+进程表
+用户空间
+系统空间
+
+## Slide 60
+2.3.5.2 核心级别线程
+实现方法：
+基于系统调用
+创建、撤销、状态转换由操作系统完成
+线程是处理器调度的基本单位
+TCB在操作系统空间，每个线程一个系统栈
+对于核心级别线程，进程状态不具有实际意义
+优点：
+同一进程内多线程可以并行执行
+一线程进入核心等待，其它线程仍可执行
+缺点：
+系统开销大，同一进程内多线程切换速度慢
+调度算法不能灵活控制
+
+## Slide 61
+2.3.5.2 核心级别线程
+进程
+线程
+核心栈
+进程表
+用户空间
+系统空间
+TCB
+
+## Slide 62
+2.3.5.3 混合线程
+Solaris例子
+User level thread:
+由Lib程序支持（创建,调度）
+Light weighted process(LWP):
+由Lib程序支持
+每个task至少一个LWP
+用戶级别线程与LWP可以多对多
+LWP对操作系统可见
+只有与LWP相联系的用户线程向前推进
+Kernel level thread:
+由kernel 支持
+每个LWP与唯一一个核心线程对应
+核心线程可与CPU多对多，可对一
+
+## Slide 63
+2.3.5.3 混合线程(Solaris)
+CPU
+task1
+task2
+task3
+kernel
+User level
+thread
+Lightweight
+process
+Kernel
+thread
+
+## Slide 64
+2.3.6 线程的应用
+内在的多控制流,需要共享数据
+生产－消费问题
+多线程优于多进程
+快100倍!
+提高处理机与设备的并行性
+多处理机环境
+提高处理机利用率，加快进程推进速度
+
+## Slide 65
+2.3.6 线程的应用
+例子：
+Word字处理（不同代码）
+交互编辑(T1)
+词法检查(T2)
+定时保存(T3)
+HTTP server（相同代码）
+对每个http请求，pop up一个线程
+
+## Slide 66
+2.4 作业（Job)
+作业概念
+用户要求计算机系统为其完成的计算任务集合。
+作业步（job step)
+作业处理过程中一个相对独立的步骤
+一般一个作业步可由一个进程完成
+某些作业步之间可以并行
+作业分类
+批处理作业
+交互式作业
+
+## Slide 67
+2.4.1 批处理作业
+作业控制语言(JCL)
+描述批处理作业控制意图的语言
+作业说明书(JCL语句的序列）
+一般一特殊符号起始
+$JOB J1
+$FORTN …
+$LINK …
+$EXEC …
+$ENDJOB
+作业控制程序
+解释并处理作业说明书的程序
+作业控制进程
+执行作业控制程序的进程
+
+## Slide 68
+作业控制进程
+读入作业内容
+释放输入井空间
+顺取作业控制语句
+是结束语句
+执行该作业步
+(可能创建子进程)
+申请输出井空间
+输出作业结果
+进程自我终止
+F
+T
+
+## Slide 69
+2.4.2 交互式作业
+帐户管理
+/etc/passwd文件
+(用户名,口令,用户根目录,同组用户,余额…)
+创建与撤销
+创建：
+用户提供（用户名,口令,资金）
+系统操作员建立（根目录/usr/zhang, 填写passwd文件）
+撤销：
+删除该用户目录及所有文件
+在passwd文件中清除对应entry
+
+## Slide 70
+2.4.2 交互式作业
+注册与注销
+注册：
+logon: 用户名
+password: ********
+(使用)
+注销：
+显式注销：
+logoff
+隐式注销：
+（如5分钟无输入命令）
+
+## Slide 71
+命令解释程序
+提示符$
+读入终端命令
+分析
+Logout
+内部命令
+处理
+建立子进程
+后台命令
+等子进程结束
+输出子进程号
+记帐
+T
+F
+T
+F
+F
+T
+
+## Slide 72
+小结：作业、进程、线程
+作业与进程
+作业进入内存后变为进程
+一个作业通常与多个进程相对应
+进程与线程
+一个进程一般包含多个线程，至少包含一个线程
+不支持多线程的系统，可视为单线程进程
+
+## Slide 73
+2.5.1 Java线程
+Java线程四种基本状态
+New：新建的线程
+Runnable：可运行状态
+Blocked：封锁状态
+Dead：终止状态．
+
+## Slide 74
+Java线程
+Java线程状态之间的转换关系图
+Sleep()
+Suspend()
+IO
+Runnable
+Blocked
+Dead
+New
+Start()
+Stop()
+Resume()
+
+## Slide 75
+JAVA线程与JVM
+Java线程是由Java虚拟机JVM支持的
+JVM位于操作系统之上
+Java线程与操作系统线程之间的对应关系由JVM确定
+对于Windows NT的JVM，Java线程与操作系统线程具有一对一关系;
+对于Solaris的JVM，其对应关系为多对多.
+
+## Slide 76
+2.5.2 Linux进程与线程
+进程与线程在系统内部具有统一的表示
+进程与线程的差别通过与fork不同的另外一个系统调用clone体现出来
+Clone系统调用的形式
+pid = clone(function,stack_ptr,sharing_flag,arg)
+Sharing-flag:
+CLONE_VM, CLONE_FILES, CLONE_SIGHAND, CLONE_PID
+
+## Slide 77
+2.5.3 Windows10 进程、线程与纤程
+进程
+在Win32环境中创建进程的过程
+当Win32应用执行CreateProcess调用，消息被发给Win32子系统，后者调用进程管理器创建进程，进程管理器调用OM创建进程对象，然后返回对象把柄给Win32.Win32子系统再次调用进程管理器为该进程创建线程，最后Win32将把柄返给新进程和线程
+
+## Slide 78
+对象头部属性
+Type: Process
+对象体属性
+进程标识（Process id）
+访问令牌（Access token）
+基础优先级（Base priority）
+缺省亲合处理机（Default processor affinity）
+配额限制（Quota limits）
+执行时间（Execution time）
+输入/输出记数（I/O counters）
+执行/调试端口（Exception/debugging ports）
+退出状态（exit status）
+服务
+创建进程（Create process）
+打开进程（Open process）
+查询进程信息（Query process information）
+设置进程信息（Set process information）
+当前进程（Current process）
+终止进程（Terminate process）
+分配/释放虚拟存储（Allocate/free virtual memory）
+读/写虚拟存储（Read/write virtual memory）
+保护虚拟存储（Protect virtual memory）
+加锁/开锁虚存（Lock/unlock virtual memory）
+查询虚拟存储（Query virtual memory）
+刷新虚拟存储（Flush virtual memory）
+进程对象描述图
+
+## Slide 79
+对象头部属性
+属性
+类型：线程（Type: thread）
+属性
+客户标识（client id）
+线程上下文（thread context）
+动态优先级（dynamic priority）
+处理机亲合掩码（thread processor affinity）
+已执行时间（thread execution time）
+警觉状态（alert status）
+挂起记数（suspension count）
+非角色令牌（impersonation token）
+终止端口（termination port）
+终止状态（exit status）
+服务
+创建线程（Create thread）
+打开线程（Open thread）
+查询线程状态（Query thread information）
+设置线程状态（Set thread information）
+当前线程（Current thread）
+终止线程（Terminate thread）
+取上下文（Get context）
+置上下文（Set context）
+挂起（Suspend）
+恢复（Resume）
+警示线程（Alert thread）
+测试线程警示（Test thread alert）
+注册终止端口（Register termination port）
+线程对象描述图
+
+## Slide 80
+就绪
+等待
+初始
+备用
+运行
+转换
+终止
+创建线程对象
+重新初始化
+执行完
+入就绪队列
+剥夺
+唤醒
+唤醒栈在外
+换入内核栈
+切换
+选中
+等待某对象
+抢先
+Windows线程状态转换图

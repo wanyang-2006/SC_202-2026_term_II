@@ -1,0 +1,1215 @@
+# 08第八章 文件系统1
+
+## Slide 1
+第八章 文件系统
+8.1 文件与文件系统
+文件
+具有符号名而且在逻辑上具有完整意义的信息项的有序序列。
+文件系统
+文件与管理文件的程序集合。
+信息项  信息项     …    信息项    …     信息项
+读(写)指针
+
+## Slide 2
+UNIX文件分类
+普通文件
+内容可以是程序、数据、图象等，保存在磁盘块中
+目录文件
+(文件名，文件号)序列，保存在磁盘块中
+特殊文件
+设备
+设备作为文件管理的好处
+界面统一，使用文件与使用设备命令相同，申请设备open, 释放close, 读read, 写write
+利用文件保护功能可以保护设备
+
+## Slide 3
+8.2 文件的访问方式
+顺序访问
+从文件起始位置开始顺序访问
+从文件中间某处开始顺序访问
+随机访问
+按记录编号随机访问
+按关键字(key)随机访问
+
+## Slide 4
+8.3 文件的组织
+逻辑组织
+用户看到的文件组织形式
+记录式文件：记录的序列
+等长记录（优点：处理方便，速度快；缺点：空间浪费）
+不等长记录（优点：省空间；缺点：处理不便，速度慢）
+流式文件：字节的序列(UNIX, Windows, etc)
+物理组织
+逻辑组织到磁盘块的映射
+文件：记录(字节)序列
+磁盘：块(block)序列
+变换关系
+
+## Slide 5
+8.3.2 文件的物理组织
+考虑因素
+记录格式
+等长或不等长, 流式不必考虑
+空间开销
+除保存文件内容之外的存储开销
+访问速度
+随机访问速度
+长度变化
+动态增长
+
+## Slide 6
+顺序结构：
+一个文件占有若干连续的磁盘块。
+优点：速度快，节省空间
+缺点：长度变化困难
+…
+块18
+块19
+块20
+块21
+块22
+...
+磁盘空间
+…
+首块=18
+块数=5
+...
+FCB
+
+## Slide 7
+链接结构：
+一文件可存于不连续块中，块间以指针相连。
+优点：节省空间，长度变化容易。
+缺点：随机访问速度慢。
+…
+块18
+...
+块80
+...
+块92
+...
+磁盘空间
+…
+首块=18
+块数=3
+...
+FCB
+
+## Slide 8
+索引结构：
+一文件可存于不连续块中，块号记在索引块中。
+优点：速度快，长度变化容易。
+缺点：索引块占空间。
+磁盘空间
+…
+索引块=29
+块数=4
+...
+FCB
+…
+块18
+块19
+...
+块26
+...
+块30
+...
+索引块29
+
+## Slide 9
+Hash结构：
+计算地址：
+hash(key)=addr (在磁盘或文件中的存放位置)
+问题：给定key1key2
+hash(key1)=addr1;
+hash(key2)=addr2;
+addr1=addr2 (conflict)
+Conflict resolution: 顺序探查法：
+如发生冲突，则在冲突位置开始顺序探查第一个空闲的存储位置。
+
+## Slide 10
+...
+...
+文件空间
+空闲标志
+冲突记数
+记录内容
+空闲标志
+冲突记数
+Hash(key)=addr
+起始位置
+计算addr=hash(key)
+对应冲突记数加1
+本记录空闲
+顺取下一个
+标记为占用
+填记录内容
+保存记录：
+T
+F
+记录内容
+
+## Slide 11
+查找记录：
+计算addr=hash(key)
+取addr对应记录的冲突记数count
+count=0
+无此记录
+本记录空闲
+顺取下一记录
+key相等
+找到
+hash(key)相等
+count:=count-1
+count=0
+无此记录
+顺取下一记录
+T
+F
+F
+T
+T
+F
+T
+F
+T
+F
+
+## Slide 12
+删除记录：
+调用查找过程(key)
+找到
+错误返回
+置空闲标志
+(找到记录)
+冲突记数-1
+对应hash(key)
+特点：
+按关键字检索速度非常快。
+用途：
+常用于目录检索。
+注意：
+文件可循环使用，满时保存失败。
+F
+T
+
+## Slide 13
+UNIX文件物理结构(索引+链接)
+…
+i_addr[0]
+...
+i_addr[9]
+i_addr[10]
+i_addr[11]
+i_addr[12]
+...
+inode
+...
+...
+...
+...
+...
+...
+...
+最大=10+256+2562+2563(块)
+
+## Slide 14
+8.4 文件目录
+文件控制块与目录项
+文件控制块(FCB)
+文件存在的标志，其中保存系统管理文件需要的全部信息
+目录项
+目录文件中的一项，内容为FCB
+文件目录与目录文件
+文件目录
+用于检索文件的目录
+目录文件
+内容为目录项的文件
+
+## Slide 15
+文件控制块FCB（File Control Block）
+文件名
+文件号
+文件主
+文件类型
+文件属性
+共享说明
+文件长度
+文件地址
+建立日期
+最后修改日期
+最后访问日期
+口令
+其它
+FCB创建：建立文件时
+FCB撤消：删除文件时
+
+## Slide 16
+单级目录(Single-Level Directory)
+A single directory for all users.
+缺点:
+1.  Naming problem
+Grouping problem
+Protection problem
+
+## Slide 17
+两级目录(Two-Level Directory)
+Separate directory for each user.
+特点:
+1.  Path name
+2.  Can have the same file name for different user
+3.  Efficient searching
+4.  No grouping capability
+
+## Slide 18
+root
+bin
+usr
+lib
+dev
+etc
+unix
+lp
+cc
+vi
+users
+Li
+Wang
+d1
+d2
+f1
+console
+passwd
+bin
+yacc
+s
+f2
+多级目录(Multi-Level Directory as in UNIX)
+clib
+flib
+
+## Slide 19
+文件目录的查找
+查找路径
+由根目录开始查找
+由当前目录开始查找
+查找算法
+顺序查找（UNIX）
+hash查找
+对分查找（要求文件名排序）
+
+## Slide 20
+文件目录的改进
+FCB
+次部：(文件名, 文件号)
+(UNIX 16 bytes)
+保存在目录文件中
+主部：(其它, 链接记数)
+(UNIX 32 bytes)
+保存在外存inode区域, 打开时读入内存.
+改进的好处
+可以提高查找速度(顺序查找)
+可以实现文件链接(link)
+
+## Slide 21
+UNIX文件卷(volume)组织形式：
+0    1    2        …             k   k+1                    …             n-1
+导引块
+特殊块
+inode区域
+每块16个inode,
+从0起依次编号
+文件存储区域
+(普通文件,目录文件)
+
+## Slide 22
+8.5 文件的共享
+共享目的
+节省存储空间
+(cc,vi,yacc)
+进程相互通讯
+UNIX pipe()
+文件共享模式
+不同时使用
+根据共享说明
+同时使用
+根据共享说明和(relaxed)R/W规则
+
+## Slide 23
+文件的共享
+文件共享的实现
+公共目录
+共享说明
+连接
+d1
+users
+wang
+li
+f1
+f2
+i_number=15
+f2    15
+f1    15
+link(“/usr/users/wang/d1/f1”,
+“/usr/users/li/f2”)
+unlink(“/usr/users/wang/d1/f1”)
+usr
+root
+
+## Slide 24
+8.6 文件的保护、保密与安全
+保护
+防止用户对文件进行非授权的访问
+保密
+防止文件内容泄露
+安全
+防止文件被破坏
+自然因素
+人为因素
+
+## Slide 25
+8.6.1文件的保护(Protection)
+File owner/creator should be able to control:
+what can be done
+by whom
+Types of access
+Read
+Write
+Execute
+Append
+Delete
+List
+
+## Slide 26
+1. 存取控制矩阵
+f1  ……  fj  ……  fn
+u1    a11….… a1j …….  a1n
+…    …  ……  …  …… ...
+ui     ai1 ……  aij  ….… ain
+…    …  ……  …  …… ...
+um   am1 …..  amj ….… amn
+R   W   E   A   M   D
+aij:
+特点：
+权限规定细，过于繁琐，占较多存储空间
+
+## Slide 27
+2. 访问权限说 明（UNIX）i_mode
+R  W  E  R  W  E  R  W  E
+文件主
+同组用户
+其他用户
+文件主判别：访问进程u_uid==i_uid
+同组用户判别：访问进程u_gid==i_gid
+i_mode在创建文件时给出，creat(filename, mode)
+其后文件主可以修改：chmod(filename, new_mode)
+
+## Slide 28
+8.6.2 文件保密
+口令
+使用
+创建文件时用户规定一个口令，系统将其记在FCB中
+访问文件要求给出口令，并与FCB中口令比较
+特点
+简单
+保密性不强(eg. 对系统操作员不保密)
+密码
+特点
+对文件内容加密，速度慢，效果好
+使用
+保存时加密(key)
+读取时解密(key)
+
+## Slide 29
+保存时：
+用一个key启动一个随机数发生器，产生一个随机数序列，将其依此加到文件的各个字中。
+读取时：
+用同一个key启动同一个随机数发生器，产生相同随机数序列，将其依次由文件的各个字中减去。
+线性同余法产生伪随机数：
+Procedure random(Var key:integer);
+Begin
+key:=(key*C1+C2)MOD C3
+End;
+
+## Slide 30
+8.6.3 文件系统的安全
+Backup
+定期将磁盘上文件复制到磁带上
+发生故障时由磁带恢复(limited recovery)
+实现方法
+海量转储
+定期将磁盘上文件全部复制到磁带上
+增量转储
+每次只复制修改部分
+磁盘整理
+利用转储和恢复可以对磁盘进行整理(使文件物理块连续，空闲盘块连续)
+
+## Slide 31
+8.7 文件系统的实现
+8.7.1 内存所需表目
+系统打开文件表(系统一个)
+FCB主部
+文件号
+共享计数
+修改标志
+
+## Slide 32
+8.7 文件系统的实现
+8.7.1 内存所需表目
+用户打开文件表(每个进程一个)
+打开方式
+读写指针
+系统打开文件表入口
+文件描述符
+
+## Slide 33
+8.7 文件系统的实现
+打开方式
+读写指针
+系统打开文件表入口
+…
+…
+…
+…
+…
+…
+打开方式
+读写指针
+系统打开文件表入口
+…
+…
+…
+…
+…
+…
+FCB主部  文件号  共享计数 修改标志
+系统打开文件表
+2
+…
+文件描述符
+文件描述符
+用户打开文件表
+15
+…
+
+## Slide 34
+外存空间的管理
+空闲块表
+空闲块链
+字位映像图
+UNIX:成组连接
+
+## Slide 35
+空闲块管理(成组连接)：
+100个空闲块为一组，组之间相互链接，最前面的组缓冲到内存。
+…
+s_nfree=66
+s_free[0]
+s_free[1]
+...
+s_free[65]
+...
+Super block
+...
+...
+...
+...
+...
+特点：速度快，空间省。
+
+## Slide 36
+空闲块管理：
+申请时：
+(1) s_nfree>1, 取s_free[--s_nfree];
+(2) s_nfree=1, 将s_free[0]所指连接块读入内存,分配s_free[0].
+释放时:
+(1) s_nfree<100, s_free[s_nfree++]=释放块号;
+(2) s_nfree=100, 将s_nfree和s_free拷贝到释放块中, 将该块号记录到s_free[0], 写回外存, s_nfree=1,
+
+## Slide 37
+8.8 文件系统的界面
+创建文件
+命令形式:creat(path_name, fcb_args)
+参数说明
+Path_name: 文件路径名
+Fcb_args: FCB参数
+执行步骤:
+(1) 为此文件分配一个FCB主部,初始化
+(2) 将文件名和文件号作为FCB次部填到末级目录中
+(3) 以写方式打开
+例如: creat(“/usr/li/d1/f1”, mode)
+
+## Slide 38
+8.8 文件系统的界面
+打开文件
+命令形式: fd=open(path_name, mode)
+参数说明
+path_name: 文件路径名;
+mode: 打开方式.
+执行步骤
+(1) 根据文件路径名查目录找到FCB主部;
+(2) 合法性检查(根据打开方式、共享说明、用户身份);
+(3) 根据文件号查系统打开文件表看该文件是否已被打开, 如是共享计数加1; 否则取一个空闲的系统打开文件表项并将外存中 FCB主部等信息填入此表项, 共享计数置为1;
+(4) 在用户打开文件表中取一空表项, 填写打开方式和读写指针, 并指向系统打开文件表的对应表项.
+返回信息: fd: 文件描述符(在用户打开文件表中的入口), 它是一个非负整数.
+
+## Slide 39
+8.8 文件系统的界面
+关闭文件
+命令形式: close(fd)
+参数说明
+fd: 文件描述符.
+执行步骤:
+(1) 由fd查用户打开文件表, 找到系统打开文件表入口;
+(2) 系统打开文件表中共享计数减1, 如减1后的值为0且修改标志为1, 则将此FCB 由内存写回外存FCB主部;
+(3) 将fd所对应的用户打开文件表项置为空闲.
+
+## Slide 40
+8.8 文件系统的界面
+指针定位
+命令形式: seek(fd,offset)
+参数说明:
+fd: 文件描述符;
+offset: 新的指针位置.
+执行步骤:
+(1) 由fd查用户打开文件表, 找到对应的入口;
+(2) 检查参数合法性；
+(3) 将用户打开文件表中文件读写指针位置设定为offset, 后继读写命令由该指针处存取文件内容.
+
+## Slide 41
+8.8 文件系统的界面
+读文件
+命令形式: read(fd,nrd,buf)
+参数说明:
+fd: 文件描述符;
+nrd: 读入记录个数;
+buf: 内存起始位置.
+步骤:
+(1) 由fd查用户打开文件表, 找到对应的入口;
+(2) 合法性检查(用户打开文件表中所记录的打开方式、存取方式);
+(3) 查系统打开文件表, 找到文件的地址;
+(4) 计算欲访问起始记录的位置(offset, 物理结构);
+(5) 将文件中由当前读指针所确定的nrd个记录读入内存中由buf起始的区域.
+
+## Slide 42
+8.8 文件系统的界面
+写文件
+命令形式: write(fd,nwt,buf)
+参数含义:
+fd: 文件描述符;
+nwt: 写出记录个数;
+buf: 内存起始位置.
+执行步骤:
+(1) 由fd查用户打开文件表, 找到对应的入口;
+(2) 合法性检查(用户打开文件表中所记录的打开方式、存取方式);
+(3) 查系统打开文件表, 找到文件的地址;
+(4) 计算欲访问起始记录的位置(物理结构, offset);
+(5) 如果需要, 申请存储块;
+(6) 将内存中由buf起始的nwt个记录写到文件中由当前写指针所确定的区域（可能切换进程）.
+
+## Slide 43
+8.8 文件系统的界面
+建立连接
+命令形式: link(old_name,new_name)
+参数含义:
+old_name: 已存在的文件路径名;
+new_name: 欲连接的文件路径名.
+执行步骤:
+(1) 查目录找到文件old_name的FCB主部, 由此得到文件号;
+(2) 查目录找到文件new_name的末级目录;
+(3) 将文件号与new_name中末级名字合起来构成一个新的目录项, 将其填入new_name的末级目录文件中;
+(4) 将FCB主部中的连接计数加1.
+如: link(“/usr/Li/f1”, “/usr/Zhang/d2/f2”)
+
+## Slide 44
+8.8 文件系统的界面
+断开连接
+命令形式: unlink(path_name)
+参数含义:
+path_name: 文件路径名.
+执行步骤:
+(1) 查目录找到文件path_name的FCB主部;
+(2) 将连接计数i_nlink减1;
+(3) 如减1后的值为0, 则归还该文件所占用的全部存储块, 该文件将被撤销;
+(4) 将FCB次部由上级目录中清除.
+如: unlink(“/usr/Zhang/d2/f2”)
+
+## Slide 45
+UNIX文件系统的实现
+内存所需表目(UNIX)
+用户打开文件表
+u_ofile (每个进程一个)
+file (整个系统一个)
+系统打开文件表
+Inode (整个系统一个)
+外存空间的管理
+空闲块表
+字位映像图(Linux)
+成组连接 (UNIX approach)
+
+## Slide 46
+UNIX内存表目：
+1. u_ofile (每进程一个)
+struct user
+{
+…
+int u_ofile[NOFILE];
+…
+}
+#define NOFILE 15
+2. file  (系统一个)
+struct file
+{
+char f_flag;   //R,W,PIPE
+char f_count;
+int f_inode;
+char *f_offset[2];  //读写指针
+}file[NFILE]
+#define NFILE 100
+
+## Slide 47
+UNIX系统的FCB
+struct inode(外存)
+{
+int      i_mode;
+char   i_nlink;
+char   i_uid;
+char   i_gid;
+char   i_size0;
+char   *i_size1;
+int      i_addr[8];
+int      i_atime[2];
+int      i_mtime[2];
+}
+struct inode (内存)
+{
+int      i_flag;
+char   i_count;
+char   i_dev;
+char   i_number;
+char   i_mode;
+char   i_nlink;
+char   i_uid;
+char   i_gid;
+char   i_size0;
+char   *i_size1;
+int      i_addr[8];
+int      i_lastr;
+}inode[NINODE];
+
+## Slide 48
+表间联系：
+u_ofile  file
+(n)         (1)
+file  inode
+(n)        (1)
+
+## Slide 49
+read(4,…)
+read(4,…)
+…
+write(2,…)
+用户空间
+u_ofile
+u_ofile
+file
+i_node
+磁盘空间
+系统空间
+...
+数据块
+…
+…
+...
+i_list
+表间联系
+
+## Slide 50
+UNIX外存空间管理：
+0    1    2             …         k   k+1                     …            n-1
+导引块
+超级块
+inode区域
+每块16个inode,
+从0起依次编号
+文件存储区域
+(普通文件,目录文件)
+超级块(super block)：
+(1) 记载文件卷上k+1块到n-1块中所有空闲块，
+(2) inode区中100个空闲inode. (缓存)
+文件安装(mount)后超级块读入内存。
+注：占用区域已经记载在各个文件的inode中。
+
+## Slide 51
+Struct filesys {
+int s_isize;    //size in blocks of i list
+int s_fsize;    //size in blocks of entire volume
+int s_nfree;    //number of in core free blocks
+int s_free[100];    //in core free blocks
+int s_ninode;    //number of in core I list
+int s_inode[100];    //in core free I nodes
+char s_flock;    //free list locking
+char s_ilock;    //i list locking
+char s_fmod;    //super block modified flag
+char s_ronly;    //mounted read only flag
+char s_time[2];    //current date of last update
+int pad[50];
+}
+
+## Slide 52
+空闲块管理：
+100个空闲块为一组，组之间相互链接。
+…
+s_nfree=88
+s_free[0]
+s_free[1]
+...
+s_free[87]
+...
+Super block
+...
+...
+...
+...
+...
+特点：速度快，空间省。
+
+## Slide 53
+空闲块管理：
+申请时：
+(1) s_nfree>1, 取s_free[--s_nfree];
+(2) s_nfree=1, 将s_free[0]所指连接块读入内存,分配s_free[0].
+释放时:
+(1) s_nfree<100, s_free[n_free++]=释放块号;
+(2) s_nfree=100, 将s_nfree和s_free拷贝到释放的块中, 将该块号记录到s_free[0], 写回外存.
+
+## Slide 54
+空闲inode管理：
+s_inode最多可以记载100个空闲inode(编号)
+申请时：
+(1) s_ninode>0, 取s_inode[--s_ninode];
+(2) s_ninode=0, 由磁盘inode区顺取100个空闲I节点(i_nlink=0)
+将其编号填入s_inode表中，修改s_ninode，然后分配。
+释放时：
+(1) s_ninode<100, s_inode[s_ninode++]=i_number (释放的);
+(2) s_ninode=100, 丢弃。
+
+## Slide 55
+文件系统界面(UNIX系统调用)
+creat
+open
+close
+seek
+read
+write
+link
+unlink
+pipe
+mknode
+smount
+sumount
+chmod
+chowner
+state
+fstate
+chdir
+
+## Slide 56
+fd=creat(pathname,mode)
+pathname: 路径名；
+mode: 共享说明；
+分配一个inode, 初始化(i_size=0, i_mode=mode, i_nlink=1,i_uid=u_uid, i_gid=u_gid );
+2. 填写目录项(name, i_number)；
+3. 以写方式打开(填写inode表、file 表和u_ofile表)；
+4. 返回文件描述符。
+例子：
+creat(“d1/d2/f1”, mode)
+假定分配i_number=15, (f1,15)d2中(??????????????, -1)
+
+## Slide 57
+fd=open(pathname,mode)
+pathname: 路径名；
+mode: 打开方式；
+fd: 文件描述符(u_ofile表的入口)
+1. 查目录找inode(移入内存i_count=1, 如已在内存i_count++);
+2. 权限检查(mode打开方式, i_mode共享说明, i_uid, i_gid文件
+主（组）, u_uid, u_gid用户身份);
+3. 在file表中分配一个表项，指向该内存i_node; 初始化
+f_count=1;  f_offset=0; f_flag=mode;
+4. 在u_ofile中取一空闲表目，指向file表中对应表目;
+5. 返回文件描述符fd(在u_ofile表中的入口)。
+
+## Slide 58
+close(fd)
+fd: 文件描述符；
+1. 由fd查u_ofile找到对应入口；
+2. 由u_ofile[fd]找到file表对应入口；
+3. f_count--, 如为0, 由f_inode找到对应inode；
+4. i_count--, 如为0，i_flag标志有修改，写回外存inode区；
+5. u_ofile[fd]=-1(空闲标志)。
+
+## Slide 59
+seek(fd, whence, offset)
+fd: 文件描述符；
+whence: 相对位置(0,1,2,3,4,5)=(头，当前位置，尾)
+offset: 移动量；
+1. 由u_ofile[fd]找到file表入口；
+2. 由f_inode找到内存inode;
+3. 检查参数合法性(i_size0, i_size1, f_offset, offset, whence);
+4. 按参数要求调整f_offset指针。
+
+## Slide 60
+nrd=read(fd,buf,count)
+fd: 文件描述符；
+buf: 进程空间接收区地址；
+count: 读字节数；
+1. 由u_ofile[fd]，找到file表对应入口；
+2. 检查访问权限(f_flag, READ);
+3. 由f_inode找到内存inode入口；
+4. 由f_offset, count和i_addr计算访问磁盘块号(可能多个块)
+(bmap函数)；
+5. 启动IO设备读取盘块到系统缓冲区中(如buffer无,切换进程);
+6. 缓冲区信息复制到进程空间(iomove)；
+7. 返回实际传输字节数nrd。
+
+## Slide 61
+nwt=write(fd,buf,count)
+fd: 文件描述符；
+buf:进程空间发送地址；
+count: 写字节数；
+1. 由u_ofile[fd]，找到file表对应入口；
+2. 检查访问权限(f_flag, WRITE);
+3. 由f_inode找到内存inode入口；
+4. 由f_offset, count和i_addr计算磁盘地址块号(可能分盘块）；
+5. 申请系统缓冲区，将buf起始count数据送到缓冲区(可多次)；
+6. 缓冲区链到设备IO链上, 如设备空闲启动设备；
+7. 修改inode中文件长度i_size;
+8. 返回实际传输字节数nwt。
+
+## Slide 62
+pipe(fd)
+int fd[2];
+1. 分配一个inode，(i_count=2);
+2. 分配2个file表目(f_flag分别为PipeR和PipeW，读/写指针
+offset为0）
+3. 分配2个u_ofile表目, 分别指向2个file表目；
+4. 返回2个文件描述符fd[0],fd[1], 分别为u_ofile中的2个入口。
+pipe文件的使用
+读(read)：读指针追上写指针，读者等待；
+写(write)：写指针追上读指针，写者等待；
+关闭：无读者，信号通知写者；无写者，唤醒等待读者；
+
+## Slide 63
+link(oldpathname, newpathname)
+oldpathname: 已存在文件名；
+newpathname: 待连接文件名；
+1. 查目录找到oldpathname(inode);
+2. 查目录找到newpathname的末级目录；
+3. 检查操作合法性；
+4. Inode的i_nlink++；
+5. (name, i_number)newpathname的末级目录。
+例子：
+link(“d1/d2/f1”,“d1/d3/f2”)
+d1,d2,f1:  存在；
+d1,d3: 存在，f2:  不存在，
+
+## Slide 64
+unlink(pathname)
+pathname: 文件路径名；
+1. 查目录找到pathname(inode);
+2. i_nlink--; 如结果为0, 释放所有磁盘块 (删除文件)；
+3. 清除末级文件名在末级目录中的登记。
+例子：
+unlink(“d1/d2/f1”)
+假定：f1文件号i_number=15;
+操作后：f1的i_nlink--, d2中原(f1, 15)改为(f1, -1)
+
+## Slide 65
+mknode(pathname, type and permissions, dev)
+pathname:  节点名；
+type and permissions: 节点类型和访问权限；
+dev: 主次设备号；
+1. 如非特权用户，失败；
+2. 建立一个i_node, 初始化(i_addr[0]=dev);
+3. 填写目录项。
+
+## Slide 66
+struct  mount
+{
+int m_dev;
+struct buf *m_bufp; //超级块
+struct inode *m_inodep;
+}mount[NMOUNT];
+#define NMOUNT 5
+dev
+root
+rk05
+Makenode创建
+usr
+Li
+d01
+安装: smount(“/dev/rk05”, “/usr/Li/d01”, 0)
+卸下: sumount(“/dev/rk01”)
+i_flag =| FMOUNT
+
+## Slide 67
+bit:  15  14  13  12  11 10   9   8   7   6   5   4   3   2   1   0
+Set uid
+Set gid
+大文件
+00普通
+01字符
+10目录
+11块型
+i_mode:
+i_flag:
+ILOCK
+IUPD
+IACC
+IMOUNT
+IWANT
+ITEXT
+执行该文件进程的身份暂时改为文件主的身份
+即: u_uid = i_uid
+文件主权限
+同组用户权限
+其他用户权限
+
+## Slide 68
+smount(special_pathname, directory_pathname, roflag)
+special_pathname: 特殊文件名
+directory_pathname: 目录文件名（安装节点）
+roflag: 只读标志
+1. 检查是否超级用户；
+2. 找到special_pathname文件的inode(用mknode建立);
+3. 合法性检查（特殊块型文件）；
+4. 找到directory_pathname节点的inode;
+5. 如非目录或引用数大于１，错返；
+6. 读入super block到buf，按filesys格式解释.
+7. 安装节点inode的i_addr[0]=设备文件i_addr[0]; (dev)
+8. 分配一个mount表项，填写（m_dev，m_bufp，m_inodep），
+9  安装节点inode的i_flag =| IMOUNT.
+
+## Slide 69
+例子：
+smount(“/dev/disk1”,“/usr/d1”,0)
+安装之前：
+disk1只能作为特殊文件(块序列文件)访问(raw IO)；
+安装之后：
+d1成为disk1文件卷的根目录。
+disk1的super block读入内存缓冲区中，按filesys格式解释，根目录inode读入内存inode区中；
+内存中inode区是所有安装文件卷共用的，因而在内存inode中有i_dev指明inode对应的卷，用于回写。
+
+## Slide 70
+sumount(special_file_name)
+special_file_name: 待卸下卷的特殊文件名；
+1. 查目录找到inode，取dev(i_addr[0]);
+2. 释放特殊文件的inode;
+3. 由dev查mount表(m_dev)找到对应super block;
+4. 系统缓冲区延迟写块写回；
+5. 该卷所有更新i_node写回；
+6. super block写回；
+7. 释放super block所占用的缓冲区；
+8. 由m_inodep找到安装节点的inode;
+9. 安装节点i_flag =& ~IMOUNT;
+10. 释放mount表项。
+
+## Slide 71
+chdir(pathname)
+pathname: 目录路径名；
+查目录找到pathname的inode;
+(不在内存读入,i_count=1；已在内存i_count++)；
+2. 检查权限；
+3. u_cdir当前所指inode的i_count--, 如为0且修改过,写回外存;
+4. 新inode入口u_cdir
+
+## Slide 72
+chown(pathname,owner, group)
+pathname: 文件路径名
+owner: 新文件主
+group:  新文件组
+1. 查目录找到文件(inode)；
+2. 权限检查(文件主,特权用户)；
+3. 更新owner和group(i_uid, i_gid)；
+4. inode写回。
+
+## Slide 73
+chmode(pathname, newmode)
+pathname: 路径名；
+newmode: 新权限说明；
+1. 查目录找到文件(inode)；
+2. 权限检查(文件主,特权用户)；
+3. 更新i_mode(=newmode)；
+4. inode回写。
+
+## Slide 74
+state(pathname, statbuffer)
+pathname: 文件路径名；
+statbuffer: 状态缓冲区；
+1. 查目录找到内存inode；
+2. inode信息(所有者、大小、权限、属性、链接数、
+inode号、访问时间等)statbuffer;
+fstate(fd, statbuffer)
+1. 由u_ofile[fd]找到file表；
+2. 由file表找到i_node;
+3. i_node信息statbuffer;
+
+## Slide 75
+8.9日志结构文件系统
+背景
+CPU速度越来越快
+内存容量以接近指数级速度增长
+磁盘容量, 更大更便宜
+磁盘速度的提高却相对较慢
+成为系统效率的瓶颈
+
+## Slide 76
+8.9日志结构文件系统
+在UNIX系统中创建一个文件
+(1)文件名写入目录中；
+(2)新文件inode更新；
+(3)目录文件inode更新；
+(4)写入文件内容.
+小量写(small write)
+一次写修改磁盘块上的一小部分数据
+假定一次写需要10ms寻道时间, 4ms旋转延迟, 50µs读写，磁盘访问效率1%.
+延迟写
+发生故障给一致性带来威胁
+
+## Slide 77
+Log Structured File System
+日志结构文件系统
+UC Berkeley的研究人员提出
+一种全新的文件系统
+
+## Slide 78
+日志结构文件系统
+LSFS将整个磁盘看做一个日志，周期性地追加新日志。写操作并非直接反映到磁盘上，而是被暂时存到内存缓冲区中，其中包括新写的数据，也包括更新数据。当积累到一定规模时，作为一个segment追加到日志的末尾。
+
+## Slide 79
+LSFS结构图
+segment1
+segmentk
+new segment
+…
+… …
+segment结构
+summary
+Inodes, directories, data blocks
+
+## Slide 80
+日志结构文件系统
+Inode map:
+Inode存储位置不能由其编号确定，系统维持一个Inode map，以实现i-number到磁盘inode的映射。
+清洁线程(cleaner)
+循环扫描磁盘并对segment进行压缩。Cleaner 首先读入第一个segment，舍弃过时内容，仍有用的inode和数据块与内存当前segment合并作为新的segment写回磁盘，旧segment被标记为空闲，然后顺序处理下个segment.
+
+## Slide 81
+8.10 内存映射文件
+背景
+文件保存于外存，存取速度慢
+访问之前需要打开
+每次访问需要经过“打开文件表”
+读写需要经过I/O传输
+缓冲可以提高速度，但首次访问需要I/O
+内存容量增加，利用率不充分
+进程虚拟空间大，只使用较小的一部分
+提示：将文件映射到内存
+以访问内存的方式访问文件
+Open, map, 使用, umap, close
+
+## Slide 82
+Memory Mapped File
+Block 2
+Block 0
+Block 3
+Block 1
+文件f1
+Pi 页表
+内存空间
+0
+1
+2
+3
+4
+5
+map
+unmap
+fd=open(“f1”,’rw’);
+map(fd, 1K);
+access
+unmap(fd);
+close(fd).
+
+## Slide 83
+8.11 系统举例
+8.11.1 Linux文件系统
+VFS(Virtual File System)文件系统
+并不是一个实际文件系统，而是多种实际文件系统的一个统一界面。
+为多种文件系统（Ext2fs, FAT）提供统一接口，也为各种外部设备提供统一接口。
+Linux的核心是扩展的快速文件管理系统。
+Ext2fs文件系统
+
+## Slide 84
+VFS（Virtual File System）
+Ext2fs
+C缓冲
+B缓冲
+Network
+协议
+IO设备
+Block
+设备
+网络
+设备
+Linux文件系统
+
+## Slide 85
+引导块
+块组
+块组
+…
+块组
+…
+块组
+超级块
+组描述
+位示图
+inode
+文件块
+Ext2fs
+一组相邻的柱面
+
+## Slide 86
+Ext2fs与VFS差别
+存储块管理
+VFS采用大块（large block, up to 8K)＋碎块（fragment）
+Ext2fs 采用统一长度块（1kb,2kb,4kb)
+空闲块管理
+Bit map
+使一个文件物理块尽量连续或临近
+预先分配，未用完盘块在文件关闭时释放
+
+## Slide 87
+8.12 文件系统效率
+caching
+keep file blocks in core memory, whenever possible
+keep read-in block buffers associated with file blocks
+keep write-out block buffers associated with file blocks
+read ahead
+for sequential access
+current file block #15, next possible #16(read ahead)
+implementation
+access bit for each open file, open set to  0(sequential)
+seek turn over the flag(non sequential)
+
+## Slide 88
+8.11 文件系统的效率
+delayed write
+write is postponed until absolutely necessary
+no free buffer
+upon file close (all user close, i_count=0)
+system flush
+reducing disk arm motion
+allocating contiguous disk blocks to a file
+request to access disk are served in scan order

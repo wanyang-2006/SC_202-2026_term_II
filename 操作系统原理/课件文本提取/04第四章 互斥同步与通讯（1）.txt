@@ -1,0 +1,2661 @@
+# 04第四章 互斥同步与通讯（1）
+
+## Slide 1
+第四章  互斥、同步与通讯
+并发进程(concurrent processes)
+进程互斥(mutual exclusion)
+进程同步(synchronization)
+进程高级通讯(communication)
+
+## Slide 2
+4.1并发进程
+4.1.1前趋图的定义
+前趋图（precedence graph）
+有向无环图，图中每个结点表示一个语句、一个计算步骤、或一个进程。
+结点间的有向边表示偏序或前趋（precedence relation)关系“→” 。
+→={（Pi，Pj）| Pj启动之前Pi必须已经完成}。
+（Pi，Pj）∈→可记作Pi→Pj, 称Pi是Pj的前趋，Pj是Pi的后继。
+在前趋图中，没有前趋的结点称为初始结点，没有后继的结点称为终止结点。
+每个结点可以有一个权重(weight)，它可以表示该结点所包含的程序量或计算时间。
+
+## Slide 3
+4.1并发进程
+前趋图的例子
+P1→P2，P1→P3，P1→P4，P2→P5，P3→P5，P4→P5，P4→P6，P5→P7，P6→P7
+1
+4
+3
+2
+6
+5
+7
+
+## Slide 4
+4.1.2顺序程序及其特性
+4.1.2.1 程序的顺序执行
+(1)内部顺序性：对于一个进程来说，它的所有指令是按序执行的。
+S1：a:=x+y
+S2：b:=a-z
+S3：c:=a+b
+S4：d:=c+5
+S1
+S2
+S3
+S4
+
+## Slide 5
+4.1.2顺序程序及其特性
+(2)外部顺序性：对于多个进程来说，所有进程的活动是依次执行的。
+例: 输入(I)、计算(C)、打印(P)三个活动构成的进程，每个进程的内部活动是顺序的，即Ii→Ci→Pi，多个进程的活动也是顺序的。
+I1
+C1
+P1
+I2
+C2
+P2
+
+## Slide 6
+4.1.2顺序程序及其特性
+4.1.2.2顺序程序特性:
+(1)连续性: 指令逐条执行
+(2)封闭性: 不受其它程序及外界因素影响
+(3)可再现性: 结果与推进速度无关
+
+## Slide 7
+4.1.3 并发程序及其特性
+4.1.3.1 程序的并发执行
+(1)内部并发性: 指一个程序内部的并发性。例：
+S1：a:=x+2；
+S2：b:=y+4；
+S3：c:=a+b；
+S4：d:=c+6；
+S5：e:=c-d；
+2
+1
+4
+3
+5
+
+## Slide 8
+4.1.3 并发程序及其特性
+4.1.3.1 程序的并发执行
+(2)外部并发性: 指多个程序之间的并发性。
+I1
+I2
+I3
+I4
+C1
+C2
+C3
+C4
+P1
+P2
+P3
+P4
+
+## Slide 9
+4.1.3 并发程序及其特性
+4.1.3.2 并发程序的特性
+（1）间断性：程序交叉执行。
+（2）非封闭性：一个进程的运行环境可能被其它进程所改变，从而相互影响。
+（3）不可再现性：由于交叉的随机性，并发程序的多次执行可能对应不同的交叉，因而不能期望重新运行的程序能够再现上次运行的结果。
+
+## Slide 10
+4.1.3 并发程序及其特性
+不可再现性的例子
+进程P：                    进程Q：
+A1: N:=0；             B1: PRINT（N）；
+A2: N:=N+1；        B2: N:=0；
+A3: GOTO A2；       B3: GOTO B1；
+此例中进程P累计计数，进程Q将累计的结果打印出来。希望打印出的数是累计数的和。
+两个进程并发执行时有许多可能的交叉:
+如进程P循环5次进程Q循环1次，然后进程P又循环3次进程Q循环1次，则输出结果是5，3；
+如进程P循环2次进程Q循环1次，然后进程P又循环6次进程Q循环1次，则输出结果是2，6。两次执行结果完全不同。
+进程Q执行完B1后被中断，进程P对N执行加1操作，然后进程Q执行B2，在这种情况下进程P的累计数将被丢失。
+
+## Slide 11
+4.1.4 程序并发执行的条件
+在失去封闭性的条件下，保持可再现性。
+R(pi)={a1,a2,…,am}表示程序pi在执行期间所需读取的所有变量的集合，称为“读集”；
+W(pi)={b1,b2,…,bn}表示程序pi在执行期间所需改变的所有变量的集合，称为“写集”。
+若有两条语句c=a+b和v=c-1，则它们的“读集”和“写集”分别为：
+R(c:=a+b)={a,b}，R(v:=c-1)={c}
+W(c:=a+b)={c}，W(v:=c-1)={v}
+
+## Slide 12
+4.1.4 程序并发执行的条件
+若两个程序p1，p2满足如下条件，则能够保持可再现性，因而可以并发执行。该条件是1966年首先由Bernstein提出的，称为Bernstein条件。
+R(p1)∩W(p2)∪R(p2)∩W(p1)∪W(p1)∩W(p2)=Φ
+
+## Slide 13
+4.1.4 程序并发执行的条件
+例如，有如下四条语句：
+S1: a:=x+y
+S2: b:=z+1
+S3: c:=a-b
+S4: w:=c+1
+R(S1)={x,y}，R(S2)={z}，R(S3)={a,b}，R(S4)={c}
+W(S1)={a}，W(S2)={b}，W(S3)={c}，W(S4)={w}
+可见，R(S1)∩W(S2)∪R(S2)∩W(S1)∪W(S1)∩W(S2)=Φ，因而S1和S2可以并发执行；而S1 和S3不能并发执行，因为W(S1)∩R(S3)={a}；S2和S3也不能并发执行，因为W(S2) ∩R(S3)={b}；同样，S3和S4不能并发执行，因为W(S3)∩R(S4)={c}。
+
+## Slide 14
+4.1.5 并发程序的表示
+cobegin (concurrent begin)……coend (concurrent end)
+即S1、S2、…Sn为n条语句，若它们可以并发执行，则用并发语句表示为：      cobegin S1、S2；…；Sn coend；
+parbegin……parend
+即S1、S2、…Sn为n条语句，若它们可以并发执行，则用并发语句表示为：      parbegin S1、S2；…；Sn parend；
+遇到上述语句时，操作系统同时创建n个进程或线程，分别执行S1、S2、…Sn这n条语句，当它们都结束时并发或并行语句结束。
+并发程序给操作系统带来一系列问题
+如互斥、死锁、饥饿等，增加了操作系统的复杂度
+但与并发所带来的好处相比，所付出的代价是值得的
+
+## Slide 15
+4.1.6 与时间有关的错误
+例：图书借阅系统        （x:某种书册数，设当前x=1.）
+终端1：                           终端2：
+CYCLE                             CYCLE
+等待借书者；                    等待借书者；
+IF x>=1 Then                  IF x>=1 Then
+Begin                            Begin
+x:=x-1;                          x:=x-1;
+借书                               借书
+End                              End
+Else  无书                       Else  无书
+End                                End
+1
+2
+3
+4
+
+## Slide 16
+关于就绪队列的整队问题
+设有A,B,C,D四个就绪进程,优先级依次为2,10,30,35,分析插队过程中出现的情况.
+
+## Slide 17
+关于就绪队列的整队问题
+
+## Slide 18
+关于就绪队列的整队问题
+分析(1)若有E进程,优先数为25处于就绪状态,则要求加入就绪队列,调整队列子程序执行,该程序判断E应加入B,C之间,则执行
+R:=C; ①   B:=E ;  E:=R
+(2)若在① 时进程F因完成I/O由等待状态变为就绪,其优先级为15,调整队列子程序被中断,转入执行中服程序,则出现丢失一个进程
+R:=C;     B:=F;       F:=R
+结论:该错误因共享就绪队列引起,对就绪队列操作不当,也是与时间相关的错误导致结果不唯一.
+
+## Slide 19
+两进程申请两个独占性资源
+设有两个进程P1,P2,系统中有两类独占性资源如打印机和输入机,两进程的活动为:
+P1                                    P2
+申请打印机                     申请输入机
+①                                 ②
+申请输入机                     申请打印机
+执行                                   执行
+退出                                    退出
+
+## Slide 20
+两进程申请两个独占性资源
+分析: (1)若P1推进到①,P2推进到②,则P1,P2均等待对方释放资源形成永久等待.该错误也与推进速度有关是与时间相关的错误.
+
+## Slide 21
+4.1.5 与时间有关的错误(Cont.)
+错误原因之1：
+进程执行不正确的交叉(interleave);
+错误原因之2：
+同时对一个公共变量(x)操作，其中一个进程的操作没有结束，另一个进程也对公共变量进行操作，使得公共变量处于一种不确定的状态，用数据库的术语说就是失去了变量x的数据完整性。
+Remarks:
+上述错误并不是一定发生，而是与进程的推进速度有关，速度是时间的函数，因为这类错误称为与时间相关的错误
+某些交叉结果不正确;必须去掉导致不正确结果的交叉。
+
+## Slide 22
+4.2 进程互斥(mutual exclusion)
+4.2.1 共享变量与临界区
+4.2.2 临界区域与进程互斥
+4.2.3 进程互斥的实现
+4.2.4 多处理机环境下的互斥
+
+## Slide 23
+4.2.1 共享变量与临界区域
+共享变量（shared variable）
+多个进程都需要访问的变量。
+临界区域（critical region）
+访问共享变量的程序段。把临界区与其所对应的共享变量联系起来称为关于某一种共享变量的临界区
+一组公共变量
+CR1
+CR2
+CRn
+…….
+
+## Slide 24
+表示
+共享变量:  shared <一组变量>
+临界区域:  region <一组变量> do <语句＞
+例子：shared  B:array[0,..,n-1]of integer;
+region B do               region B do
+begin                      begin
+…… (访问B）          …..（访问B）.
+end;                       end;
+
+## Slide 25
+嵌套临界区域
+shared x1,x2;              shared y1,y2;
+region x1,x2 do             region y1,y2 do
+begin                        begin
+……                            …….
+region y1,y2 do             region x1,x2 do
+begin                         begin
+…….                           …….
+end                           end
+end;                          end;
+
+## Slide 26
+4.2.2 临界区域与进程互斥
+定义：多个进程不能同时进入关于同一组共享变量的临界区域，否则可能发生与时间有关的错误，这种现象称为进程互斥。
+二层涵义：
+（1）任何时刻最多只能有一个进程处于同一组共享变量的相同的临界区域；
+（2）任何时刻最多只能有一个进程处于同一组共享变量的不同的临界区域。
+Remarks: 互斥是相对于公共变量而言的。
+
+## Slide 27
+4.2.3 进程互斥的实现
+Framework
+Repeat
+critical section
+remainder section
+Until false
+entry section
+exit section
+
+## Slide 28
+4.2.3 进程互斥的实现
+Requirements:
+mutual exclusion(互斥性，互斥进入): 一次只允许一个进程进入关于同一组公共变量的临界区；
+Progress(进展性，空闲让进): 临界区空闲时，放行一个进入者；
+bounded waiting(有限等待): 一个想要进入临界区的进程在等待有限个进程进入并离开临界区后获得进入临界区的机会。
+
+## Slide 29
+临界区的调度原则：
+当关于某一组共享变量的所有临界区均为空闲时，一个要求进入该组共享变量某一临界区的进程应该能够立即进入；
+当关于某一组共享变量的某一临界区被占用时，一个要求进入该组共享变量某一临界区的进程应当等待；
+当一个进程离开关于某一组共享变量的某一临界区时，应当容许某一个等待进入该组共享变量某一临界区的进程进入；
+
+## Slide 30
+4.2.3.1 进程互斥的软件实现
+完全用程序实现，不需特殊硬件指令支持。
+可用于单CPU和多CPU环境中。
+有忙式等待问题。
+不进入等待状态
+它反复地检测一个条件，如果条件成立就反复地循环
+如果CPU被剥夺了，就回到就绪状态
+以后如果再分配CPU，还检测这个条件
+
+## Slide 31
+4.2.3.1 进程互斥的软件实现（续）
+忙式等待与阻塞式等待
+相同之处
+在于进程都不具备继续向前推进的条件
+不同之处
+处于忙式等待的进程不主动放弃CPU，尽管CPU可能被剥夺，因而是低效的
+而处于阻塞状态的进程主动放弃CPU，因而是高效的
+
+## Slide 32
+4.2.3.1 进程互斥的软件实现（续）
+软件实现方法
+在进入区设置和检查一些标志来标明是否有进程在临界区中
+如果已有进程在临界区，则在进入区通过循环检查进行等待
+进程离开临界区后则在退出区修改标志
+问题：设置什么标志和如何检查标志
+
+## Slide 33
+尝试1
+int turn;
+P0:                                                  P1:
+do{                                                do{
+while (turn==1) ;                       while(turn==0);
+临界区代码                                    临界区代码
+turn=1;                                         turn=0;
+其余代码                                        其余代码
+}while(1);                                      }while(1);
+不满足进展性: P0和P1必须交替进入临界区.
+
+## Slide 34
+尝试2
+Boolean flag[2];
+P0:                                             P1:
+Do{                                           do{
+while (flag[1]) ;                      while (flag[0]);
+flag[0]=true;                           flag[1]=true;
+临界区                                      临界区
+flag[0]=false;                         flag[1]=false;
+其余代码                                   其余代码
+}while(1);                                 while(1);
+不满足互斥性: flag[0]=flag[1]=false.
+
+## Slide 35
+尝试3
+boolean flag[2]; (false,false)
+do{                                                 do{
+flag[0]=true;                               flag[1]=true;
+while (flag[1]);                            while(flag[0]);
+临界区代码                                     临界区
+flag[0]=false;                              flag[1]=false;
+其余代码                                        其余代码
+}while(1);                                      }while(1);
+不满足进展性: flag[0]=flag[1]=true, 进程P1和进程P2都不能进入临界区.
+
+## Slide 36
+Dekker算法
+int flag[2];            //(init 0),表示进程想进入或已经进入临界区
+int turn; (0 or 1)  //初值为0或1，表示当前的轮流次序
+do{
+flag[0]=1;
+while(flag[1]) do
+if(turn==1){
+flag[0]=0;
+while (turn==1)
+skip;
+flag[0]=1;
+}
+临界区
+turn=1;
+flag[0]=0;
+其余代码
+}while(1);
+P0：
+do{
+flag[1]=1;
+while(flag[0]) do
+if(turn==0){
+flag[1]=0;
+while (turn==0)
+skip;
+flag[1]=1;
+}
+临界区
+turn=0;
+flag[1]=0;
+其余代码
+}while(1);
+P1：
+
+## Slide 37
+Peterson算法
+boolean flag[2];
+int turn;
+P0:
+Do{
+flag[0]=true; turn=1;
+while (flag[1] && turn==1);
+临界区
+flag[0]=false;
+其余代码
+}while(1);
+P1:
+Do{
+flag[1]=true; turn=0;
+while (flag[0] && turn==0);
+临界区
+flag[1]=false;
+其余代码
+}while(1);
+
+## Slide 38
+Lamport面包店算法
+38
+问题描述：一个面包店，较小，一次只能进入一位顾客。顾客在进入面包店之前，首先抓一个号，然后按照号码由小到大的顺序依次进入面包店购买面包。
+
+## Slide 39
+Lamport面包店算法
+算法思想：设置一个发号者，按0,1,2,…, 发号。想进入临界区的进程抓号，抓到号之后按由小到大的次序依次进入。
+Problem: 两个进程可能抓到相同的号。
+Why?  为保证抓到不同的号，需要互斥机制。
+Resolution: 若抓到相同的号，按进程编号依次进入。
+Definition: (a,b)<(c,d) iff (a<c)or(a==c and b<d)
+
+## Slide 40
+Lamport面包店算法
+Boolean choosing[0,…,n-1];//进程是否正在抓号
+Int number[0,…,n-1]; (0)  //进程抓到的号码
+Pi 进入：
+1. choosing[i]=true;   //进程正在抓号
+2. number[i]=max{number[0],…,number[n-1]}+1;
+3. choosing[i]=false;
+4. For(j=0;j<n;j++){
+5.     While (choosing[j]) skip;
+6.     While (number[j]!=0)and
+7.             (number[j],j)<(number[i],i) skip;
+8. }
+
+## Slide 41
+Lamport面包店算法
+Boolean choosing[0,…,n-1];（false)
+Int number[0,…,n-1]; (0)
+Pi 进入：
+1.
+2. number[i]=max{number[0],…,number[n-1]}+1;
+3.
+4. For(j=0;j<n;j++){
+5.
+6.     While (number[j]!=0)and
+7.             (number[j],j)<(number[i],i) skip;
+8. }
+(1)P1抓到1未赋值
+(2)P2抓到1进入临界区
+(3)P1抓到1进入临界区
+
+## Slide 42
+Lamport面包店算法(Cont.)
+Pi离开：
+number[i]=0：
+变量choosing的作用：
+P1：抓到1;
+P2：抓到1;
+P2进入后离开前P1进入,不满足互斥性.
+
+## Slide 43
+满足临界区管理原则
+互斥性(mutual exclusion)
+多个进程竞争进入临界区时, 下述条件之一成立: (1)一个进程抓到最小号, (2)若干进程抓到最小号. 情形(1)抓到最小号的进程获准进入临界区; 情形(2)编号最小抓到最小号的进程获准进入临界区, 其它进程将在第一个while循环或第二个while循环处等待, 因而满足互斥性.
+进展性(progress)
+当仅有一个进程想进入临界区时, 该进程可以立即进入; 当有多个进程想进入临界区时其二元组(number[i],i)最小的进程获准进入, 因而确定进入临界区进程的决策将在有限时间内确定.
+有限等待性(bounded waiting)
+对任意一个想要进入临界区的进程Pi, 设其抓到号码为number[i], 按二元组(number[i],i)次序排在Pi之前的竞争进程数量是有限的, 在最坏情况下Pi将等待n-1个排在其前面的进程进入并离开临界区后获得进入临界区的资格, 因而满足有限等待性.
+
+## Slide 44
+Eisenberg/Mcguire算法
+enum flag[0,…,n-1] (idle, want_in, in_cs);
+int turn;  //0..n-1; 初始任意
+0
+i
+turn
+n-1
+先于i
+先于i
+flag[i]==idle:  进程Pi不想进入临界区
+flag[i]==want_in:   进程Pi想进入临界区
+flag[i]==in_cs:   进程Pi想进入或已进入临界区
+
+## Slide 45
+将n个进程首尾相连
+45
+Eisenberg/Mcguire算法（Cont.）
+
+## Slide 46
+如果Pi想要进入临界区，将状态置为want_in，还需要看从turn开始到i-1是否有想要进入临界区的进程。
+46
+Eisenberg/Mcguire算法（Cont.）
+
+## Slide 47
+如果从turn开始到i-1，这些进程都不想进入临界区，则Pi有机会进入临界区，将状态置为in_cs。
+47
+Eisenberg/Mcguire算法（Cont.）
+
+## Slide 48
+48
+问题：
+进程Pi能否进入临界区？
+不一定
+如果当i号进程扫描i-1号进程时是idle的，但扫描过去后，i-1号进程也想进入临界区，将自己的状态置为want_in，接下来， i-1号进程将扫描从turn开始到i-2，如果这些进程状态都是idle的，也会将自己的状态置为in_cs
+同样，对于l，k号进程，也会将自己状态置为in_cs
+Eisenberg/Mcguire算法（Cont.）
+
+## Slide 49
+多个进程状态都是in_cs。如何处理？
+49
+Eisenberg/Mcguire算法（Cont.）
+
+## Slide 50
+从头来。将进程状态置为want_in
+重新扫描，那么对于i号进程，扫描turn到i-1时，所有进程状态不都是idle了，不能通过检查，不能将自己状态置为in_cs。
+其它进程同理。
+50
+Eisenberg/Mcguire算法（Cont.）
+
+## Slide 51
+针对l号进程，如果在从turn到l-1，进程状态都为idle，则l号进程将自己状态置为in_cs。
+思想：一个进程将自己状态置为in_cs后，要检测其它进程状态是否为in_cs，如果都不是in_cs，则可以进入临界区。反过来，如果除了自己外，还有其它进程状态为In_cs，则从头来。
+51
+Eisenberg/Mcguire算法（Cont.）
+
+## Slide 52
+52
+Eisenberg/Mcguire算法（Cont.）
+Do{
+flag[i]=want_in; // Pi想进入临界区
+j=turn; //全局变量，给出轮到哪个进程进入临界区了
+While (j!=i) //从j开始到i-1，如果所有进程状态都为idle，结束循环
+//否则，重新扫描
+If (flag[j] != idle) j=turn //从头来，重新扫描
+Else  j=(j+1)% n;
+flag[i]=in_cs;
+j=0;
+While (j<n)and(j==i or flag[j]!=in_cs) do //确认无冲突其它进程是否为in_cs
+j++;
+}while (j!=n);//遍历一遍，j=n时表示无其它进程为in_cs， Pi可以进入
+//如果还有进程状态是in_cs，则从头来
+turn=i;
+
+## Slide 53
+53
+Eisenberg/Mcguire算法（Cont.）
+Pi离开：          //从临界区出来，将互斥权交给第一个不是idle的进程
+j=(turn+1)% n;
+While (flag[j]==idle)
+j=(j+1)% n;
+turn=j;
+flag[i]=idle;//该条语句不能放在退出临界区后的第一条语句位置，这样会导致上述while循环不终止！！
+CS
+
+## Slide 54
+满足临界区管理原则
+互斥性
+仅当flag[i]==in_cs, 且对所有j!=i, flag[j]!=in_cs时, 进程Pi才进入临界区域, 因而满足互斥性.
+进展性
+临界区空闲时, 排在序列turn, turn+1, …, n-1,0,1, 2,…,turn-1最前面的申请进入临界区的进程获准进入临界区, 因而满足进展性.
+有限等待性
+进程离开临界区时,按循环次序turn+1, …, n-1,0,1, 2,…,turn-1确定唯一一个竞争进程为其后继, 所以一个进程最多等待n-1个进程进入并离开临界区后一定能进入临界区, 因而满足有限等待性.
+
+## Slide 55
+4.2.3.2 进程互斥的硬件实现
+1. 硬件提供“测试并建立”指令
+int test_and_set(int &target){
+int temp;
+temp=target;
+*target=1;
+return(temp);}.
+对一组公共变量，int lock;（初始=0);
+Pi进入：While test_and_set(&lock);
+Pi离开：lock=0;
+满足互斥性，进展性，不满足有限等待性。
+
+## Slide 56
+4.2.3.2 进程互斥的硬件实现
+满足有限等待性：
+全局变量：
+int waiting[n];可能忙等标志
+int lock;
+局部变量：
+int j;
+int key;
+waiting[i]=1; key=1;
+While(waiting[i]&&key)
+key=test_and_set(&lock);
+waiting[i]=0;//清除忙等标志
+临界区
+J=(i+1)%n;//找第一个忙等进程
+While(((j!=i)&&(!waiting[j]))
+j=(j+1)%n;//下一个无忙等进程
+If(j==i) lock=0;//无忙等进程，开锁
+Else waiting[j]=0;//清除j号进程忙等标志
+其余部分
+
+## Slide 57
+4.2.3.2 进程互斥的硬件实现
+2. 硬件提供“交换”指令
+void swap(int &a,&b){
+int temp;
+temp:=*a; *a:=*b; *b:=temp;
+};
+对一组公共变量：int lock (初始=0);
+对一个进程空间：int key;
+Pi进入：key=1;
+do swap(&lock,&key) while (key==1);
+Pi离开：lock=0;
+
+## Slide 58
+4.2.3.2进程互斥的硬件实现
+Remarks：
+(1) test_and_set指令和swap指令是原子的，不可中断的(在单CPU情况下)。
+(2) test_and_set实际上是：将内存中一个单元的内容取出，再送一个新值。
+(3) swap实际上是：交换内存两个单元的内容。
+
+## Slide 59
+4.2.3.2进程互斥的硬件实现
+3. 硬件提供“关中断”和“开中断”指令
+关中断
+{ Critical Region}
+开中断
+Remarks:
+(1) 开关中断只在单CPU系统中有效;(why?)
+(2) 影响并发性。
+
+## Slide 60
+4.2.4 多处理机环境下互斥
+单CPU, 指令间交叉, test_and_set, swap指令是原子的;
+多CPU, 指令周期间交叉, test_and_set, swap指令不是原子的;
+
+## Slide 61
+4.2.4 多处理机环境下互斥
+内存
+Word 1000
+initial:   0
+CPU1
+CPU2
+Bus
+1. Read 0
+3.  Write  1
+2.  Read 0
+4.  Write 1
+
+## Slide 62
+4.2.4 多处理机环境下互斥
+TS指令，Swap指令: first lock the bus
+bus request protocol:
+modern buses have these facilities
+earlier ones didn’t
+
+## Slide 63
+4.2.4 多处理机环境下互斥
+b=1;
+while(b){
+lock(bus);
+b = test_and_set(&lock);
+unlock(bus);
+}
+lock=0;
+CR
+
+## Slide 64
+进程互斥
+经典UNIX系统
+机制
+关中断互斥(提高处理机优先级)
+特点
+简单
+开销小
+影响并发性
+关中断后代码很短
+在SMP系统中采用自旋锁
+
+## Slide 65
+作业 #2
+Consider the following program:
+var blocked: array[0..1]of boolean;
+turn:0..1;
+procedure P(id:integer);
+begin
+repeat
+blocked[id]:=true;
+while turn<>id do
+begin
+while blocked[1-id] do
+{nothing}
+turn:=id
+end;
+<Critical section>
+blocked[id]:=false;
+<Remainder>
+until false
+end;
+begin
+blocked[0]:=false;
+blocked[1]:=false;
+turn:=0;
+parbegin
+P(0); P(1)
+parend;
+end.
+This is a software solution to the mutual exclusion problem proposed by Hyman. Find a counter example to demonstrate that this solution is incorrect. It is interesting to note that even the Communication of the ACM was fooled on this one.
+
+## Slide 66
+4.3 进程同步
+4.3.1 进程同步的概念
+例：司机-售票员问题
+司机活动：                售票员活动：
+do{                             do{
+启动车辆                    关车门
+正常行驶                    售    票
+到站停车                    开车门
+}while(1)                  }while(1)
+
+## Slide 67
+4.3.1 进程同步的概念
+定义：一组进程，为协调其推进速度，在某些关键点处需要相互等待与相互唤醒，进程之间这种相互制约的关系称为进程同步。
+P1:
+P2:
+synchronize
+后
+先
+
+## Slide 68
+4.3.2  进程同步机制
+定义：
+用于实现进程同步的工具称为同步机制（synchronization mechanism）
+一组进程，如果它们单独不能正常进行，但并发可以正常进行，称这种现象为进程合作
+参与合作的进程称作合作进程
+
+## Slide 69
+4.3.2  进程同步机制
+同步机制要求：
+描述能力够用;
+可实现;
+高效;
+使用方便.
+
+## Slide 70
+典型同步机制
+信号量与PV操作(semaphore and PV operations)
+管程(monitor)
+会合(rendezvous)
+条件临界区(conditional critical region)
+路径表达式(path expression)
+事件(event,traditional UNIX)
+
+## Slide 71
+4.3.3  信号量与PV操作
+E.W.Dijkstra, 1965.
+4.3.3.1 信号量与PV操作的定义
+Typedef semaphore struct{
+int value;
+PCBpointer queue;
+};
+semaphore s;
+Remarks:
+(1) semaphore is pre-defined data type,
+(2) s can be declared as needed, eg. semaphore s1,s2;
+
+## Slide 72
+信号灯变量
+S.value
+S.queue
+S.value
+S.queue
+PCB
+PCB
+PCB
+Var S:semaphore;
+FIFO
+
+## Slide 73
+P操作原语
+P操作原语：
+void P(semaphore*s)
+{ s->value--;
+If s->value<0
+asleep(s->queue)
+}
+asleep(s->queue):
+(1) 执行此操作进程的PCB入s->queue尾（状态改为等待）；
+(2) 转处理机调度程序。
+Primitive:: a piece of code
+un-interruptible
+
+## Slide 74
+V操作原语
+V操作原语：
+void V(semaphore *s)
+{ s->value++;
+if (s->value<=0)
+wakeup(s->queue);
+}
+wakeup(s->queue)
+S->queue链头PCB出等待队列，进入就绪队列（状态改为就绪）。
+Primitive: a piece of code
+un-interruptible
+
+## Slide 75
+规定和结论
+对于信号量变量的规定：
+必须置一次初值，只能置一次初值，初值>=0;
+只能执行P操作和V操作，所有其它操作非法。
+几个有用的结论：
+当s->value>=0时，s->queue为空；
+当s->value<0时，|s->value|为队列s->queue的长度；
+当s->value初=1时，可以实现进程互斥；
+当s->value初=0时，可以实现进程间的简单同步；
+当s->value为非1的正整数时，可以用来管理同种组合资源，申请资源执行一次P操作，归还资源执行一次V操作；
+
+## Slide 76
+用开关中断实现P、V操作
+void P(semaphore *s)
+{disable interrupt;
+s->value--;
+if (s->value<0)
+{asleep(s->queue)
+enable interrupt;
+goto CPU dispatcher;
+}else
+enable interrupt;
+}
+
+## Slide 77
+用开关中断实现P、V操作
+void V(semaphore *s)
+{disable interrupt;
+s->value++;
+if (s->value≤0)
+{wakeup(s->queue)；
+enable interrupt;
+}else
+enable interrupt;
+}
+
+## Slide 78
+用开关中断实现P、V操作
+asleep(s->queue):set this process status to blocked;place this process in s->queue.
+wakeup(s->queue):remove a process from s->queue;place the process in ready list.
+
+## Slide 79
+用TS、swap指令实现P、V操作
+void P(semaphore *s)
+{while(TS(s->flag));
+s->value--;
+if (s->value<0)
+{asleep(s->queue)
+s->flag=0;
+goto CPU dispatcher;
+}else
+s->flag=0;
+}
+
+## Slide 80
+用TS、swap指令实现P、V操作
+void V(semaphore *s)
+{while(TS(s->flag));
+s->value++;
+if (s->value≤0)
+{wakeup(s->queue)
+s->flag=0;
+}else
+s->flag=0;
+}
+
+## Slide 81
+用信号量和P、V实现进程互斥
+Var mutex: semaphore; (初值=1）
+shared x,y,z:integer;
+CR1                CR2                  CRn
+……
+
+## Slide 82
+用信号灯实现进程互斥
+Var mutex: semaphore; (初值=1）
+shared x,y,z:integer;
+P(mutex)          P(mutex)              P(mutex)
+CR1               CR2                   CRn
+V(mutex)          V(mutex)             V(mutex)
+……
+
+## Slide 83
+互斥例子：借书系统(revisited)
+Var mutex:semaphore; (initial value is 1)
+终端1：                           终端2：
+CYCLE                             CYCLE
+等待借书者；               等待借书者；
+IF x>=1 Then                     IF x>=1 Then
+Begin                                 Begin
+x:=x-1;                               x:=x-1;
+借书                                   借书
+End                                    End
+Else 无书;                           Else 无书;
+End                                    End
+
+## Slide 84
+互斥例子：借书系统(revisited)
+Var mutex:semaphore; (initial value is 1)
+终端1：                           终端2：
+CYCLE                             CYCLE
+等待借书者；               等待借书者；
+P(mutex)                    P(mutex)
+IF x>=1 Then              IF x>=1 Then
+Begin                        Begin
+x:=x-1;                     x:=x-1;
+V(mutex)                    V(mutex)
+借书                          借书
+End                           End
+Else V(mutex);无书;        Else V(mutex);无书;
+End                                    End
+
+## Slide 85
+用信号量、P、V实现进程同步
+后动作
+先动作
+P1:
+P2:
+
+## Slide 86
+用信号灯实现进程同步
+General Case:
+VAR S:semaphore; (initial value 0)
+P(S)
+后动作
+先动作
+V(S)
+P1:
+P2:
+
+## Slide 87
+用信号量、P、V实现进程同步
+例子：司机-售票员问题：
+司机活动：              售票员活动：
+Do{                      Do{
+关车门
+启动车辆
+正常行驶                售  票
+到站停车
+开车门
+}While(1)            }While(1)
+
+## Slide 88
+用信号量、P、V实现进程同步
+例子：司机-售票员问题：
+VAR s1,s2: semaphore; (initial value 0)
+司机活动：              售票员活动：
+Do{                    Do{
+P(S1)                   关车门
+启动车辆                V(S1)
+正常行驶                售  票
+到站停车                P(S2)
+V(S2)                   开车门
+}While(1)              }While(1)
+
+## Slide 89
+Classical synchronization problems
+1. Producers and consumers problem
+2. Readers and writers problem
+3. Dining philosophers problem
+4. Cigarette smokers problem
+5. Sleepy barbers problem
+etc.
+
+## Slide 90
+例1. 生产者/消费者问题
+预备知识：
+组合资源：若干相对独立的资源构成的资源集合，其中每个相对独立的资源称为子资源。
+同种组合资源：相同类型子资源构成的组合资源。
+管理：Var S:semaphore; (初值=子资源个数）
+例子：2台打印机
+Var S:semaphore; S.value=2;
+申请：P（S）；
+释放：V（S）；
+
+## Slide 91
+自动机描述
+2
+…
+1
+0
+-1
+-2
+P(S)
+P(S)
+P(S)
+P(S)
+P(S)
+V(S)
+V(S)
+V(S)
+V(S)
+V(S)
+S->value=空闲资源数
+S->queue=空
+|S->value|=等待进程数
+空闲资源数=0
+...
+P(S): 申请一台打印机, 分配, 空闲打印机减1
+P(S): 申请一台打印机, 等待, 等待进程数加1
+
+## Slide 92
+2
+自动机描述
+…
+1
+0
+-1
+-2
+P(S)
+P(S)
+P(S)
+P(S)
+P(S)
+V(S)
+V(S)
+V(S)
+V(S)
+V(S)
+S->value=空闲资源数
+S->queue=空
+|S->value|=等待进程数
+空闲资源数=0
+...
+V(S): 释放一台打印机, 唤醒一个等待者, 打印机分给被唤醒进程, 等待进程数减1
+V(S): 释放一台打印机, 空闲打印机数量增1
+
+## Slide 93
+例1. 生产者/消费者问题
+0    1            ……          k-1
+箱子，容量k
+B:Array[0..k-1]Of item
+生产者
+消费者
+生产物品
+放入B中
+B中取物品
+消费之
+
+## Slide 94
+环形缓冲区
+1
+0
+K-1
+in
+(in+1)mod k
+out
+(out+1)mod k
+
+## Slide 95
+问题分析
+生产者活动：                        消费者活动：
+do{                    do{
+加工一件物品                  箱中取一物品
+物品放入箱中                  消耗这件物品
+}while(1)              }while(1)
+资源：箱子（同种组合）     资源：物品（同种组合）
+Var S1:semaphore;       Var S2:semaphore;
+S1->value=k;               S2->value=0;
+放前：P（S1）             取前：P（S2）
+放后：V（S2）             取后：V（S1）
+
+## Slide 96
+同步
+生产者活动：                              消费者活动：
+Do{                      Do{
+加工一件物品                      P(S2)
+P(S1)                                     箱中取一物品
+物品放入箱中                   V(S1)
+V(S2)                                    消耗这件物品
+}While(1)               }While(1)
+对B和in,out的互斥：
+Var mutex:semaphore; (mutex.value=1)
+
+## Slide 97
+互斥
+生产者活动：                          消费者活动：
+Do{                       Do{
+加工一件物品                       P(S2)
+P(S1)                                      P(mutex)
+P(mutex)                               箱中取一物品
+物品放入箱中                       V(mutex)
+V(mutex)                              V(S1)
+V(S2)                                     消耗这件物品
+}While(1)                }While(1)
+
+## Slide 98
+考虑死锁
+生产者活动：                          消费者活动：
+Do{                       Do{
+加工一件物品                       P(mutex)
+P(mutex)                             P(S2)
+P(S1)                                  箱中取一物品
+物品放入箱中                       V(S1)
+V(S2)                                   V(mutex)
+V(mutex)                             消耗这件物品
+}While(1)                }While(1)
+
+## Slide 99
+程序
+Program producers_consumers;
+Var B:Array[0,…,k-1]Of item;
+S1,S2,mutex:semaphore;
+in,out:0..k-1;
+Procedure producer
+cycle
+produce a product
+P(S1);
+P(mutex);
+B[in]:=product;
+in:=(in+1)mod k;
+V(mutex);
+V(S2)
+end
+Procedure consumer
+cycle
+P(s2);
+P(mutex);
+x:=B[out];
+out:=(out+1)mod k;
+V(mutex);
+V(S1);
+consume x;
+end;
+
+## Slide 100
+程序
+Begin
+S1.value:=k; S2.value:=0;
+mutex.value:=1;
+in:=0; out:=0;
+Cobegin
+P1: producer; …… , Pm: producer;
+C1: consumer; ……, Cn: consumer;
+Coend;
+End.
+
+## Slide 101
+并发性提高策略
+生产者和消费者：不操作B的相同分量
+生产者的共享变量：
+B[in], in
+消费者的共享变量：
+B[out], out
+in=out: 满或空,
+Var mutex1,mutex2:semaphore; (init 1)
+
+## Slide 102
+并发性提高策略
+生产者活动：                              消费者活动：
+Repeat                   Repeat
+加工一件物品                      P(S2)
+P(S1)                                     P(mutex2)
+P(mutex1)                            箱中取一物品
+物品放入箱中                      V(mutex2)
+V(mutex1)                            V(S1)
+V(S2)                                    消耗这件物品
+Until false               Until false
+
+## Slide 103
+例2. 读者/写者问题
+P. T. Courtois 1971
+Communication of the ACM, Vol.14, 667-669.
+ACM: Association for Computing Machinery
+解法1：写者可能饿死
+解法2：写者优先
+
+## Slide 104
+例2. 读者/写者问题
+Problem Statement:
+一组公共数据DB
+R1 …… Rm W1 …... Wn
+要求：（1）R-R可以同时
+（2）R-W不可同时
+（3）W-W不可同时
+accessing
+
+## Slide 105
+Solution1:  不考虑R-R不互斥
+Var r_w_w:semaphore; (init value: 1)
+Reader：                      Writer:
+P(r_w_w);                   P(r_w_w)
+{读操作}                       {写操作}
+V(r_w_w);                   V(r_w_w)
+分析：（1）写者活动正确；（2）R-R不能同时。
+改进：最先进入的R执行P；最后离开的R执行V；
+
+## Slide 106
+Solution2:  考虑R-R不互斥
+Var read_count:integer; (initial value is 0)
+Reader:
+read_count:=read_count+1;
+If read_count=1 Then P(r_w_w);
+{读操作}
+read_count:=read_count-1;
+If read_count=0 Then V(r_w_w);
+问题：对Read_count操作的互斥问题。
+
+## Slide 107
+Solution3: 正确解法
+Var mutex:semaphore; (initial value is 1)
+Reader:
+P(mutex);
+read_count:=read_count+1;
+If read_count=1 Then P(r_w_w);
+V(mutex);
+{读操作}
+P(mutex);
+read_count:=read_count-1;
+If read_count=0 Then V(r_w_w);
+V(mutex);
+读者等待在何处？
+读者如何被唤醒？
+
+## Slide 108
+程序
+Program readers_writers;
+Var r_w_w: semaphore;
+mutex:semaphore;
+read_count: integer;
+procedure writer;
+begin
+P(r_w_w);
+{ write ops }
+V(r_w_w)
+end;
+
+## Slide 109
+程序（Cont.）
+Procedure reader;
+begin
+P(mutex);
+read_count:=read_count+1;
+If read_count=1 Then P(r_w_w);
+V(mutex);
+{ read ops }
+P(mutex);
+read_count:=read_count-1;
+If read_count=0 Then V(r_w_w);
+V(mutex);
+end;
+
+## Slide 110
+程序（Cont.）
+begin
+read_count:=0;
+r_w_w.value:=1;
+mutex.value:=1;
+cobegin
+r1: reader; ……; rm: reader;
+w1: writer; ,,,,,,; wn: writer
+coend
+end.
+
+## Slide 111
+分析：
+问题：读者源源不断，read_count不归0，写者会被饿死。
+策略：一旦有写者等待，新到达读者等待，正在读的读者都结束后，写者进入。
+Further improvement is left to
+interested students.
+
+## Slide 112
+例3. 哲学家就餐问题
+Dining Philosophers Problem
+Proposed and solved by
+E.W. Dijkstra, in 1965
+
+## Slide 113
+例3. 哲学家就餐问题
+Room
+ph0
+ph4
+ph3
+ph2
+ph1
+f0
+f4
+f3
+f2
+f1
+
+## Slide 114
+例3. 哲学家就餐问题
+哲学家活动：
+Do{
+思考
+进食
+}While(1)
+进食：需要“叉子”
+叉子：不同种组合资源
+哲学家活动（包含资源活动）
+Do{
+思考
+取左叉，取右叉
+进食
+放左叉，放右叉
+}While(1)
+
+## Slide 115
+解决方法
+var fork : array [0…4] of semaphore;
+fork [0], fork [1], fork [2], fork [3], fork [4] :=1;
+process PH ( i) begin
+repeat
+think;
+P (fork [i]);
+P(fork [(i+1)mod 5]);
+eat;
+V(fork[ i]);
+V(fork[(i+1) mod 5]);
+end;
+死锁情况：每位哲学家拿到左叉，等待右叉。
+
+## Slide 116
+死锁预防策略
+死锁解决方法：同时申请左、右两把叉子（预先分配）。
+哲学家状态描述（增加了hungry状态）：
+State: Array[0..4]Of (thinking,hungry,eating);
+等待队列设置（每个哲学家一个队列）：
+Self: Array[0..4]Of semaphore; (initial value is 0);
+
+## Slide 117
+就餐条件测试
+测试I号哲学家是否具备进食条件：
+Procedure test(I:0..4)
+If (state[I]=hungry) and
+(state[(I-1)mod 5]<>eating) and
+(state[(I+1)mod 5]<>eating)
+Then state[I]:=eating; V(self[I])
+Remark:
+1.自测试不需要state[I]=hungry, 但测试左邻右舍需要此条件。
+2.如果i号哲学家处于饥饿状态，且左右两边的哲学家都不处于进食状态，那么将i号哲学家状态改为进食状态，同时唤醒i号哲学家。
+
+## Slide 118
+未考虑互斥问题
+I号哲学家活动：
+1. Repeat
+2.   思考
+3.   state[I]:=hungry;
+4.   test(I);
+5.   P(self[I]);
+6.   取左叉，取右叉；
+7.   进食
+8.   放左叉，放右叉；
+9.   state[I]:=thinking;
+10   test((I-1)mod 5);
+11.  test((I+1)mod 5)
+12.Until false;
+共享变量：state;
+临界区域：3-4, 9-11
+Var mutex:semaphore;(1)
+
+## Slide 119
+考虑互斥问题
+I号哲学家活动：
+1.     Repeat
+2.       思考
+3.       P(mutex);
+4.      state[I]:=hungry;
+5.       test(I);
+6.       V(mutex);
+7.       P(self[I]);
+8.       取左叉，取右叉；
+9.       进食
+10.     放左叉，放右叉；
+11.   P(mutex);
+12.  state[I]:=thinking;
+13    test((I-1)mod 5);
+14.   test((I+1)mod 5);
+15.   V(mutex)
+16.Until false;
+
+## Slide 120
+程序
+Program dining_philosophers
+var state:array[0..4]of (thinking,hungry,eating);
+self:array[0..4]of semaphore;
+mutex:semaphore;
+procedure test(I:0..4)
+begin
+if (state[I]=hungry)and
+(state[(I-1)mod 5]<>eating)
+and(state[(I+1)mod 5]<>eating) then
+begin state[I]:=eating; V(self[I]) end
+end;
+
+## Slide 121
+程序(Cont.)
+Procedure philosopher(I:0..4)
+begin
+cycle
+{thinking}
+P(mutex);
+state[I]:=hungry;
+test(I);
+V(mutex);
+P(self[I]);
+
+## Slide 122
+pick_up_fork(I);pick_up_fork((I+1)mod 5);
+{Eating};
+put_down_fork(I);put_down_fork((I+1)mod 5);
+P(mutex);
+state[I]:=thinking;
+test((I-1)mod 5);
+test((I+1)mod 5);
+V(mutex);
+end
+end
+程序(Cont.)
+
+## Slide 123
+程序(Cont.)
+begin
+for I:=0 to 4 do
+begin state[I]:=thinking; self[I].value:=0 end;
+mutex.value:=1;
+cobegin
+ph0: philosopher(0);
+…….
+Ph4: philosopher(4);
+coend
+end.
+
+## Slide 124
+问题
+饿死情况：
+某哲学家左右邻居至少有一个处于eating状态。
+一     二        三       四        五
+1         2        3       4          5           1
+
+## Slide 125
+解决方法
+var fork : array [0…4] of semaphore;
+fork [0], fork [1], fork [2], fork [3], fork [4] :=1;   count:semaphore;
+count := 4;
+process PH ( i)                           eat;
+begin                                    V(fork[ i]);
+repeat                                 V(fork[(i+1) mod 5]);
+think;                                 V( count);
+P( count );                          until false;
+P (fork [i]);                       end;
+P(fork [(i+1)mod 5]);
+
+## Slide 126
+例4. 吸烟者问题
+Cigarette Smokers’ Problem
+Patil S. S. Limitations and Capabilities of Dijkstra’s semaphore primitives for coordination among processes. MIT project MAC Computation Structure Group Memo 57, MIT, Cambridge, Mass, 1977.
+
+## Slide 127
+吸烟者问题-problem statement
+3 supplier processes:
+X: supplies tobacco and match;
+Y: supplies match and wrapper;
+Z: supplies wrapper and tobacco.
+3 smoker processes:
+A: possess tobacco;
+B: possess match;
+C: possess wrapper.
+(1) only one of X,Y,Z can supply at a time;
+(2) X,Y,Z can proceed only after consumption.
+
+## Slide 128
+Traditional semaphore:
+Var t,m,w,s:semaphore; (0,0,0,1)
+Process X        process Y       process Z
+P(s);              P(s);             P(s);
+V(t);             V(m);            V(w);
+V(m);            V(w);             V(t);
+Process A        Process B       process C
+P(m);            P(w);              P(t);
+P(w);            P(t);               P(m);
+smoke;          smoke;            smoke;
+V(s);            V(s);               V(s);
+
+## Slide 129
+Simultaneous P-operation
+SP(S1,t1,d1;…;Sn,tn,dn);
+if S1>=t1 and … and Sn>=tn then
+for I:=1 to n do Si:=Si-di endfor
+else
+(1) place the executing process in the waiting queue for the first Si with Si<ti,  //将运行进程插入到第一个Si<ti的队列
+(2)and set the program counter to the beginning of the SP operation so that all conditions will be reexamined when the process is reactivated. //将该进程的PC寄存器的内容设置为SP操作的起始位置，使得当该进程重新执行时可以对所有条件进行重新评估
+ti： ：资源分配的下限值
+d1 ：进程对该资源的需求值
+
+## Slide 130
+Simultaneous V-operation
+SV(S1,d1;…;Sn,dn)
+{
+for(i=1; i<=n; i++)
+Si = Si+di；
+Remove all processes waiting in the
+queue associated with Si into ready queue；}
+其中Si为信号量，ti、di为大于0的整数。当ti、di均为1时，称为AND型信号量，是最常用的一种形式
+
+## Slide 131
+吸烟者问题-Solution
+Shared t,w,m:semaphore; (0,0,0)
+s:semaphore; (1)
+Process X           Process Y           Process Z
+loop                  loop                 loop
+P(s);                 P(s);                P(s);
+SV(t,1;m,1);       SV(m,1;w,1);      SV(w,1;t,1);
+endloop              endloop             endloop
+
+## Slide 132
+吸烟者问题-Solution
+Process A           Process B           Process C
+loop                  loop                 loop
+SP(m,1,1;           SP(w,1,1;          SP(t,1,1;
+w,1,1);             t,1,1);              m,1,1);
+smoke;               smoke;             smoke;
+V(s);                 V(s);                V(s);
+endloop              endloop             endloop
+
+## Slide 133
+例5.  3台打印机管理
+Var lp:array[1..3]of (free,used);  (initial value is free)
+S: semaphore; (initial value is 3)
+mutex: semaphore; (initial value is 1)
+function require:1..3;      procedure return(i:1..3);
+P(S);                         P(mutex);
+P(mutex);                    lp[i]:=free;
+for i:=1 to 3 do            V(mutex);
+if lp[i]=free then       V(S);
+break;
+lp[i]:=used;
+V(mutex);
+return(i);
+
+## Slide 134
+例6. 生产线问题
+0    1            ……          k-1
+车架
+车轮
+车架，车轮
+工人1
+工人2
+工人3
+
+## Slide 135
+例6. 生产线问题
+工人1活动：
+Do{
+加工一个车架
+车架放入箱中
+}while(1)
+工人2活动：
+Do{
+加工一个车轮
+车轮放入箱中
+}while(1)
+工人3活动：
+Do{
+箱中取一车架
+箱中取二车轮
+组装成一台车
+}while(1)
+semaphore empty; (空位，k)
+semaphore frame; (车架，0)
+Semaphore wheel; (车轮，0)
+
+## Slide 136
+例6. 生产线问题
+工人1活动：
+Do{
+加工一个车架
+P(empty)
+车架放入箱中
+V(frame)
+}while(1)
+工人2活动：
+Do{
+加工一个车轮
+P(empty)
+车轮放入箱中
+V(wheel)
+}while(1)
+工人3活动：
+Do{
+P(frame)
+箱中取一车架
+V(empty)
+P(wheel)
+P(wheel)
+箱中取二车轮
+V(empty)
+V(empty)
+组装成一台车
+}while(1)
+死锁情况：K个车轮，k个或k-1个车架
+死锁防止：车架不超过k-2个（S1）
+车轮不超过k-1个（S2）
+
+## Slide 137
+例6. 生产线问题
+工人1活动：
+Do{
+加工一个车架
+P(S1)
+P(empty)
+车架放入箱中
+V(frame)
+}while(1)
+工人2活动：
+Do{
+加工一个车轮
+P(S2)
+P(empty)
+车轮放入箱中
+V(wheel)
+}while(1)
+工人3活动：
+Do{
+P(frame)
+箱中取一车架
+V(empty)
+V(S1)
+P(wheel)
+P(wheel)
+箱中取二车轮
+V(empty)
+V(empty)
+V(S2)
+V(S2)
+组装成一台车
+}while(1)
+semaphore S1; (初值k-2, 车架)
+semaphore S2; (初值k-1, 车轮)
+
+## Slide 138
+例7. 资源调度问题
+三组进程A、B、C，互斥使用某资源R
+只有一组申请进程，依次；
+两组申请进程，组间交替，组内依次；
+三组申请进程，组间轮流，组内依次。
+变量定义
+int free; (init 1)
+semaphore mutex; (init 1)
+semaphore qa, qb, qc; (init 0)
+int counta, countb, countc; (init 0)
+
+## Slide 139
+例7. 资源调度问题
+A组申请：
+P(mutex)
+if (free==1){
+free=0;
+V(mutex);
+}else{
+counta++;
+V(mutex);
+P(qa);
+}
+A组释放：
+P(mutex)
+if (countb>0){
+countb--;
+V(qb);
+}else if(countc>0){
+countc--;
+V(qc);
+}else if(counta>0){
+counta--;
+V(qa);
+}else free=1;
+V(mutex)
+
+## Slide 140
+例8. 系统与网络打印机问题
+设有网络打印机和系统打印机各一台。网络打印机由网络用户使用；系统打印机一般由系统用户使用，但当其空闲时也可由网络用户使用。试用信号灯与PV 操作实现对两台打印机的管理。
+变量定义
+int sys_free, net_free; (1,1)
+int sys_wait, net_wait; (0,0)
+semaphore sys_q, net_q; (0,0)
+semaphore mutex; (1)
+
+## Slide 141
+例8. 系统与网络打印机问题
+sys_apply
+{
+L1: P(mutex);
+If(sys_free){
+sys_free=0;
+V(mutex);
+}else{
+sys_wait++;
+V(mutex);
+P(sys_q);
+goto L1;
+}
+}
+user_apply
+{
+L2: P(mutex);
+if(net_free) {
+net_free=0;
+V(mutex);
+return(net);
+}else if(sys_free){
+sys_free=0;
+V(mutex);
+return(sys);
+}else{
+net_wait++;
+V(mutex);
+P(net_q);
+goto L2;
+}
+}
+
+## Slide 142
+例8. 系统与网络打印机问题
+sys_return{
+P(mutex);
+if(sys_wait>0) {
+sys_wait--;
+V(sys_q);
+}else{
+if(net_wait>0){
+net_wait--;
+V(net_q);}
+}else
+{sys_free=1;}
+V(mutex);
+}
+user_return{
+P(mutex);
+if(net_wait>0){
+net_wait--;
+V(net_q);
+}else{
+net_free=1;}
+V(mutex);
+}
+
+## Slide 143
+例9. 2009研究生入学考试题
+三个进程P1、P2、P3互斥使用一个包含N(N>0)个单元的缓冲区。P1每次用produce()生成一个正数并用put()送入缓冲区某一空闲单元中；P2每次用getodd()从该缓冲区中取出一个奇数并用countodd()统计奇数个数； P3每次用geteven()从该缓冲区中取出一个偶数并用countodd()统计偶数个数。请用信号量机制实现三个进程的同步与互斥活动，并说明所定义信号量的含义。
+
+## Slide 144
+例9. 2009研究生入学考试题
+变量定义
+semaphore empty; (init N)
+semaphore odd, even; (init 0)
+semaphore mutex; (init 1)
+
+## Slide 145
+例9. 2009研究生入学考试题
+maim()
+{
+process P1
+do{
+n=produce();
+P(empty);
+P(mutex);
+put();
+V(mutex);
+if(n%2==0)
+V(even);
+else
+V(odd);
+}while(true)
+process P2
+do{
+P(odd);
+P(mutex);
+getodd();
+V(mutex);
+V(empty);
+countodd();
+}while(true)
+process P3
+do{
+P(even);
+P(mutex);
+geteven();
+V(mutex);
+V(empty);
+counteven();
+}while(true)
+}
+
+## Slide 146
+例10. 寺庙问题
+某寺庙有老和尚、小和尚若干。庙内有一水缸，由小和尚提水入缸，供老和尚饮用。水缸可容纳30桶水，每次入水、取水仅为一桶，不可同时进行。水取自同一井中，井口狭窄，每次只能容纳一个水桶取水。设有5只水桶，老和尚与小和尚共用。试用信号灯与PV操作给出老和尚和小和尚的活动。
+
+## Slide 147
+例10. 寺庙问题
+变量定义
+semaphore empty; (30)  //水缸容量
+semaphore full; (0)  //当前水量
+semaphore bucket; (5) //水桶数
+semaphore mutex_bigjar;
+semaphore mutex_well;
+
+## Slide 148
+例10. 寺庙问题
+Young_monk()
+{
+do{
+P(empty);
+P(bucket);
+走到井边;
+P(mutex_well);
+井中取水;
+V(mutex_well);
+走到寺庙;
+P(mutex_bigjar);
+水入缸中;
+V(mutex_bigjar);
+V(bucket);
+V(full);
+while(1)
+}
+old_monk()
+{
+do{
+P(full);
+P(bucket);
+P(mutex_bigjar);
+缸中取水;
+V(mutex_bigjar);
+喝水;
+V(bucket);
+V(empty);
+}
+}
+
+## Slide 149
+例10. 寺庙问题（死锁分析）
+P操作的顺序不当会引起死锁
+上述解法是无死锁解法
+若在上述解法中存在多个小和尚、老和尚时，P操作的不当顺序会引起死锁。假设先P(bucket)然后再P(empty)就会出现死锁
+死锁一般都是在极限状态的时候判断
+
+## Slide 150
+4.3.5 管程（Monitor）
+PV操作：
+分散式同步机制：共享变量操作，PV操作，分散在整个系统中或各个进程中。
+缺点：
+可读性差；
+正确性不易保证；
+不易修改。
+优点：
+高效，灵活。
+管程：
+集中式同步工具：共享变量及其所有相关操作集中在一个摸块中。
+优点：
+可读性好；
+正确性易于保证；
+易于修改。
+缺点：
+不甚灵活，效率略低。
+
+## Slide 151
+4.3.5.1 管程的提出
+70年代初, By
+E.W.Dijkstra, C.A.R.Hoare, P.B.Hansen.
+背景:  Structured programming
+基于管程的语言
+Concurrent Pascal (Hansen)
+Modula (With)
+Mesa
+Mod*
+Concurrent Euclid
+XCY
+Java:
+synchronized method
+
+## Slide 152
+4.3.5.1 管程的提出(Cont.)
+构造操作系统的PCM方法
+P：process
+C：class
+M：monitor
+Example system
+solo
+
+## Slide 153
+4.3.5.2 管程形式
+Type monitor_name=MONITOR(形参表)
+共享变量说明
+define 本管程内定义，本管程外使用的子程序名表；
+use 本管程外定义，本管程内使用的子程序名表；
+Procedure 过程名（形参表）；
+局部变量说明
+Begin    语句序列    End;
+…………
+
+## Slide 154
+4.3.5.2 管程形式(Cont.)
+Function 函数名（形参表）:返回值类型；
+局部变量说明
+Begin  语句序列 End;
+……………
+Begin  共享变量初始化语句序列  End;
+语言特点：
+(1) modularized;
+(2) abstract data type;
+(3) information hiding.
+
+## Slide 155
+4.3.5.3 管程语义
+管程的共享变量在管程外部不可见，外部只能通过调用管程中的外部子程序访问共享变量；
+为保证对共享变量操作的数据完整性，规定管程互斥进入；
+管程中有等待/唤醒机制，等待时释放管程的互斥权，唤醒时（P唤醒Q）：
+P紧急等待，Q继续，直到Q退出或等待；(Hoare)
+Signal and urgent wait
+Q等待，P继续，直到P退出或等待；(Java)
+Signal and continue
+被唤醒进程需要重新检查等待条件,可能再次等待.
+唤醒是管程中可执行的最后一个操作。(Hansen)
+Signal and leave
+
+## Slide 156
+Hoare管程设施
+入口等待队列：
+每个管程变量一个，用于排队进入；
+紧急等待队列：
+每个管程变量一个，用于唤醒等待；
+内部等待队列：
+var c: condition; 可根据需要定义多个，用于设置等待条件。
+
+## Slide 157
+管程队列
+PCB
+PCB
+…
+c1
+PCB
+PCB
+…
+c2
+PCB
+PCB
+…
+PCB
+PCB
+…
+入口队列
+紧急队列
+Monitor
+
+## Slide 158
+管程成分
+PCB
+PCB
+…
+c1
+PCB
+PCB
+…
+c2
+PCB
+PCB
+…
+PCB
+PCB
+…
+入口队列
+紧急队列
+初始化代码
+共享变量
+操作
+操作
+操作
+…
+
+## Slide 159
+进入与离开
+进入管程：
+申请管程互斥权。
+离开管程：
+如紧急等待队列非空，唤醒第一个等待者；否则开放管程。
+
+## Slide 160
+条件变量操作
+Var c:condition;
+wait(c):
+如紧急队列非空，唤醒第一个等待者，否则释放管程互斥权;
+执行此操作的进程（线程）进入c链尾。
+signal(c):
+如c链空，相当空操作。
+否则唤醒第一个，执行此操作的进程（线程）进入紧急队列。
+
+## Slide 161
+4.3.5.4 管程的使用
+生产者/消费者问题
+读者/写者问题（写优先）
+哲学家就餐问题（another approach)
+Sleepy barber’s problem
+Disk head scheduler
+Single resource management
+
+## Slide 162
+例1.生产消费问题
+Type producer_consumer = MONITOR
+Var B:Array[0..n-1]Of integer;
+count, in, out: integer;
+pq, cq:condition;
+define put_in, get_out;
+Procedure put_in(item:integer);
+Begin
+If(count==n)Then
+wait(pq);
+B[in]:=item;
+in:=(in+1)%n;
+count++;
+signal(cq);
+End;
+
+## Slide 163
+例1.生产消费问题
+Procedure get_out(Var item:integer)
+Begin
+If(count==0)Then
+wait(cq);
+item:=B[out];
+out:=(out+1)%n;
+count--;
+signal(pq);
+End;
+Begin
+in:=0; out:=0; count:=0;
+End;
+
+## Slide 164
+例1.生产消费问题
+生产者进程：
+{生产一个item;
+producer_consumer.put_in(item);
+}while（1）
+消费者进程：
+{producer_consumer.get_out(item);
+消费一个item;
+}while（1）
+
+## Slide 165
+例2. 读者/写者问题
+写者优先
+Type readers_writers = Monitor;
+Var rq,wq: condition;
+reading_count,write_count:integer;
+Define start_read,finish_read,
+start_write,finish_write;
+
+## Slide 166
+例2. 读者/写者问题
+Procedure start_read;
+Begin
+If write_count>0 Then
+wait(rq);
+reading_count++;
+signal(rq);
+End;
+Procedure finish_read;
+Begin
+reading_count--;
+If reading_count=0
+Then signal(wq)
+End;
+
+## Slide 167
+例2. 读者/写者问题
+Procedure start_write
+Begin
+write_count++;
+If (write_count>1) or
+(reading_count>0)
+Then
+wait(wq)
+End;
+Procedure finish_write;
+Begin
+write_count--;
+If write_count>0
+Then signal(wq)
+Else signal(rq)
+End;
+
+## Slide 168
+例2. 读者/写者问题
+Begin
+reading_count:=0;
+write_count:=0;
+End;
+Var rw:readers_writers;
+读者：                           写者：
+rw.start_read;                 rw.start_write;
+{reading}                          {writing}
+rw.finish_read;                 rw.finish_write;
+reading_count
+write_count
+rq
+wq
+rw:
+
+## Slide 169
+例3. 哲学家就餐问题
+哲学家活动：
+Repeat
+思考
+L: 取左叉
+If 右叉空闲 Then
+Begin 取右叉，进食，放左叉，放右叉 end;
+Else Begin 放左叉, goto L end;
+Until false
+
+## Slide 170
+例3. 哲学家就餐问题
+Type dining-philosophers=MONITOR
+Var fork:Array[0..4]Of(free,used);
+q:Array[0..4]Of condition;
+define pick_up, try_pick_up, put_down;
+Procedure pick_up(I:0..4);
+Begin
+If fork[I]=used Then
+wait(q[I]);
+fork[I]:=used
+End;
+
+## Slide 171
+例3. 哲学家就餐问题
+Function try_pick_up(I:0..4):boolean;
+Begin
+If fork[I]=used Then
+try_pick_up:=false
+Else Begin
+fork[I]:=used;
+try_pick_up:=true
+End
+End;
+
+## Slide 172
+例3. 哲学家就餐问题
+Procedure put_down(I:0..4);
+Begin
+fork[I]:=free;
+signal(q[I])
+End;
+Procedure init;
+Var I:0..4;
+Begin
+For I:=0 to 4 Do fork[I]:=free;
+End;
+Begin init End;
+
+## Slide 173
+例3. 哲学家就餐问题
+Var forks:dining_philosophers;
+I号哲学家活动：
+Repeat
+{thinking}
+with_two_forks:=false;
+Repeat
+forks.pick_up(I);
+If forks.try_pick_up((I+1)mod 5)Then
+with_two_forks:=true
+Else forks.put_down(I)
+Until with_two_forks;
+
+## Slide 174
+例3. 哲学家就餐问题
+{Eating}
+forks.put_down(I);
+forks.put_down((I+1)mod 5)
+Until false;
+
+## Slide 175
+例4.4. 磁头引臂调度问题
+0 1 …… 199
+up
+down
+磁头
+引臂
+扇区
+
+## Slide 176
+调度算法
+FCFS（first come first serve）
+公平
+效率低   (12,190,19,180,11,190…)
+SSTF（shortest seek time first）
+效率高
+磁道歧视
+SCAN（elevator algorithm）
+效率较高，较公平
+
+## Slide 177
+Hansen管程实现SCAN算法
+外部过程：
+申请：require(dest:0..199)
+释放：release()
+使用方式：
+require(dest);
+{IO操作}     --(管程外操作)
+release
+
+## Slide 178
+管程实现SCAN算法
+Type diskhead=MONITOR
+Var busy:boolean;
+headpos:0..199;
+direction:(up,down);
+cylinder:Array[0..199]Of condition;
+count:Array[0..199]Of integer;
+Define require, release;
+
+## Slide 179
+管程实现SCAN算法
+Procedure require(dest:0..199);
+Begin
+If busy Then
+Begin
+count[dest]:=count[dest]+1;
+wait(cylinder[dest])
+End;
+busy:=true;
+If dest<headpos Then
+direction:=down
+Else If dest>headpos Then
+direction:=up;
+headpos:=dest
+End;
+
+## Slide 180
+管程实现SCAN算法
+Procedure upscan;
+Var I:0..200;
+Begin
+I:=headpos;
+While (I<=199)and(count[I]=0) Do
+I:=I+1;
+If I<=199 Then
+Begin
+count[I]:=count[I]-1;
+signal(cylinder[I])
+End
+End;
+
+## Slide 181
+管程实现SCAN算法
+Procedure downscan;
+Var I:-1..199;
+Begin
+I:=headpos;
+While (I>=0)and(count[I]=0) Do
+I:=I-1;
+If I>=0 Then
+Begin
+count[I]:=count[I]-1;
+signal(cylinder[I])
+End
+End;
+
+## Slide 182
+管程实现SCAN算法
+Procedure release;
+Begin
+busy:=false;
+If direction=up Then
+Begin
+upscan; downscan
+End
+Else
+Begin
+downscan; upscan
+End
+End;
+
+## Slide 183
+管程实现SCAN算法
+Procedure initialize;
+Var I: 0..199;
+Begin
+busy:=false;
+headpos:=0;
+direction:=up;
+For I:=0 To 199 Do
+count[I]:=0
+End
+Begin initialize End;
+
+## Slide 184
+例. 单一资源管理
+Type single_resource=MONITOR;
+Var busy:boolean;
+q:condition;
+Define require,release;
+Procedure require;
+Begin
+If busy Then
+wait(q);
+busy:=true
+End;
+
+## Slide 185
+例. 单一资源管理
+Procedure release;
+Begin
+busy:=false;
+signal(q);
+End;
+Begin busy:=false End;
+Var lp,tape:single_resource;
+Busy
+q
+lp:
+Busy
+q
+Tape:
+申请lp: lp.require
+释放lp: lp.release
+申请tape: tape.require;
+释放tape: tape.release
+
+## Slide 186
+例4.5 嗜眠理发师问题(Sleepy barber’s problem)
+…
+凳子(n个)
+理发椅
+理发室
+
+## Slide 187
+例5 嗜眠理发师问题
+一把理发椅, 顾客理发时坐在理发椅上, 由理发师为其理发. 没有顾客时,理发师在理发椅上睡觉;
+N个凳子, 顾客等待理发用. 凳上坐满顾客时, 新进入的顾客退出理发室.
+
+## Slide 188
+例5 嗜眠理发师问题
+TYPE sleepybarber=MONITOR;
+VAR chair:condition;
+stool:condition;
+count:0..n+1;
+Define sleep, enter, leave;
+Procedure sleep;
+Begin
+If count=0 Then
+wait(chair)
+End;
+
+## Slide 189
+例5 嗜眠理发师问题
+Procedure enter(var full:Boolean);
+Begin
+If count=n+1 Then
+full:=true;
+Else Begin
+full:= false;
+count:=count+1;
+If count =1 Then
+signal(chair);
+Else wait(stool);
+End;
+End;
+
+## Slide 190
+例5 嗜眠理发师问题
+Procedure leave;
+Begin
+count:=count-1;
+If count<> 0 Then
+signal(stool)
+End;
+Begin count:=0; End
+
+## Slide 191
+例5 嗜眠理发师问题
+理发师活动:
+Repeat
+sleepybarber.sleep;
+Cuthair;
+Until false;
+顾客活动:
+Repeat
+sleepybarber.enter(full);
+Until not full;
+Cuthair
+Sleepybarber.leave
+
+## Slide 192
+4.3.5.5 管程与PV操作的等价性
+用PV操作可以构造管程
+用管程可以构造PV操作
+Implementing PV operations
+using monitors is trivial
+
+## Slide 193
+用管程构造PV操作
+TYPE semaphore=MONITOR(init_value)
+VAR c:condition;
+count: integer;
+DEFINE  P,V;
+PROCEDURE P;
+BEGIN
+count:=count-1;
+IF count<0 THEN
+wait(c);
+END;
+PROCEDURE V;
+BEGIN
+count:=count+1;
+IF count <=0 THEN
+signal(c);
+END;
+BEGIN
+count:=init_value;
+END;
+
+## Slide 194
+用管程构造PV操作(Cont.)
+信号灯与PV操作
+管程
+VAR s:semaphore;
+TYPE s=MONITOR;
+s.value:=init_value;
+Init s(init_value);
+P(s);
+s.P;
+V(s);
+s.V;
+
+## Slide 195
+用PV操作构造管程
+管程
+信号灯与PV操作
+一个管程实例
+一个入口等待队列mutex:semaphore(1)
+一个紧急等待队列urgent:semaphore (0)
+一个紧急等待计数urgent_count:integer(0)
+一个条件变量
+c: condition;
+一个信号灯变量s:semaphore (0)
+一个计数变量count:integer (0)
+等待操作
+wait(c)
+count:=count+1;
+IF urgent_count>0 THEN
+BEGIN
+urgent_count:=urgent_count-1;
+V(urgent)
+ELSE
+V(mutex);
+P(s);
+
+## Slide 196
+用PV操作构造管程
+管程
+信号灯与PV操作
+唤醒操作
+Signal(c)
+IF count>0 THEN
+BEGIN
+count:=count-1;
+urgent_count:=urgent_count+1;
+V(s);
+P(urgent)
+END
+进入管程
+P(mutex);
+离开管程
+IF urgent_count>0 THEN
+BEGIN
+urgent_count:=urgent_count-1;
+V(urgent)
+END
+ELSE
+V(mutex);
+
+## Slide 197
+4.3.5.6 管程的嵌套调用问题
+Wait(c)
+P:
+M1
+M2
+Mn
+Mn-1
+...
+问题：1. 是否允许嵌套；
+2. 若允许，如何处理互斥权。
+方法：1. 禁止嵌套（Modula)
+2. 允许嵌套，等待时释放当前管程互斥权（CPASCAL）；
+3. 允许嵌套，等待时释放所有管程互斥权；
+4. 允许嵌套，调用时释放路经管程互斥权
+
+## Slide 198
+Java语言中的“管程”
+类似管程的对象object
+每个object有一个互斥锁lock，一般未用；
+说明为synchronized的method启用互斥锁；
+每个object内部有一个等待队列；
+wait() method:
+释放lock, 状态改为blocked, 进入wait set.
+notify() method:
+在wait set中取任意线程，移到entry set,状态改为runnable. (Signal and continue)
+notifyAll() method:
+Wait set所有线程移到entry set, 状态改为runnable.
+
+## Slide 199
+Entry set and wait set
+Object
+Lock
+owner
+Entry set
+wait set
+wait
+Acquire lock
+notify,  notifyAll
+
+## Slide 200
+Entry set and wait set
+锁的持有者执行wait操作, 状态改为blocked,释放所持有的锁, 进入wait set; 若entry set非空,选择其一进入同步方法.
+锁的持有者执行notify操作, 任选wait set上的一个线程, 入entry set, 状态改为runnable.
+锁的持有者执行notifyAll操作, wait set上的所有线程出wait set, 入entry set, 状态改为runnable.
+
+## Slide 201
+例子：生产/消费问题--Java
+public class Bounded Buffer {
+public BoundedBuffer() {    //缓冲区变量定义
+count=0; in=0; out=0;
+buffer=new Object[BUFFER_SIZE];
+}
+
+## Slide 202
+例子：生产/消费问题--java
+public synchronized void enter(Object item) {
+while (count==BUFFER_SIZE) {
+try { wait();   //被唤醒后重新检测等待条件
+} catch (InterruptedException e){ }
+}
+++count;
+buffer[in]=item;
+in=(in+1)% BUFFER_SIZE;
+notify();
+}
+
+## Slide 203
+例子：生产/消费问题--java
+public synchronized Object remove() {
+while (count==0) {
+try { wait();
+} catch (InterruptedException e){ }
+}
+--count;
+item=buffer[out];
+out=(out+1)% BUFFER_SIZE;
+notify();
+return(item);
+}
+
+## Slide 204
+例子：生产/消费问题--java
+private static final int NAP_TIME=5;
+private static final int BUFFER_SIZE=5;
+private int count in,out;
+private Object[] buffer;
+}
+
+## Slide 205
+读者／写者问题-Java solution
+Multiple notification
+notifyAll() -- 唤醒wait set集合中所有线程, 进入entry set。
+public class Database {
+public Database() {
+Readcount=0;
+dbReading=false;
+dbWriting=false;
+}
+public synchronized int startRead() {
+//
+}
+
+## Slide 206
+读者／写者问题-Java solution
+public synchronized int endRead() {
+//
+}
+public synchronized startWrite() {
+//
+}
+public synchronized endWrite() {
+//
+}
+private int readerCount;
+private boolean dbReading;
+private boolean dbWriting;
+}
+
+## Slide 207
+读者／写者问题-Java solution
+public synchronized void startRead() {
+while (dbWriting==true) {
+try {
+wait();
+}catch(InterruptedException e){}
+++readCount;
+if (readCount==1)
+dbReading=true;
+}
+
+## Slide 208
+读者／写者问题-Java solution
+public synchronized void endRead() {
+--readCount;
+if(readCount==0)
+dbReading=false;
+notifyAll();
+}
+
+## Slide 209
+读者／写者问题-Java solution
+public synchronized void startWrite() {
+while(dbReading==true||dbWriting==true) {
+try{
+wait();
+}catch(InterruptedException e){ }
+}
+dbWriting=true;
+}
+public synchronized void endWrite(){
+dbWriting=false;
+notifyAll();
+}
+
+## Slide 210
+Java synchronization rules
+A thread that owns the lock for an object can enter another synchronized method (or block) for the same object.
+A method can nest synchronized method invocation for different objects. Thus a thread cab simultaneously own the lock for several different objects.
+If a method is not declared as synchronized, then it can be invoked regardless of lock ownership, even while another synchronized method for the same object is executing.
+If the wait set for an object is empty, then a call to notify() or notifyAll() has no effect.
+
+## Slide 211
+作业 #4
+1. P144, #23
+2. 用Hoare管程实现电梯算法。
+
+## Slide 212
+Windows 10 互斥同步机制
+Mutex (OS API)
+CreateMutex,     //创建互斥对象，返回句柄
+OpenMutex,     //打开并返回存在对象句柄
+ReleaseMutex;      //释放对互斥对象的占用
+semaphore (OS API)
+CreateSemaphore,    //创建信号量
+OpenSemaphore,    //返回已存在信号量句柄
+ReleaseSemaphore;    //释放对信号量的占用
+
+## Slide 213
+Windows 10 互斥同步机制
+Event (OS API)
+CreateEvent,
+OpenEvent,
+SetEvent,
+ResetEvent,
+PulseEvent.
+
+## Slide 214
+Windows 10互斥同步机制
+CRITICAL_SECTION类型
+InitializeCriticalSection: 初始化
+EnterCriticalSection: 等待进入
+TryEnterCriticalSection: 非等待，失败返回0
+LeaveCriticalSection: 离开
+DeleteCriticalSection: 清除

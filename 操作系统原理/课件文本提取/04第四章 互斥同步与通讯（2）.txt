@@ -1,0 +1,823 @@
+# 04第四章 互斥同步与通讯（2）
+
+## Slide 1
+4.3.6 会合(Rendezvous)
+背景
+80年代, Ada, Initiated by DOD;
+Ada 95, (Object-oriented)
+会合：两个并发执行流汇集到一处
+并发执行流
+调用
+接受
+均发生，握手，同步。
+
+## Slide 2
+P1:
+会合引入背景—分布系统
+共享变量
+（被动）
+Semaphore s;
+…
+…
+P(S)
+CR2
+V(S)
+…
+…
+P2:
+共享变量与访问进程在同一存储区，不适合分布环境。
+PV操作问题:
+P(S)
+CR1
+V(S)
+
+## Slide 3
+P1:
+会合引入背景—分布系统
+共享变量
+（被动）
+Semaphore s;
+…
+…
+P(S)
+CR2
+V(S)
+…
+…
+P2:
+共享变量与访问进程在同一存储区，不适合分布环境。
+PV操作问题:
+P(S)
+CR1
+V(S)
+站点1
+站点2
+
+## Slide 4
+会合引入背景—分布系统
+共享变量
+CR1
+CR2
+管程（被动）
+P1：
+...
+...
+P2：
+...
+...
+管程与调用进程在同一存储区，不适合分布环境。
+管程问题:
+
+## Slide 5
+会合引入背景—分布系统
+共享变量
+CR1
+CR2
+管程（被动）
+P1：
+...
+...
+P2：
+...
+...
+管程与调用进程在同一存储区，不适合分布环境。
+管程问题:
+站点1
+站点2
+
+## Slide 6
+会合图示
+任务
+task
+任务
+task
+任务
+task
+调用语句
+调用语句
+接受语句
+选择语句
+被调用者代调用者执行调用代码
+
+## Slide 7
+会合图示
+被调用任务
+入口1：accept
+入口2：accept
+select
+...
+...
+...
+PCB
+PCB
+...
+...
+PCB
+PCB
+...
+…
+调用语句
+调用语句
+调用任务
+入口FIFO队列
+
+## Slide 8
+Ada同步语句
+1. 调用语句
+<任务名称> . <入口名称>[<实参表>]
+2. 接受语句
+accept<入口名称>[<形参表>]
+[do<语句序列>end<入口名称>]
+
+## Slide 9
+Accept语句
+有调用者
+等待
+选取第一个
+会合开始
+调用者等待
+有in参数
+取in参数
+有语句序列
+执行之
+有out参数
+送out参数
+会合结束
+调用者继续
+会合期
+T
+F
+T
+F
+T
+F
+T
+F
+
+## Slide 10
+例子--单一资源管理
+task single_resource is
+entry acquire;
+entry return;
+end single_resource;
+task body single_resource is
+begin
+loop
+accept acquire;
+accept return;
+end loop
+end single_resource;
+single_resource.acquire;
+使用
+single_resource.return;
+
+## Slide 11
+Ada同步语句（cont.）
+3. 选择语句
+select
+[when <布尔表达式> =>]
+<接受语句>
+[<语句序列>]
+{or [when <布尔表达式> =>]
+<接受语句>
+[<语句序列>] }
+[else <语句序列>]
+end select
+
+## Slide 12
+Select语句语义
+计算所有布尔表达式，为真者对应入口标记开放；
+If 无开放的<接受语句> Then
+If 有ELSE部分 Then 执行之 Else 异常;  break;
+If 无被调用的开放的<接受语句> Then
+If 有ELSE部分 Then 执行之; break; Else 等待;
+任取一开放的被调用的接受语句
+会合开始，调用者等待；
+If 有in参数 Then 取in参数；
+If 有<语句子列> Then 执行之；             会合期
+If 有out参数 Then 送out参数；
+会合结束，调用者继续；
+If select语句有语句序列 Then 执行之。
+
+## Slide 13
+4.3.6.1  会合的描述(Cont.)
+select 语句流程
+计算所有布尔表达式
+为’真’者对应<accept>标记开放
+有开放的<accept>
+有else部分
+F
+有被调用的开放的<accept>
+T
+有else部分
+F
+等 待
+F
+会合开始，调用者等待
+有 in 参数
+有语句序列
+F
+取 in 参数
+T
+执行语句序列
+T
+有 out 参数
+F
+送 out 参数
+T
+else部分
+T
+建立异常条件
+F
+else部分
+T
+F
+会合结束，调用者继续
+任取一开放且被调用的<accept>
+T
+
+## Slide 14
+4.3.6.2 会合例子--客栈问题
+...
+explorers
+bakery
+hunter
+活动：
+(1)接受猎物
+(2)接受面包
+(3)做三明治
+(4)给探险家
+限制：
+一份猎物
+一份面包
+一份三明治
+一位客人
+master
+客栈
+
+## Slide 15
+客栈问题
+explorer：
+loop
+探   险
+进客栈
+取三明治
+出客栈
+吃三明治
+end loop
+hunter：
+loop
+狩   猎
+进客栈
+送猎物
+出客栈
+end loop
+bakery：
+loop
+做面包
+进客栈
+送面包
+出客栈
+end loop
+入口
+入口
+入口
+
+## Slide 16
+客栈问题
+procedure Adalodge is
+task type explorer;
+task hunter;
+task bakery;
+task master is
+entry deliverbread;  //面包师送面包
+entry delivermeat;  //狩猎者送猎物
+entry lodge;  //探险家取三明治
+end master;
+
+## Slide 17
+客栈问题
+task body explorer is
+victuals:food;
+begin
+loop
+explore;
+master.lodge(victuals);  //入客栈取三明治
+eat(victuals)
+end loop
+end explorer;
+
+## Slide 18
+客栈问题
+task body hunter is
+walrus:food;
+begin
+loop
+hunt(walrus);
+master.delivermeat(walrus)
+end loop
+end hunter;
+
+## Slide 19
+task body bakery is
+rolls:food;
+begin
+loop
+bake(rolls);
+master.deliverbread(rolls)
+end loop
+end bakery;
+客栈问题
+
+## Slide 20
+客栈问题
+task body master is
+bread, meat, sandwich: food;
+procedure makesandwich is
+begin
+cook(meat);
+sandwich:=bread+meat;
+bread:=0;
+meat:=0;
+end makesandwich;
+
+## Slide 21
+客栈问题
+begin
+bread:=0; meat:=0; sandwich:=0;
+loop
+select
+when bread=0 =>
+accept deliverbread(br: in food) do
+bread:=br;
+end deliverbread;
+or  when meat=0 =>
+accept delivermeat(mt: in food) do
+meat:=mt;
+end delivermeat;
+
+## Slide 22
+客栈问题
+or  when (sandwich<>0)or(bread<>0 and meat<>0)=>
+accept lodge(snack: out food) do  //入店取三明治
+if sandwich=0 then
+makesandwich
+end if;
+snack:=sandwich;
+end lodge;
+sandwich:=0  //会合期之外
+else  if (bread<>0)and(meat<>0)and(sandwich=0)
+then makesandwich end if    //栈主人活动
+end select
+end loop
+end master
+
+## Slide 23
+客栈问题
+explorers: array(1..numberofexploers)of explorer;
+begin
+null;
+end Adalodge;
+
+## Slide 24
+Bounded buffer problem
+task boundedbuffer is
+entry putin;
+entry getout;
+end boundedbuffer;
+task body boundedbuffer is
+b: array(0..k-1)of integer;
+ip, op: 0..k-1;
+count: integer;
+begin
+ip:=0; op:=0; count:=0;
+
+## Slide 25
+Bounded buffer problem
+loop
+select
+when (count<k) =>
+accept putin(item:in integer) do
+b(ip):=item
+end putin;
+ip:=(ip+1)mod k;
+count:=count+1;
+
+## Slide 26
+Bounded buffer problem
+or when (count>0) =>
+accept getout(item:out integer) do
+item:=b(op);
+end getout;
+op:=(op+1)mod k;
+count:=count-1;
+end select
+end loop
+end boundedbuffer;
+
+## Slide 27
+作业 #4
+1.  用Ada语言中的会合解决读者/写者问题，要求写者优先。即编写一个任务，其中有如下四个入口：
+start_read; finish_read,
+start_write, finish_write.
+提示：可以使用嵌套的accept语句。
+
+## Slide 28
+读者-写者问题
+Task readers_writers is
+entry start_read;
+entry finish_read;
+entry start_write;
+entry finish_write;
+End  readers_writes;
+Task body readers_writers is;
+Var read_count, write_count: integer;
+begin
+read_count:=0;
+write_count:=0;
+
+## Slide 29
+读者-写者问题
+Loop
+select
+when write_count=0 =>
+accept start_read do
+read_count := read_count+1;
+end start_read
+or
+when read_count>0 =>
+accept finish_read do
+read_count := read_count-1;
+end finish_read;
+or
+
+## Slide 30
+读者-写者问题
+when write_count=0 =>
+accept start_write do
+while read_count > 0 do
+accept finish_read do
+read_count:= read_count -1;
+end finish_read
+end while
+end start_write;
+write_count:=write_count+1;
+or
+when write_count>0 =>
+accept finish_write do
+write_count:=write_count-1;
+end finish_write;
+end select
+End loop;
+End readers_writers
+
+## Slide 31
+读者-写者问题
+读者活动:
+Readers_writes.start_read;
+读操作
+Readers_writers.finish_read;
+写者活动:
+Readers_writers.start_write;
+写操作
+Readers_writers.finish_write;
+
+## Slide 32
+4.4 进程高级通讯
+进程通讯：进程之间的相互作用。
+低级通讯（简单信号）
+进程互斥
+进程同步
+高级通讯（大宗信息）
+高级通讯
+memory sharing vs. message passing
+direct vs. indirect
+symmetric vs. non-symmetric
+buffering vs. non-buffering
+4.4.1 进程通讯概念
+
+## Slide 33
+4.4.2 进程通讯模式
+1. 共享内存模式(shared memory)：
+2. 消息传递模式(message passing)：
+OS提供：
+（1）公共内存
+（2）互斥同步机制
+P1
+P2
+M
+send
+receive
+直接：进程-进程
+间接：进程-信箱-进程
+P1
+P2
+公共内存
+
+## Slide 34
+4.4.3 直接方式
+对称形式(sender and receiver name each other)
+send(R,message)
+receive(S,message)
+…
+Send(R,M)
+...
+…
+Receive(S,N)
+...
+S:
+R:
+
+## Slide 35
+4.4.3 直接方式
+…
+receive(pid,N)
+...
+…
+send(R,M1)
+...
+…
+send(R,M2)
+...
+非对称形式(only sender names receiver)
+send(R,message)
+receive(pid,message)
+C/S model
+R:
+S1:
+S2:
+
+## Slide 36
+4.4.3.1 有缓冲途径(消息传递模式,直接方式,非对称形式)
+PCB
+…
+send(R,M)
+…
+size
+text
+…
+PCB
+…
+receive(pid,N)
+…
+…
+M:
+N:
+msg
+msg
+msg
+...
+发送者S:
+接收者R:
+
+## Slide 37
+Message passing, direct,non-symmetric, buffering
+Size
+text
+sender
+link
+载有消息的缓冲：
+进程消息队列管理：
+Var Sm:semaphore; (0)
+收取消息前：P（Sm）;
+消息入队后：V（Sm);
+消息队列互斥：
+Var  m_mutex:semaphore;(1)
+P(m_mutex);
+入列(出列)动作;
+V(m_mutex);
+
+## Slide 38
+Buffer pool management
+buf
+buf
+buf
+...
+Var Sb,  b_mutex:semaphore; (k,1)
+申请：P(Sb);
+P(b_mutex);
+头缓冲出链;
+V(b_mutex);
+释放：P(b_mutex);
+缓冲入链头;
+V(b_mutex);
+V(Sb);
+Head：
+缓冲池
+
+## Slide 39
+发送-接收原语
+Send(R,M)
+根据R找接收者；
+P(Sb);
+P(b_mutex);
+取一空buf;
+V(b_mutex);
+size,text,sender => buf
+P(m_mutex);
+消息入链尾；
+V(m_mutex);
+V(Sm);
+Receive(pid,N)
+P(Sm);
+P(m_mutex);
+头消息出链;
+V(m_mutex);
+size,text=> N
+sender => pid
+P(b_mutex);
+空buf入链；
+V(b_mutex);
+V(Sb);
+
+## Slide 40
+Remarks：
+Send/receive 为高级通讯原语，可用低级原语实现；
+Send/receive不是真正意义的原语，可以被中断。
+
+## Slide 41
+4.4.3.2 无缓冲途径(消息传递模式,直接方式,非对称形式)
+发送-接收都发生,信息由发送者复制到接收者.
+PCB中两个信号灯, S_m, S_w, 初值0.
+发送过程:send(R,M)
+根据R找到消息接收者
+发送消息进程增1, 如接收进程等待将其唤醒, 即执行V(S_m)
+等待消息传送完毕, 即执行P(S_w)
+
+## Slide 42
+4.4.3.2 无缓冲途径
+接收过程:receive(pid,N)
+等待消息到达, 即执行P(S_m)
+消息由发送进程空间复制到接收进程空间;
+唤醒发送消息进程, 即执行V(S_w)
+
+## Slide 43
+4.4.3.2 无缓冲途径
+Send(R,M)
+Receive(pid, N)
+M:
+N:
+reg
+send
+receive
+…
+S_m
+S_w
+…
+PCB
+硬件
+OS
+
+## Slide 44
+4.4.3.2 无缓冲途径
+优点:
+节省空间(不需要buffer)
+缺点:
+并发性差: 发送进程需要等待接收进程执行receive把信息复制到接收进程空间后才能继续.
+
+## Slide 45
+4.4.4 间接方式
+Mailbox
+Send_mb(mb,m)
+Receive_mb(mb,n)
+...
+multi-sender -- multi-receiver;
+multi-sender -- one receiver
+
+## Slide 46
+4.4.4.1 信箱属于操作系统空间
+Type   mailbox=record
+in,out:0..k;
+s1,s2:semaphore; (k,0)
+mutex:semaphore; (1)
+letter:array[0..k-1]of message;
+end;
+Var mb:mailbox;
+create_mb(mb); 系统调用
+delete_mb(mb);  系统调用
+
+## Slide 47
+信箱通讯
+Procedure send_mb(var mb:mailbox; m:massage);
+begin
+with mb do
+begin
+P(s1);  //申请空位
+P(mutex);
+letter[in]:=m;
+in:=(in+1)mod k;
+V(mutex);
+V(s2)  //消息增加一个
+end;
+end;
+
+## Slide 48
+信箱通讯
+Procedure receive_mb(var mb:mailbox; var n:massage);
+begin
+with mb do
+begin
+P(s2);  //申请消息
+P(mutex);
+n:=letter[out];
+out:=(out+1)mod k;
+V(mutex);
+V(s1)  //空位增加一个
+end;
+end;
+
+## Slide 49
+属于操作系统空间的信箱
+…
+Var mb: mailbox
+create_MB
+delete_MB
+send_MB
+receive_MB
+…
+create_MB(mb)
+…
+receive_MB(mb,N)
+…
+delete_MB(mb)
+…
+N:
+…
+send_MB(mb,M)
+…
+…
+M:
+
+## Slide 50
+UNIX进程高级通讯机制
+Pipe: an unnamed file with two fds, one for write,
+and the other for read. The size of pipe file is
+limited to 4 blocks(one block is 512 bytes).
+int fd[2];
+pipe(fd):
+功能：创建一个pipe文件
+返回：fd[0]: 读描述符；
+fd[1]: 写描述符。
+pipe可以被子进程继承
+子进程1：
+write(fd[1],buf1,count1);
+子进程2：
+read(fd[0],buf2,count2)
+
+## Slide 51
+UNIX进程高级通讯机制
+速度：
+pipe作为文件，需要两次IO，但一般不会真正执行IO操作:
+缓冲与延迟写(delayed write), 写到内存缓冲区, 只要内存资源不紧张, 缓冲区不另作它用, 不会写到外存, 读时可在内存缓冲区中得到.
+Pipe文件大小的限制 (Eg. 2k), 循环使用, 避免缓冲资源紧张.
+特点：
+基于文件系统实现，与文件统一的界面。
+
+## Slide 52
+UNIX信号通讯机制
+struct proc{
+…
+char p_sig;
+…
+}proc[NPROC]
+struct user{
+…
+int u_signal[NSIG];
+…
+}
+系统调用signal(sig, func)预置信号处理程序
+u_signal[sig]=func;
+Func=0时接收信号进程终止自己;
+Func=奇数时忽略;
+Func=偶数时为处理程序入口.
+进程初创时继承其父进程信号处理程序.
+信号发送与接收
+任何时候都可接收, 记录在p_sig中.
+处理
+被调度选中即将由核心态转到目态.
+(用户处理的中断)
+
+## Slide 53
+Windows 10 的管道
+1. 无名管道：
+BOOL CreatePipe(PHANDLE hReadPipe,
+PHANDLE hWritepipe,
+LPSECURITY_ATTRIBUTES lpPipeAt,
+DWORD nSize)
+2. 命名管道：
+服务器端：\\.\pipe\PipeName;
+客户端：\\serverName\pipe\PipeName
+CreateNamedPipe: 在服务器端建立管道；
+ConnectNamedPipe: 在服务器端等待客户连接请求；
+CallNamedPipe: 客户进程建立与服务器管道连接；
+ReadFile, WriteFile: 管道读写。
+
+## Slide 54
+Windows 10的mailslot
+服务器端：\\.\mailslot\[path]name
+客户进程：\\range\mailslot\[path]name
+range:  本地或服务器
+CreatMailslot: 服务器端创建邮件槽；
+GetMailslotInfo: 服务器查询邮件槽信息；
+ReadFile: 服务器读邮件槽；
+WriteFile: 客户端发送消息。

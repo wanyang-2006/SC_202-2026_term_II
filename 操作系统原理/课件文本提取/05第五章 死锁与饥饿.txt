@@ -1,0 +1,803 @@
+# 05第五章 死锁与饥饿
+
+## Slide 1
+第五章 死锁与饥饿
+死锁与饥饿
+死锁: indefinite wait.
+可察觉
+饥饿: not necessarily in wait state.
+?
+死锁和饥饿都是由于进程竞争资源而引起的.
+
+## Slide 2
+5.1 死锁的概念
+例子： r1 和 r2为可再用资源;
+P1: apply for r1;
+...
+apply for r2;
+...
+return r1;
+...
+return r2;
+P2: apply for r2;
+...
+apply for r1;
+...
+return r1;
+...
+return r2;
+1
+2
+
+## Slide 3
+死锁定义
+一组进程中的每一个进程，均无限期地等待此组进程中某个其他进程占有的，因而永远无法得到的资源，这种现象称为进程死锁。
+定义死锁时刻：
+无限等待发生时；
+等待发生前（已注定死锁）。
+
+## Slide 4
+由定义得到的结论
+几个有用的结论：
+参与死琐的进程至少有二个；
+每个参与死锁的进程均等待资源；
+参与死锁的进程中至少有两个进程占有资源；
+死锁进程是系统中当前进程集合的一个子集。
+
+## Slide 5
+5.2 死锁类型
+1.  竞争资源引起的死锁
+（1）不同种资源
+D
+B
+A
+C
+W:直行
+E：左转
+S：左转
+
+## Slide 6
+5.2 死锁类型
+1.  竞争资源引起的死锁
+（1）不同种资源
+S
+S
+E
+W
+W:直行
+E：左转
+S：左转
+
+## Slide 7
+5.2 死锁类型
+1.  竞争资源引起的死锁
+（1）不同种资源
+S
+E
+E
+W
+W:直行
+E：左转
+S：左转
+
+## Slide 8
+5.2 死锁类型
+（2）同种资源
+4台打印机，申请:a, 释放 a
+P1: a a a a a a a a
+P2: a a a a
+
+## Slide 9
+5.2 死锁类型(Cont.)
+2.  进程通讯引起的死锁
+P1：receive(P2,M1);
+P2:  receive(P3,M2);
+P3:  receive(P1,M3);
+其它原因引起的死锁
+After you / after you
+
+## Slide 10
+5.3 死锁的条件
+Coffman条件（必要条件）
+资源独占（mutual exclusion）
+不可抢占（non preemption）
+保持申请（hold-while-applying）
+循环等待（circular wait）
+当每类资源只有一个实例时，充要条件。
+破坏上述任意一个条件可以消除死锁。
+
+## Slide 11
+5.4 死锁的处理
+死锁预防（deadlock prevention）-静态
+死锁避免（deadlock avoidance）--动态
+死锁检测（deadlock detection）
+死锁恢复（deadlock recovery）
+
+## Slide 12
+5.5 资源分配图
+定义: G=(V,E), V=PR, P={p1,p2,…,pn}, R={r1,r2,…,rm},
+E={(pi,rj)}{(rj,pi)}, piP, rjR.
+申请边(pi,rj): pi申请rj；
+分配边(rj,pi): rj分配pi;
+图示：进程：
+资源：
+申请边：由进程到资源类；
+分配边：由资源实例到进程。
+
+## Slide 13
+5.5 资源分配图
+申请：pi申请rj中的一个资源实例，由pi向rj画一条申请边，如可满足，改为分配边。
+释放：去掉分配边。
+
+## Slide 14
+例子（无环路，无死锁）
+例1. P={p1,p2,p3}, R={r1(1),r2(2),r3(1),r4(3)}
+E={(p1,r1),(p2,r3),(r1,p2),(r2,p1),(r2,p2),(r3,p3), (r4,P3)}
+p1
+p2
+p3
+r1
+r3
+r2
+r4
+
+## Slide 15
+例子（有环路，有死锁）
+p1
+p2
+p3
+r1
+r3
+r2
+r4
+增加边（p3,r2)
+
+## Slide 16
+例子（有环路，无死锁）
+p1
+p2
+p3
+p4
+r1
+r2
+
+## Slide 17
+例子（有环路，无死锁）
+p1
+p2
+p3
+p4
+r1
+r2
+P2释放占有资源r1, 分给P1, (p1,r1)改为(r1,p1)
+
+## Slide 18
+5.5.2 资源分配图的约简
+寻找一个非孤立且没有请求边的节点pi, 若无算法结束
+去除pi的所有分配边使其成为一个孤立节点;
+寻找所有请求边都可满足的进程pj, 将pj的所有请求边全部改为分配边;
+转步骤1
+
+## Slide 19
+死锁定理
+若算法结束时,所有节点均为孤点,则称资源分配图是完全可约简的,否则称为不可完全约简的.
+死锁定理:
+S为死锁状态的充分必要条件是S的资源分配图不可完全约简.
+
+## Slide 20
+5.6 死锁预防
+对进程有关资源的活动加限制，所有进程遵循这种限制，即可保证没有死锁发生。
+优点：简单，系统不需要做什么。
+缺点：对进程的约束，违反约束仍可能死锁。
+预防方法：
+预先分配法；
+有序分配法。
+
+## Slide 21
+5.6.1 预先分配法
+进程：运行前申请所需全部资源；
+系统：
+能够满足，全部分配，
+否则，一个也不分配。
+破坏“hold-and-wait”条件
+缺点：
+资源利用效率低；
+一次提出申请困难。
+
+## Slide 22
+5.6.2 有序分配法
+资源集：R={r1,r2,…,rn}
+函数：F：RN
+例如：R={scanner,tape,printer}
+F(scanner)=1; F(tape)=2; F(printer)=3;
+进程pi可以申请资源rj中的实例rl,pi当前占有rl, F(rl)F(rj)
+r1
+r2
+rk
+rm
+...
+...
+申请次序
+
+## Slide 23
+5.6.2 有序分配法
+证明无死锁（deadlock free)：
+反证，假定死锁
+时刻t1: p1无限等待rk1中的资源实例，被p2占有；
+t2: p2无限等待rk2中的资源实例，被p3占有；
+…
+tn: pn无限等待rkn中的资源实例，被p1占有;
+根据有序申请假设：
+F(rk1)<F(rk2)<…<F(rkn)<F(rk1)
+矛盾。
+
+## Slide 24
+5.6.2 有序分配法
+优点
+与预先分配相比,资源利用率提高.
+缺点
+资源编号困难;
+为保持按序申请,某些暂时不用的资源也需提前申请, 牺牲资源利用率.
+
+## Slide 25
+例子
+D
+B
+A
+C
+W:直行
+E：左转
+S：左转
+死锁的可能性：情形1，情形2
+资源编号：F(D)=1; F(B)=2; F(A)=3; F(C)=4;
+Var S1,S2,S3,S4:semaphore; (1,1,1,1)
+
+## Slide 26
+例子
+Procedure S:
+P(S1);
+驶入D；
+P(S2);
+驶入B;
+V(S1);
+P(S3);
+驶入A；
+V(S2);
+驶出A;
+V(S3)
+Procedure E:
+P(S2);
+驶入B；
+P(S3);
+驶入A;
+V(S2);
+P(S4);
+驶入C；
+V(S3);
+驶出C;
+V(S4);
+Procedure W:
+P(S1);
+P(S4);
+驶入C;
+驶入D；
+V(S4);
+驶出D；
+V(S1);
+
+## Slide 27
+例子
+COBEGIN
+S1:S;  …  ; Sm:S;
+E1:E; … ; En:E;
+W1:W; ... ; Wo:W
+COEND;
+
+## Slide 28
+5.7 死锁避免
+可满足请求
+分配
+不分配
+安全
+不安全
+系统处于安全状态：存在安全进程序列<p1,p2,…,pn>
+进程序列<p1,p2,…,pn>安全，p1,p2,…,pn可依次进行完。
+安全
+不安全
+死锁
+检测
+
+## Slide 29
+银行家算法(Cont.)
+Banker’s algorithm, E.W. Dijkstra.
+进程：事先申明所需资源最大量（并不分配）
+Claim=Max
+系统：对每个可满足的资源申请命令进行安全性检查。
+安全,分配;不安全:不分配
+P={p1,p2,…,pn};
+R={r1,r2,…,rm};
+
+## Slide 30
+银行家算法(Cont.)
+数据结构：
+Available: array[1..m]of integer;   //系统可用资源
+Claim: array[1..n,1..m]of integer;   //进程最大需求
+Allocation: array[1..n,1..m]of integer;   //当前分配
+Need: array[1..n,1..m]of integer;   //尚需资源
+Request: array[1..n,1..m]of integer;   //当前请求
+临时变量：
+Work: array[1..m]of integer;
+Finish: array[1..n]of boolean;
+
+## Slide 31
+银行家算法(Cont.)
+设X,Y为下标1..l的一维数组：
+XY  j (1jl), X[j]Y[j]
+X:=Y  j (1jl), X[j]:=Y[j]
+X:=c  j (1jl), X[j]:=c
+X±Y  j (1jl), X[j]±Y[j]
+
+## Slide 32
+资源分配
+Pi请求资源
+Request[I]Need[I]
+请求超量，错返
+Request[I]Available
+不满足，等待
+Available:=Available-Request[I]
+Allocation[I]:=Allocation[I]+Request[I]
+Need[I]:=Need[I]-Request[I]
+安全
+确认，pi继续
+Available:=Available+Request[I]
+Allocation[I]:=Allocation[I]-Request[I]
+Need[I]:=Need[I]+Request[I]
+pi等待
+F
+T
+F
+T
+T
+F
+
+## Slide 33
+安全性检测算法
+F
+Work:=Available;
+Finish:=false;
+有满足条件的j:
+Finish[j]=false
+Need[j]Work
+Finish[j]=true;
+Work:=Work+Allocation[j]
+T
+j ,finish[j]=true
+T
+F
+安全
+不安全
+
+## Slide 34
+银行家算法例子
+R={A(10),B(5),C(7)}    P={p0,p1,p2,p3,p4}
+Claim     Allocation      Need       Available      Work    Finish
+A  B  C      A  B  C        A  B  C       A  B  C       A  B  C
+7   5   3       0   1   1        7   4   2        3   3   3
+3   2   2       2   0   0        1   2   2
+9   0   2       3   0   0        6   0   2
+2   2   2       2   1   1        0   1   1
+4   3   3       0   0   2        4   3   1
+P0:
+p1:
+p2:
+p3:
+p4:
+安全进程序列：<p1,p3,p4,p2,p0>
+p2请求：Request[2]=(1,0,2)
+
+## Slide 35
+银行家算法例子
+Claim     Allocation       Need       Available     Work   Finish
+A  B  C      A  B  C        A  B  C        A  B  C       A  B  C
+7   5   3       0   1   0        7   4   3        2   3   1
+3   2   2       2   0   0        1   2   2
+9   0   2       4   0   2        5   0   0
+2   2   2       2   1   1        0   1   1
+4   3   3       0   0   2        4   3   1
+P0:
+p1:
+p2:
+p3:
+p4:
+假定分配：
+安全进程序列：<p3,p1,p4,p0,p2>
+p4请求：Request[4]=(3,3,0), 不能满足，等待；
+p0请求：Request[0]=(0,2,0), 不安全，取消分配，等待。
+
+## Slide 36
+例子：R={A,B}, 申请a, b; 释放a, b
+P={p1,p2}, p1: a b a b;  p2:b b b a a b
+Claim    Allocation    Need    Available    Work    Finish
+A  B         A  B           A  B        A   B          A  B
+p1：1  1         0   0            1   1        1    1
+p2：1  1         0   0            1   1
+Request[1]=(1,0), 安全，分配。
+银行家算法的保守性
+
+## Slide 37
+银行家算法的保守性
+Request[2]=(0,1), 不安全，不分配，（分配不导致死锁）
+Claim  Allocation    Need    Available    Work Finish
+A  B        A  B          A  B       A   B         A  B
+p1：1  1         1   0           0   1       0    1
+p2：1  1         0   0           1   1
+分配后：
+
+## Slide 38
+讨论
+Remarks1:
+银行家算法要求条件：进程所需资源最大量, 这个信息对于充要性分析是不够的。
+Remarks2:
+假设：进程预先给出有关资源的命令序列，则可以给出死锁避免的充要性算法，复杂度（NP Complete)。
+Remarks3:
+预先给出进程有关资源的命令序列是困难的(程序的分枝和循环）。
+
+## Slide 39
+5.8 死锁的检测
+数据结构：
+Available:  array[1..m]of integer;
+Allocation:  array[1..n,1..m]of integer;
+Request:  array[1..n,1..m]of integer;
+临时变量：
+Work:  array[1..m]of integer;
+Finish:  array[1..n]of Boolean;
+
+## Slide 40
+5.8.1 死锁检测算法
+Work:=Available;
+Finish:=false;
+有满足条件的i:
+Finish[i]=false
+Request[i]Work
+Finish[i]=true;
+Work:=Work+Allocation[i]
+T
+i ,finish[i]=true
+T
+F
+F
+无死锁
+死锁
+Finish[I]=true
+for allocation[I]=0
+
+## Slide 41
+Remarks
+1.  上述算法可以检测到参与死锁的全部进程，包括占有资
+源和不占有资源的进程。
+2.   如果希望只检测占有资源的进程，初始化时：
+Finish[i]=true, for Allocation[I]=0
+
+## Slide 42
+Remarks
+令P是所有进程的集合，P’包含于P是所有占有资源的进程集合，则:
+P死锁P’死锁。
+死锁检测之后是恢复，只考虑P’中的进程。
+死锁检测不考虑P-P’中的进程，缩小了检测范围，降低了系统开销。
+
+## Slide 43
+死锁例子
+例子：R={A(7),B(3),C(6)};  P={p0,p1,p2,p3,p4}
+Allocation        Request       Available      Work      Finish
+A  B  C           A  B  C          A  B  C        A  B  C
+p0:   0  1  0             0   0   0          0   1   0
+p1:   2  0  0             2   0   2
+p2:   3  0  3             0   0   0
+p3:   2  1  1             1   0   0
+p4:   0  0  2             0   0   2
+未死锁。
+此时，Request[2]=(0,0,1), 死锁，参与死锁进程{p1,p2,p3,p4}
+
+## Slide 44
+5.8.2 死锁检测时刻
+考虑因素：
+死锁发生频度；
+死锁影响进程。
+1. 等待时检测：
+发现早，恢复代价小，开销大（overhead)。
+2. 定时检测：
+3. 资源（eg. CPU）利用率下降时检测。
+
+## Slide 45
+5.9 死锁的恢复
+1. 重新启动
+简单，代价大，涉及未参与死锁的进程。
+2. 终止进程(process termination)
+环路上占有资源的进程。
+(1) 一次性全部终止；(2) 逐步终止（优先级，代价函数）
+3. 剥夺资源(resource preemption)+进程回退(rollback)
+(1) select a victim；(2) rollback.
+问题: (1) 保存snapshot代价大；(2) 消除影响困难;
+(3) starvation.
+
+## Slide 46
+5.10 鸵鸟算法
+视而不见
+Pro:
+工程师观点(考虑死锁发生的频率,危害,处理代价)
+死锁发生频率<其它故障引起的系统瘫痪的频率
+死锁处理constant overhead > 危害
+Cont:
+数学家观点
+必须处理,无论代价如何
+目前系统实际如此
+Eg. UNIX proc结构(50 and up)
+
+## Slide 47
+5.11 有关问题的讨论
+关于充要性算法
+已知进程关于资源活动序列
+困难: 程序中的分枝与循环
+复杂度高(NP Complete)
+生灭资源问题
+消息
+消耗性资源与可重用资源并存
+关于两阶段封锁
+增长阶段有可能死锁
+
+## Slide 48
+5.12 饥饿与活锁
+饥饿(starvation)：当等待时间给进程推进和响应带来明显影响时,称发生了进程饥饿.饥饿到一定程度的进程所赋予的使命即使完成也不再具有实际意义时称该进程被饿死(starved to death).
+没有时间上界的等待
+排队等待
+忙式等待
+忙式等待条件下发生的饥饿,称为活锁(live lock).
+
+## Slide 49
+死锁与饥饿
+饥饿 vs 死锁
+死锁进程处于等待状态，忙式等待的进程并非处于等待状态, 但却可能被饿死;
+死锁进程等待永远不会释放的资源, 饿死进程等待可能被释放,但却不会分给自己的资源,其等待时间没有上界;
+死锁一定发生了循环等待,饿死不然;
+死锁至少涉及两个进程, 饿死进程可能只有一个.
+
+## Slide 50
+5.13 死锁的例子
+过河问题：
+水
+流
+1
+2
+n-1
+n
+…
+West
+East
+W-E
+E-W
+Deadlock prevention: one direction at any time.
+
+## Slide 51
+过河问题
+Var west_crossing,east_crossing:integer; (0,0)
+west_wait, east_wait:integer; (0,0);
+wq, eq: semaphore;
+mutex:semaphore;
+西面过河者活动：
+P(mutex);
+If east_crossing>0 Then
+Begin
+west_wait:=west_wait+1;
+V(mutex);
+P(wq)
+End;
+Else Begin
+west_crossing:=west_crossing+1;
+
+## Slide 52
+V(mutex)
+End;
+过河；
+P(mutex);
+west_crossing:=west_crossing-1;
+If west_crossing=0 Then
+While east_wait >0 Do
+Begin
+east_wait:=east_wait-1;
+east_crossing:=east_crossing+1;
+V(eq);
+End;
+V(mutex);
+过河问题
+
+## Slide 53
+过河问题
+东面过河者活动：
+P(mutex);
+If west_crossing>0 Then
+Begin
+east_wait:=east_wait+1;
+V(mutex);
+P(eq)
+End
+Else Begin
+east_crossing:=east_crossing+1;
+V(mutex)
+End;
+
+## Slide 54
+过河问题
+过河；
+P(mutex);
+east_crossing:=east_crossing-1;
+If east_crossing=0 Then
+While west_wait >0 Do
+Begin
+west_wait:=west_wait-1;
+west_crossing:=west_crossing+1;
+V(wq);
+End;
+V(mutex);
+
+## Slide 55
+思考问题
+对于过河问题，考虑一个没有饿死情况的解法。
+
+## Slide 56
+例2. 过河问题(2)
+水
+流
+West
+East
+1
+2
+6
+5
+8
+7
+3
+4
+1-2-3-4-6-5
+5-6-7-8-2-1
+要求:  (1)无死锁;  (2)无饿死;  (3)并行度高。
+
+## Slide 57
+WE:
+P(S);
+P(s1);
+走到1;
+P(s2);
+走到2;
+V(s1);
+P(s3);
+走到3；
+V(s2);
+P(s4);
+走到4；
+EW:
+P(S);
+P(s5);
+走到5;
+P(s6);
+走到6;
+V(s5);
+P(s7);
+走到7；
+V(s6);
+P(s8);
+走到8；
+V(s3);
+P(s5);
+P(s6);
+走到6;
+V(s4);
+走到5;
+V(s6);
+走到E;
+V(s5);
+V(S);
+V(s7);
+P(s1);
+P(s2);
+走到2;
+V(s8);
+走到1;
+V(s2);
+走到W;
+V(s1);
+V(S);
+Var S, s1,s2,s3,s4,s5,s6,s7,s8:semaphore; (5,1,1,1,1,1,1,1,1)
+
+## Slide 58
+5.14 简单组合资源死锁的静态分析
+条件：已知各个进程有关资源的活动序列；
+判断：有无死锁可能性。
+步骤1：以每个进程占有资源，申请资源作为一个状态，
+记作：(pi：aj：ak1,…,akn)=(进程：请求：占有);
+步骤2：以每个状态为一个节点；
+步骤3：如s1所申请资源为s2所占有，则由s1向s2画一有向
+弧（相同进程间不画）；
+步骤4：找出所有环路；
+步骤5：判断环路上状态是否能同时到达，如是有死锁可能
+性，否则无死锁可能性。
+(1)环路中有相同进程，不能到达；
+(2)环路中有相同被占有资源，不能到达。
+
+## Slide 59
+死锁分析例子
+R={A，B，C，D，E，F，G}
+p1:c  d  c a b d  a  b
+P2:d  e  d b f  e  b  f
+P3:c  e  e  f a e f  a
+(p1:d:c)
+(p1:a:d)
+(p1:b:da)
+(p2:e:d)
+(p2:b:e)
+(p2:f:eb)
+(p3:e:c)
+(p3:f:c)
+(p3:a:cf)
+
+## Slide 60
+死锁分析例子
+R={A，B，C，D，E，F，G}
+p1：c  d  c  a  b  d  a  b
+p2：d  e  d  b  f  e  b  f
+p3：c  e  e  f  a  e  f  a
+(p1:d:c)
+(p1:a:d)
+(p1:b:da)
+(p2:e:d)
+(p2:b:e)
+(p2:f:eb)
+(p3:e:c)
+(p3:f:c)
+(p3:a:cf)
+
+## Slide 61
+死锁分析例子
+p1：c d c  a  b  d  a  b
+p2：d e d  b  f  e  b  f
+p3：c e e  f  a  e  f  a
+1
+2
+证明：线1不可达；
+反证：假定线1可达，则线2可达。
+p2先于p1; p3先于p2; p1先于p3, 矛盾。
+…
+p1:
+p2:
+pn:
+a
+
+## Slide 62
+5.15 同种组合资源死锁的必要条件
+M：资源数量
+N：使用该类资源进程的数量
+：所有进程所需要该类资源的总量
+假定死锁，n个进程参与了死锁(2nN)
+参与死锁的进程所需资源的总量M+n
+未参与死锁进程所需资源的总量N-n
+所有进程所需资源的总量M+n+N-n=M+N
+当<M+N时，一定没有死锁；
+当M+N时，至少有一个交叉有死锁。
+
+## Slide 63
+例子
+例1. M=15；
+N=4；P1(4);  P2(6);  P3(1);  P4(7)
+=4+6+1+7=18<M+N=19
+无死锁可能性。
+例2. M=15;
+N=4；P1(5);  P2(6);  P3(1);  P4(7)
+=5+6+1+7=19M+N=19
+有死锁可能性。死锁情况：
+P1：a  a  a  a  a
+P2：a  a  a  a  a  a
+P3：a
+P4：a  a  a  a  a  a  a
+
+## Slide 64
+Assignment #6
+P172. 18
